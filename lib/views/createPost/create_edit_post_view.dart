@@ -129,7 +129,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              editImageWidget(images: _images),
+              editImageWidget(
+                images: const [],
+                stringImages: _images,
+              ),
               const SizedBox(height: 5),
               Padding(
                 padding: const EdgeInsets.all(15.0),

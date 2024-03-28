@@ -38,6 +38,7 @@ class CreatePostViewState extends State<CreatePostView> {
   String _description = '';
   String _price = '';
   DateTime _expiringDate = DateTime.now();
+  List<File> tempImages = [];
 
   // Date variables for the expiration date of the post
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
@@ -49,8 +50,7 @@ class CreatePostViewState extends State<CreatePostView> {
       final pickedImage =
           await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedImage == null) return;
-      fetchBarCode(File(pickedImage.path));
-      _images.add(await _postService.uploadFile(File(pickedImage.path)));
+      tempImages.add(File(pickedImage.path));
       setState(() {});
     } on PlatformException catch (e) {
       debugPrint('Failed to pick Image: $e');
@@ -98,8 +98,7 @@ class CreatePostViewState extends State<CreatePostView> {
           source: ImageSource.gallery);
 
       if (pickedImage != null) {
-        fetchBarCode(File(pickedImage.path));
-        _images.add(await _postService.uploadFile(File(pickedImage.path)));
+        tempImages.add(File(pickedImage.path));
         setState(() {});
       }
     } on PlatformException catch (e) {
@@ -126,6 +125,10 @@ class CreatePostViewState extends State<CreatePostView> {
 
   Future<Post?> _createPost() async {
     // Create a Post object using the entered data
+    for (var image in tempImages) {
+      _images.add(await _postService.uploadFile(image));
+    }
+
     return await _postService.createPost(
       images: _images,
       title: _title,
@@ -156,7 +159,10 @@ class CreatePostViewState extends State<CreatePostView> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              editImageWidget(images: _images),
+              editImageWidget(
+                images: tempImages,
+                stringImages: const [],
+              ),
               const SizedBox(height: 5),
               Padding(
                 padding: const EdgeInsets.all(15.0),
