@@ -4,6 +4,7 @@ import 'package:kitsain_frontend_spring2023/app_typography.dart';
 import 'package:kitsain_frontend_spring2023/categories.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
 import 'package:kitsain_frontend_spring2023/database/pantry_proxy.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:realm/realm.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
@@ -163,6 +164,10 @@ class _NewItemFormState extends State<NewItemForm> {
                             duration: Duration(seconds: 2),
                           ));
                           try {
+                            OpenFoodAPIConfiguration.userAgent = UserAgent(
+                              name:
+                                  'Kitsain', // Replace 'Your-App-Name' with your app's name
+                            );
                             _EANCodeField.text = res;
                             primaryFocus!.unfocus(disposition: _disposition);
                             _offData = await getFromJson(res);

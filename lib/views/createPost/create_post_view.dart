@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:kitsain_frontend_spring2023/views/createPost/create_post_image_widget.dart';
@@ -11,6 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/feed_image_widget.dart';
 import 'package:logger/logger.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 
 /// A view for creating a new post.
 ///
@@ -46,11 +49,42 @@ class CreatePostViewState extends State<CreatePostView> {
       final pickedImage =
           await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedImage == null) return;
-
+      fetchBarCode(File(pickedImage.path));
       _images.add(await _postService.uploadFile(File(pickedImage.path)));
       setState(() {});
     } on PlatformException catch (e) {
       debugPrint('Failed to pick Image: $e');
+    }
+  }
+
+  Future<void> fetchBarCode(File file) async {
+    logger.i('Fetching barcode from image');
+    var barCodeScanner = GoogleMlKit.vision.barcodeScanner();
+    final inputImage = InputImage.fromFile(file);
+    final List<Barcode> barcodes =
+        await barCodeScanner.processImage(inputImage);
+    if (barcodes.isEmpty) {
+      logger.i('No barcode found');
+      return;
+    }
+    for (Barcode barcode in barcodes) {
+      if (barcode.rawValue != null) {
+        final String rawValue = barcode.rawValue!;
+        logger.i('Barcode raw value: $rawValue');
+        OpenFoodAPIConfiguration.userAgent = UserAgent(
+          name: 'Kitsain',
+        );
+
+        try {
+          var product = await getFromJson(rawValue);
+          logger.i('Product name: ${product!.productName}');
+        } catch (e) {
+          // Handle any errors that occur during fetching product information
+          logger.e('Error fetching product information: $e');
+        }
+      } else {
+        logger.w('Barcode raw value is null');
+      }
     }
   }
 
@@ -64,6 +98,7 @@ class CreatePostViewState extends State<CreatePostView> {
           source: ImageSource.gallery);
 
       if (pickedImage != null) {
+        fetchBarCode(File(pickedImage.path));
         _images.add(await _postService.uploadFile(File(pickedImage.path)));
         setState(() {});
       }

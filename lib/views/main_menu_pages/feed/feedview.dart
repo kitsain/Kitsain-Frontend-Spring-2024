@@ -17,7 +17,7 @@ import 'package:kitsain_frontend_spring2023/views/help_pages/pantry_help_page.da
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/createPost/create_edit_post_view.dart';
 import 'package:logger/logger.dart';
-
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'feed_image_widget.dart';
 
 /// The feed view widget that displays a list of posts.
