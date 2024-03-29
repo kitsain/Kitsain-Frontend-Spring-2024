@@ -16,6 +16,7 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_s
 import 'package:kitsain_frontend_spring2023/views/help_pages/pantry_help_page.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/createPost/create_edit_post_view.dart';
+import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:logger/logger.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'feed_image_widget.dart';
@@ -188,7 +189,9 @@ class _PostCardState extends State<PostCard> {
   // Variable to hold the current user
   final loginController = Get.put(LoginController());
   final authService = Get.put(AuthService());
+  var logger = Logger(printer: PrettyPrinter());
   final postService = PostService();
+  final CommentService commentService = CommentService();
   late String userId;
   bool isOwner = false;
 
@@ -196,6 +199,7 @@ class _PostCardState extends State<PostCard> {
   void initState() {
     super.initState();
     fetchUserId();
+    //loadComments();
   }
 
   Future<void> fetchUserId() async {
@@ -203,6 +207,14 @@ class _PostCardState extends State<PostCard> {
     setState(() {
       userId = fetchedUserId;
       isOwner = widget.post.userId == userId;
+    });
+  }
+
+  Future<void> markPostUseful() async {
+    await postService.markPostUseful(widget.post.id);
+    Post? updatedPost = await postService.getPostById(widget.post.id);
+    setState(() {
+      if (updatedPost != null) widget.post.useful = updatedPost.useful;
     });
   }
 
@@ -333,13 +345,10 @@ class _PostCardState extends State<PostCard> {
                   IconButton(
                     icon: const Icon(Icons.thumb_up_alt_outlined),
                     onPressed: () {
-                      setState(() {
-                        widget.post.addUsefulcount(
-                            loginController.googleUser.value!.id);
-                      });
+                      markPostUseful();
                     },
                   ),
-                  Text(widget.post.useful.length.toString()),
+                  Text(widget.post.useful.toString()),
                   const SizedBox(width: 16),
                   IconButton(
                     icon: const Icon(Icons.comment_rounded),
@@ -350,9 +359,11 @@ class _PostCardState extends State<PostCard> {
                           List<Comment> comments =
                               widget.post.comments.cast<Comment>();
                           if (comments.isEmpty) {
-                            return const CommentSectionView(comments: []);
+                            return CommentSectionView(
+                                parentID: widget.post.id, comments: const []);
                           } else {
-                            return CommentSectionView(comments: comments);
+                            return CommentSectionView(
+                                parentID: widget.post.id, comments: comments);
                           }
                         }),
                       ).then((updatedComments) {

@@ -25,7 +25,7 @@ class Post extends ChangeNotifier {
   String description = "EMPTY_DESC";
   String price = "0";
   DateTime expiringDate = DateTime.now();
-  List<String> useful = [];
+  int useful;
   List<Comment> comments = [];
   String id = "";
   String userId = "";
@@ -39,22 +39,9 @@ class Post extends ChangeNotifier {
     required this.expiringDate,
     required this.id,
     required this.userId,
-    this.useful = const [],
+    this.useful = 0,
     this.comments = const [],
   });
-
-  /// Adds or removes the given [id] from the [useful] list.
-  ///
-  /// If the [id] is already present in the [useful] list, it will be removed.
-  /// Otherwise, it will be added to the [useful] list.
-  void addUsefulcount(String id) {
-    if (useful.contains(id)) {
-      useful = List.from(useful)..remove(id);
-    } else {
-      useful = List.from(useful)..add(id);
-    }
-    notifyListeners();
-  }
 }
 
 /// A provider class for managing posts.

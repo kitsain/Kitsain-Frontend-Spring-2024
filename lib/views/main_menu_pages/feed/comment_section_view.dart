@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
+import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 
 /// TODO:
 /// - Connect user information to comment box; an identifier
@@ -10,9 +13,12 @@ import 'package:kitsain_frontend_spring2023/models/comment.dart';
 
 /// Class for creating the comment section view.
 class CommentSectionView extends StatefulWidget {
+  final String parentID;
   final List<Comment> comments;
 
-  const CommentSectionView({super.key, required this.comments});
+  const CommentSectionView({super.key,
+    required this.parentID,
+    required this.comments});
 
   @override
   State<CommentSectionView> createState() => _CommentSectionViewState();
@@ -22,6 +28,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   List<Comment> _tempComments = [];
   late TextEditingController _textFieldController;
   late ScrollController _scrollController;
+  final CommentService commentService = CommentService();
 
   @override
   void initState() {
@@ -35,7 +42,11 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   /// Comment object for storing info about
   /// current instance of comment.
   Comment _createCommentObj(String author, String message, DateTime date) {
-    return Comment(author: author, message: message, date: date);
+    return Comment(
+        postID: widget.parentID,
+        author: author,
+        message: message,
+        date: date);
   }
 
   @override
@@ -52,59 +63,74 @@ class _CommentSectionViewState extends State<CommentSectionView> {
       ),
       body: Padding(
         padding: const EdgeInsets.only(bottom: 85),
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            reverse: true,
-            shrinkWrap: true,
-            itemCount: _tempComments.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onLongPress: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Container(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              ListTile(
-                                textColor: Colors.red,
-                                iconColor: Colors.red,
-                                leading: Icon(Icons.delete),
-                                title: Text('Remove post'),
-                                onTap: (){
-                                  setState(() {
-                                    // TODO: check if user matches comment author
-                                    _removeComment(index);
-                                    Navigator.of(context).pop();
-                                  });
-                                },
-                              ),
-                              ListTile(
-                                leading: Icon(Icons.edit),
-                                title: Text('Edit'),
-                                onTap: (){
-                                  // TODO: logic for editing comment
-                                },
-                              ),
-                            ]
-                          ),
-                        )
-                      );
-                    }
-                  );
+        child: Container(
+          height: MediaQuery.of(context).size.height * 1,
+          width: MediaQuery.of(context).size.width *1 ,
+          child: RefreshIndicator(
+            onRefresh: () {
+              return Future.delayed(
+                Duration(seconds: 1),
+                () {
+                setState(() {});
                 },
-                child: CommentBox(
-                  comment: _tempComments[index].message,
-                  author: 'user1', // TODO: implement author
-                  date: _tempComments[index].date,
-                ),
               );
             },
+            child: SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              controller: _scrollController,
+              child: ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                reverse: true,
+                shrinkWrap: true,
+                itemCount: _tempComments.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onLongPress: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  ListTile(
+                                    textColor: Colors.red,
+                                    iconColor: Colors.red,
+                                    leading: Icon(Icons.delete),
+                                    title: Text('Remove post'),
+                                    onTap: (){
+                                      setState(() {
+                                        // TODO: check if user matches comment author
+                                        _removeComment(index);
+                                        Navigator.of(context).pop();
+                                      });
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.edit),
+                                    title: Text('Edit'),
+                                    onTap: (){
+                                      // TODO: logic for editing comment
+                                    },
+                                  ),
+                                ]
+                              ),
+                            )
+                          );
+                        }
+                      );
+                    },
+                    child: CommentBox(
+                      comment: _tempComments[index].message,
+                      author: 'user1', // TODO: implement author
+                      date: _tempComments[index].date,
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -122,9 +148,17 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                 onPressed: () {
                   String message = _textFieldController.text;
                   Comment myComment = _createCommentObj(
-                      "user", _textFieldController.text, DateTime.now());
+                      "user", //TODO: connect to real user
+                      _textFieldController.text,
+                      DateTime.now());
                   if (message != '') {
                     setState(() {
+                      commentService.postComment(
+                        postID: widget.parentID,
+                        user: "user",
+                        content: message,
+                        date: DateTime.now(),
+                      );
                       _tempComments.add(myComment);
                     });
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -161,27 +195,22 @@ class _CommentSectionViewState extends State<CommentSectionView> {
 class CommentBox extends StatelessWidget {
   // TODO: connect author to actual user
 
-  final DateTime date;
-  final String comment;
   final String author;
+  final String comment;
+  final DateTime date;
 
   const CommentBox(
       {super.key,
-      required this.comment,
       required this.author,
+      required this.comment,
       required this.date});
 
   /// Converts the time into a pretty string.
+  /// > If comment was posted within 7 days -> display days ago
+  /// > If time was under 1 minute ago -> displau 'just now'
+  /// > If time was under 1 hour ago -> display minutes
+  /// > If time was over 1 hour ago -> display hours
   String _timeToString(DateTime t) {
-    /**
-     * TODO: ideas
-     * - Make time and date display smarter. For example:
-     *   > If comment was posted today -> display 'today' on date
-     *   > If comment was posted within 7 days -> display eg. 3 days ago
-     *   > If time was under 1 minute ago -> displau 'just now'
-     *   > If time was under 1 hour ago -> display minutes
-     *   > If time was over 1 hour ago -> display hours
-     */
 
     DateTime currTime = DateTime.now();
     final difference = currTime.difference(t);
@@ -189,7 +218,9 @@ class CommentBox extends StatelessWidget {
     String minute = t.minute.toString();
     if (t.minute < 10){
       minute = '0$minute';
-    } else if (difference.inSeconds < 60) {
+    }
+
+    if (difference.inSeconds < 60) {
       return 'just now';
     } else if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m';
@@ -197,10 +228,9 @@ class CommentBox extends StatelessWidget {
       return '${difference.inHours}h';
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d';
-    } else {
-      return '${t.year}.${t.month}.${t.day}   ${t.hour}:$minute';
     }
-    return '${t.year}.${t.month}.${t.day}   ${t.hour}:$minute';
+
+    return '${DateFormat('dd.MM.yyyy').format(t)}   ${t.hour}:$minute';
   }
 
   @override
