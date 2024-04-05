@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:kitsain_frontend_spring2023/assets/commentBox.dart';
+import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 
 /// TODO:
 /// - Connect user information to comment box; an identifier
@@ -20,10 +21,16 @@ class CommentSectionView extends StatefulWidget {
 }
 
 class _CommentSectionViewState extends State<CommentSectionView> {
-  List<Comment> _tempComments = [];
+  late List<Comment> _tempComments = [];
+  late List<String> _users = [];
+  late String _currUser = '';
+  late bool _isOwner = false;
+
   late TextEditingController _textFieldController;
   late ScrollController _scrollController;
+
   final CommentService commentService = CommentService();
+  final PostService postService = PostService();
 
   @override
   void initState() {
@@ -32,6 +39,26 @@ class _CommentSectionViewState extends State<CommentSectionView> {
 
     _textFieldController = TextEditingController();
     _scrollController = ScrollController();
+
+    fetchUserId();
+    usersList();
+  }
+
+  Future<void> fetchUserId() async {
+    final fetchedUserId = await postService.getUserId();
+    setState(() {
+      _currUser = fetchedUserId;
+    });
+  }
+
+  void usersList() {
+    for (int i = 0; i < _tempComments.length; i++) {
+      String user = _tempComments[i].author;
+      if (!_users.contains(user)) {
+        _users.add(user);
+      }
+      print('List of *******************: $_users');
+    }
   }
 
   /// Comment object for storing info about
@@ -78,42 +105,49 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onLongPress: () {
-                      showModalBottomSheet(
+                      if (_currUser == _tempComments[index].author){
+                        showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
                             return Container(
                                 child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    ListTile(
-                                      textColor: Colors.red,
-                                      iconColor: Colors.red,
-                                      leading: Icon(Icons.delete),
-                                      title: Text('Remove post'),
-                                      onTap: () {
-                                        setState(() {
-                                          // TODO: check if user matches comment author
-                                          _removeComment(index);
-                                          Navigator.of(context).pop();
-                                        });
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.edit),
-                                      title: Text('Edit'),
-                                      onTap: () {
-                                        // TODO: logic for editing comment
-                                      },
-                                    ),
-                                  ]),
-                            ));
-                          });
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text(
+                                            '${_tempComments[index].message}'
+                                        ),
+                                        ListTile(
+                                          textColor: Colors.red,
+                                          iconColor: Colors.red,
+                                          leading: Icon(Icons.delete),
+                                          title: Text('Remove comment'),
+                                          onTap: (){
+                                            setState(() {
+                                                _removeComment(index);
+                                              Navigator.of(context).pop();
+                                            });
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: Icon(Icons.edit),
+                                          title: Text('Edit'),
+                                          onTap: (){
+                                            // TODO: logic for editing comment
+                                          },
+                                        ),
+                                      ]
+                                  ),
+                                )
+                            );
+                          }
+                        );
+                      }
                     },
                     child: CommentBox(
                       comment: _tempComments[index].message,
-                      author: 'user1', // TODO: implement author
+                      author: (_getUserIdx(_tempComments[index].author)+1).toString(), // TODO: implement author
                       date: _tempComments[index].date,
                     ),
                   );
@@ -137,7 +171,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                 onPressed: () {
                   String message = _textFieldController.text;
                   Comment myComment = _createCommentObj(
-                      "user", //TODO: connect to real user
+                      _currUser, //TODO: connect to real user
                       _textFieldController.text,
                       DateTime.now());
                   if (message != '') {
@@ -169,6 +203,10 @@ class _CommentSectionViewState extends State<CommentSectionView> {
 
   void _removeComment(int index) {
     _tempComments.removeAt(index);
+  }
+
+  int _getUserIdx(String userId) {
+    return _users.indexOf(userId);
   }
 
   @override

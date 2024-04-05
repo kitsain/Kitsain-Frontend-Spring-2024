@@ -44,7 +44,7 @@ class CommentService {
         }));
 
         logger.i("Comments loaded successfully");
-        return comments;
+        return comments.reversed.toList();
       } else {
         throw Exception(
             'Failed to load posts: ${response.statusCode} /n ${response.body}');
@@ -97,7 +97,7 @@ class CommentService {
     try {
       return Comment(
         postID: json['id'],
-        author: json['userName'],
+        author: json['userId'],
         message: json['content'],
         date: DateTime.parse(json['createdDate']),
       );
