@@ -36,7 +36,6 @@ class _PostCardState extends State<PostCard> {
   final authService = Get.put(AuthService());
   var logger = Logger(printer: PrettyPrinter());
   final postService = PostService();
-  final CommentService commentService = CommentService();
   late String userId;
   bool isOwner = false;
 
@@ -211,10 +210,10 @@ class _PostCardState extends State<PostCard> {
                               widget.post.comments.cast<Comment>();
                           if (comments.isEmpty) {
                             return CommentSectionView(
-                                parentID: widget.post.id, comments: const []);
+                                postID: widget.post.id, comments: const []);
                           } else {
                             return CommentSectionView(
-                                parentID: widget.post.id, comments: comments);
+                                postID: widget.post.id, comments: comments);
                           }
                         }),
                       ).then((updatedComments) {

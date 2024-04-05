@@ -327,7 +327,7 @@ class PostService {
         expiringDate: expiringDate,
         id: id,
         userId: userId,
-        comments: await commentService.getComments(json['id']),
+        comments: await commentService.getComments(id),
         useful: useful,
       );
     } catch (e) {

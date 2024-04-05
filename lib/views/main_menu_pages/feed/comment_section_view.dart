@@ -10,11 +10,11 @@ import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 
 /// Class for creating the comment section view.
 class CommentSectionView extends StatefulWidget {
-  final String parentID;
+  final String postID;
   final List<Comment> comments;
 
   const CommentSectionView(
-      {super.key, required this.parentID, required this.comments});
+      {super.key, required this.postID, required this.comments});
 
   @override
   State<CommentSectionView> createState() => _CommentSectionViewState();
@@ -22,9 +22,8 @@ class CommentSectionView extends StatefulWidget {
 
 class _CommentSectionViewState extends State<CommentSectionView> {
   late List<Comment> _tempComments = [];
-  late List<String> _users = [];
+  late final List<String> _users = [];
   late String _currUser = '';
-  late bool _isOwner = false;
 
   late TextEditingController _textFieldController;
   late ScrollController _scrollController;
@@ -40,24 +39,26 @@ class _CommentSectionViewState extends State<CommentSectionView> {
     _textFieldController = TextEditingController();
     _scrollController = ScrollController();
 
-    fetchUserId();
-    usersList();
+    _fetchUserId();
+    _refreshComments();
+    _usersList();
   }
 
-  Future<void> fetchUserId() async {
+  /// Finds id of current user
+  Future<void> _fetchUserId() async {
     final fetchedUserId = await postService.getUserId();
     setState(() {
       _currUser = fetchedUserId;
     });
   }
 
-  void usersList() {
+  /// Makes a list of the users who have commented in the order of commenting.
+  void _usersList() {
     for (int i = 0; i < _tempComments.length; i++) {
       String user = _tempComments[i].author;
       if (!_users.contains(user)) {
         _users.add(user);
       }
-      print('List of *******************: $_users');
     }
   }
 
@@ -65,7 +66,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   /// current instance of comment.
   Comment _createCommentObj(String author, String message, DateTime date) {
     return Comment(
-        postID: widget.parentID, author: author, message: message, date: date);
+        postID: widget.postID, author: author, message: message, date: date);
   }
 
   @override
@@ -74,7 +75,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
       appBar: AppBar(
         title: const Text('Comments'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context, _tempComments);
           },
@@ -82,20 +83,21 @@ class _CommentSectionViewState extends State<CommentSectionView> {
       ),
       body: Padding(
         padding: const EdgeInsets.only(bottom: 85),
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height * 1,
           width: MediaQuery.of(context).size.width * 1,
           child: RefreshIndicator(
             onRefresh: () {
               return Future.delayed(
-                Duration(seconds: 1),
+                const Duration(seconds: 1),
                 () {
-                  setState(() {});
+                  setState(() {
+                  });
                 },
               );
             },
             child: SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               controller: _scrollController,
               child: ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
@@ -109,45 +111,66 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Container(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Text(
-                                            '${_tempComments[index].message}'
-                                        ),
-                                        ListTile(
-                                          textColor: Colors.red,
-                                          iconColor: Colors.red,
-                                          leading: Icon(Icons.delete),
-                                          title: Text('Remove comment'),
-                                          onTap: (){
-                                            setState(() {
-                                                _removeComment(index);
-                                              Navigator.of(context).pop();
-                                            });
-                                          },
-                                        ),
-                                        ListTile(
-                                          leading: Icon(Icons.edit),
-                                          title: Text('Edit'),
-                                          onTap: (){
-                                            // TODO: logic for editing comment
-                                          },
-                                        ),
-                                      ]
-                                  ),
-                                )
+                            return Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                        _formatComment(index)
+                                    ),
+                                    ListTile(
+                                      textColor: Colors.red,
+                                      iconColor: Colors.red,
+                                      leading: Icon(Icons.delete),
+                                      title: Text('Remove comment'),
+                                      onTap: (){
+                                        setState(() {
+                                          _removeComment(index);
+                                          Navigator.of(context).pop();
+                                        });
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: Icon(Icons.edit),
+                                      title: Text('Edit'),
+                                      onTap: (){
+                                        // TODO: logic for editing comment
+                                      },
+                                    ),
+                                  ]
+                              ),
                             );
                           }
                         );
-                      }
+                      } else {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text(
+                                        _formatComment(index)
+                                      ),
+                                      ListTile(
+                                        leading: Icon(Icons.reply),
+                                        title: Text('Reply to comment'),
+                                        onTap: (){
+                                          // TODO: reply logic
+                                        },
+                                      ),
+                                    ]
+                                ),
+                              );
+                            },
+                        );}
                     },
                     child: CommentBox(
                       comment: _tempComments[index].message,
-                      author: (_getUserIdx(_tempComments[index].author)+1).toString(), // TODO: implement author
+                      author: 'user ${(_users.indexOf(_tempComments[index].author)+1)}',
                       date: _tempComments[index].date,
                     ),
                   );
@@ -170,19 +193,9 @@ class _CommentSectionViewState extends State<CommentSectionView> {
             IconButton(
                 onPressed: () {
                   String message = _textFieldController.text;
-                  Comment myComment = _createCommentObj(
-                      _currUser, //TODO: connect to real user
-                      _textFieldController.text,
-                      DateTime.now());
                   if (message != '') {
                     setState(() {
-                      commentService.postComment(
-                        postID: widget.parentID,
-                        user: "user",
-                        content: message,
-                        date: DateTime.now(),
-                      );
-                      _tempComments.add(myComment);
+                      _addComment(message);
                     });
                     FocusManager.instance.primaryFocus?.unfocus();
                     _textFieldController.clear();
@@ -196,22 +209,54 @@ class _CommentSectionViewState extends State<CommentSectionView> {
     );
   }
 
+  /// Sets the position to the top of the scroll view.
   void _scrollToTop() {
     _scrollController.animateTo(_scrollController.position.minScrollExtent,
         duration: const Duration(seconds: 1), curve: Curves.decelerate);
   }
 
+  /// Adds  a new comment to the backend and updates information locally
+  void _addComment(String message) async {
+    await commentService.postComment(
+      postID: widget.postID,
+      content: message,
+    );
+    _refreshComments();
+  }
+
+  /// Fetches most recent comment information from backend and updates locally.
+  void _refreshComments() async {
+    try {
+      List<Comment> newComments = await commentService.getComments(widget.postID);
+      _tempComments.clear();
+      _tempComments.addAll(newComments);
+    } catch (e) {
+      debugPrint('Error loading posts: $e');
+    }
+  }
+
+  /// Removes comment from the backend.
   void _removeComment(int index) {
+    commentService.deleteComment(_tempComments[index].postID, _currUser);
     _tempComments.removeAt(index);
   }
 
-  int _getUserIdx(String userId) {
-    return _users.indexOf(userId);
+  /// Formats comment for modal bottom sheet.
+  ///
+  /// Displayed when user tries to remove a
+  /// comment or reply to other users' comment
+  String _formatComment(int i) {
+    Comment comment = _tempComments[i];
+    int userIndex = (_users.indexOf(comment.author)) + 1;
+    String message = comment.message;
+
+    return '"user $userIndex": "$message"';
   }
 
   @override
   void dispose() {
     _textFieldController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }
