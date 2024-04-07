@@ -228,8 +228,10 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   void _refreshComments() async {
     try {
       List<Comment> newComments = await commentService.getComments(widget.postID);
-      _tempComments.clear();
-      _tempComments.addAll(newComments);
+      setState(() {
+        _tempComments.clear();
+        _tempComments.addAll(newComments);
+      });
     } catch (e) {
       debugPrint('Error loading posts: $e');
     }
