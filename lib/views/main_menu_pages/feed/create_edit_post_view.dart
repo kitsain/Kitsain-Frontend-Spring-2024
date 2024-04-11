@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
+import 'package:kitsain_frontend_spring2023/assets/tagSelectView.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:logger/logger.dart';
@@ -29,6 +31,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   String _description = '';
   String _price = '';
   DateTime _expiringDate = DateTime.now();
+  late List<String> _myTags = [];
   List<File> tempImages = [];
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
   final TextEditingController _dateController = TextEditingController();
@@ -55,7 +58,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _price = '';
       _expiringDate = DateTime.now();
       _dateController.text = _dateFormat.format(_expiringDate);
+      _myTags = [];
     }
+  }
+
+  void loadTags() async {
+    // _tags = await _postService.getTags();
   }
 
   /// Function for taking an image with camera.
@@ -279,6 +287,45 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                 ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Tags'),
+                    ElevatedButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return tagSelectView(myTags: _myTags);
+                            }).then((tags) {
+                              setState(() {
+                                if (tags != null){
+                                  _myTags = tags;
+                                }
+                              });
+                              print(_myTags);
+                            });
+                      },
+                      child: Text('Set tags'),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    children: List.generate(_myTags.length, (index) {
+                      return _myTags.isEmpty ? Text('NoTags') : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        child: ElevatedButton(
+                            onPressed: null,
+                            child: Text(_myTags[index])
+                        ),
+                      );
+                    })
+                  ),
+                ),
+                Divider(),
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
