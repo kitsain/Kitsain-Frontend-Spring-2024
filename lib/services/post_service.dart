@@ -135,7 +135,7 @@ class PostService {
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        //logger.e(response.body);
+        logger.e(response.body);
       }
     } catch (error) {
       logger.e("ERROR: $error");
