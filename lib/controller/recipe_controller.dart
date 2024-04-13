@@ -5,7 +5,6 @@ import 'package:kitsain_frontend_spring2023/controller/task_controller.dart';
 import 'package:kitsain_frontend_spring2023/database/recipes_proxy.dart';
 import 'package:realm/realm.dart';
 
-
 class RecipeController {
   final _taskListController = Get.put(TaskListController());
   final _taskController = Get.put(TaskController());
@@ -18,7 +17,7 @@ class RecipeController {
       _taskListController.createTaskLists("My Recipes");
     }
     await getRecipeTasks();
-    }
+  }
 
   Future checkIfRecipeListExists() async {
     await _taskListController.getTaskLists();
@@ -37,12 +36,12 @@ class RecipeController {
     return recipeIndex;
   }
 
-  bool checkIfRecipeInrealm(String googleTaskId, RealmResults<Recipe> realmItems) {
+  bool checkIfRecipeInrealm(
+      String googleTaskId, RealmResults<Recipe> realmItems) {
     var googleTaskIdList = realmItems.map((e) => e.googleTaskId);
     if (googleTaskIdList.contains(googleTaskId)) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -51,13 +50,15 @@ class RecipeController {
     var googleTaskIdList = tasks.items.map((e) => e.id);
     if (googleTaskIdList.contains(googleTaskId)) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
-  
-  saveRecipeTasksToRealm(realmItems, tasks,) async {
+
+  saveRecipeTasksToRealm(
+    realmItems,
+    tasks,
+  ) async {
     for (var i = 0; i < tasks.items.length; i++) {
       if (!checkIfRecipeInrealm(tasks.items[i].id, realmItems)) {
         var item = Recipe(
@@ -71,11 +72,12 @@ class RecipeController {
       }
     }
   }
+
   List<String> getInstructions(String notes) {
     List<String> recipeParts = notes.split('\n\n');
     String instructionsSection = recipeParts[1];
     List<String> instructions = parseInstructions(instructionsSection);
-    
+
     return instructions;
   }
 
@@ -85,9 +87,8 @@ class RecipeController {
     for (String line in lines.skip(1)) {
       steps.add(line.trim());
     }
-  return steps;
+    return steps;
   }
-
 
   Map<String, String> getIngredients(String notes) {
     List<String> recipeParts = notes.split('\n\n');
@@ -104,23 +105,24 @@ class RecipeController {
       ingredients[parts[0]] = parts[1];
     }
     return ingredients;
-}
+  }
 
-  deleteMissingGoogleTasksFromRealm(RealmResults<Recipe> realmItems, tasks) async {
+  deleteMissingGoogleTasksFromRealm(
+      RealmResults<Recipe> realmItems, tasks) async {
     for (var i = 0; i < realmItems.length; i++) {
       if (!checkIfRecipeInGoogleTasks(realmItems[i].googleTaskId, tasks)) {
         _recipeProxy.deleteRecipe(realmItems[i]);
       }
     }
   }
-  
+
   syncRecipeTasksWithRealm(index) async {
     var realmItems = RecipeProxy().getRecipes();
     var tasks = await _taskController.getTasksList(index);
     print("testing");
     saveRecipeTasksToRealm(realmItems, tasks);
     deleteMissingGoogleTasksFromRealm(realmItems, tasks);
-  } 
+  }
 
   getRecipeTasks() async {
     await _taskListController.getTaskLists();
@@ -150,7 +152,8 @@ class RecipeController {
   Future<void> createRecipeTask(Recipe recipe) async {
     final valuesString = createStringOfRecipeValues(recipe);
     final taskListIndex = await checkIfRecipeListExists();
-    var googleTaskId = await _taskController.createTask(recipe.name, valuesString, taskListIndex.toString());
+    var googleTaskId = await _taskController.createTask(
+        recipe.name, valuesString, taskListIndex.toString());
     recipe.googleTaskId = googleTaskId;
     RecipeProxy().upsertRecipe(recipe);
   }
@@ -195,5 +198,4 @@ class RecipeController {
     }
     return recipeIndex;
   }
-
 }

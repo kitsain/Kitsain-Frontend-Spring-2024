@@ -69,7 +69,9 @@ class _RecipeViewState extends State<RecipeView> {
         backgroundImageName: 'assets/images/pantry_banner_B1.jpg',
         titleBackgroundColor: AppColors.titleBackgroundBrown,
       ),
-      body: _buildBody(),
+      body: RefreshIndicator(onRefresh: () async {
+        await _recipeController.getRecipeTasks();
+      }, child: _buildBody()),
     );
   }
 

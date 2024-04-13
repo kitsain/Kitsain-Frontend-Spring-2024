@@ -31,6 +31,15 @@ class PantryController {
     return pantryIndex;
   }
 
+  Future completePantryItem(Item item) async {
+    await editItemTasks(item, complete: true);
+  }
+
+  Future deletePantryItemFromTasks(Item item) async {
+    var pantryIndex = await findPantryIndex();
+    await _taskController.deleteTask(pantryIndex, item.googleTaskId!, 0);
+  }
+
   /// Checks if pantry item exists as a task in the My Pantry tasklist.
   ///
   /// [pantryItemGoogleTaskIndex] is the google task index of the Pantry Item
@@ -101,7 +110,8 @@ class PantryController {
   /// Creates a string of all pantry item details.
   ///
   /// [pantryItem] is the pantry item that contains the details to be stringified.
-  createStringOfPantryItemValues(Item pantryItem) {
+  createStringOfPantryItemValues(Item pantryItem,
+      {bool returnToPantry = false}) {
     var valuesString = "";
     valuesString += "amount: ${pantryItem.amount}\n";
     valuesString += "location: ${pantryItem.location}\n";
@@ -116,8 +126,30 @@ class PantryController {
   /// Edits the pantry item in Google Tasks with provided changes.
   ///
   /// [item] is the pantry item with its updated properties.
-  Future<void> editItemTasks(Item item) async {
+  Future<void> editItemTasks(Item item,
+      {bool complete = false,
+      bool returnToPantry = false,
+      bool favoritedFromPantryView = false}) async {
     print("opening date 3: ${item.openedDate}");
+    final valuesString = createStringOfPantryItemValues(item);
+    final taskListIndex = await checkIfPantryListExists();
+    String? expiryDateAsString;
+    if (item.expiryDate != null) {
+      expiryDateAsString = changeFormatOfExpiryDate(item.expiryDate.toString());
+    }
+    print("MOI!!!!");
+    await _taskController.editTask(
+        item.name,
+        valuesString,
+        taskListIndex.toString(),
+        item.googleTaskId!,
+        0,
+        expiryDateAsString,
+        item.amount,
+        complete);
+    if (!complete && !returnToPantry && !favoritedFromPantryView) {
+      PantryProxy().upsertItem(item);
+    }
   }
 
   String _ignoreSubMicro(String s) {
@@ -206,26 +238,78 @@ class PantryController {
     }
   }
 
+  moveIncompleteTasksToPantry(tasks) {
+    var usedItems = _pantryProxy.getUsedItems();
+    var completedTasks =
+        tasks.items.where((i) => i.status == "completed").toList();
+    for (var i = 0; i < usedItems.length; i++) {
+      if (!completedTasks.contains(usedItems[i])) {
+        _pantryProxy.changeLocation(usedItems[i], "Pantry");
+      }
+    }
+  }
+
   /// Saves whatever is in Google Tasks to realm
   ///
   /// [realmItems] are the items that are in realm and [tasks] are the items that are in Google Tasks
   saveGoogleTasksToRealm(realmItems, tasks) {
     var notes = "";
-    for (var i = 0; i < tasks.items.length; i++) {
-      if (!checkIfItemInrealm(tasks.items[i].id, realmItems)) {
-        var item = Item(
-            ObjectId().toString(), tasks.items[i].title, "Pantry", 1,
-            googleTaskId: tasks.items[i].id);
-        if (tasks.items[i].due != null) {
-          item.expiryDate = convertToRealmDateTime(tasks.items[i].due);
+    var usedItems = _pantryProxy.getUsedItems();
+    var usedItemsTasksIds = usedItems.map((i) => i.googleTaskId).toList();
+    var completedTasks =
+        tasks.items.where((i) => i.status == "completed").toList();
+    var completedTasksIds = completedTasks.map((i) => i.id).toList();
+
+    moveIncompleteTasksToPantry(tasks);
+
+    var itemBothIds = {};
+    realmItems.forEach((item) {
+      itemBothIds[item.googleTaskId] = item.id;
+    });
+
+    tasks.items.forEach((item) {
+      if (!checkIfItemInrealm(item.id, realmItems)) {
+        var newItem = Item(ObjectId().toString(), item.title, "Pantry", 1,
+            googleTaskId: item.id);
+        if (item.due != null) {
+          newItem.expiryDate = convertToRealmDateTime(item.due);
         }
-        if (tasks.items[i].notes != null) {
-          notes = tasks.items[i].notes;
+        if (item.notes != null) {
+          notes = item.notes;
         }
-        item = parseDescriptionStringFromGoogleTask(notes, item);
-        _pantryProxy.upsertItem(item);
+        item = parseDescriptionStringFromGoogleTask(notes, newItem);
+
+        if (!usedItemsTasksIds.contains(newItem.googleTaskId)) {
+          _pantryProxy.upsertItem(newItem);
+        }
+
+        if (completedTasksIds.contains(newItem.googleTaskId) &&
+            !usedItemsTasksIds.contains(newItem.googleTaskId)) {
+          _pantryProxy.changeLocation(newItem, "Used");
+        }
+      } else {
+        if (itemBothIds.keys.contains(item.id)) {
+          var newItem = Item(itemBothIds[item.id], item.title, "Pantry", 1,
+              googleTaskId: item.id);
+          if (item.due != null) {
+            newItem.expiryDate = convertToRealmDateTime(item.due);
+          }
+          if (item.notes != null) {
+            notes = item.notes;
+          }
+          item = parseDescriptionStringFromGoogleTask(notes, newItem);
+
+          if (!usedItemsTasksIds.contains(newItem.googleTaskId)) {
+            _pantryProxy.upsertItem(newItem);
+          }
+
+          if (completedTasksIds.contains(newItem.googleTaskId) &&
+              !usedItemsTasksIds.contains(newItem.googleTaskId)) {
+            _pantryProxy.changeLocation(newItem, "Used");
+          }
+        }
       }
-    }
+    });
   }
 
   /// Deletes items from Realm that aren't in Google Tasks
@@ -245,7 +329,7 @@ class PantryController {
   /// [index] is the My Pantry tasklist index
   syncPantryTasksWithRealm(index) async {
     var realmItems = PantryProxy().getPantryItems();
-    var tasks = await _taskController.getTasksList(index);
+    var tasks = await _taskController.getTasksList(index, pantryList: true);
     saveGoogleTasksToRealm(realmItems, tasks);
     deleteMissingGoogleTasksFromRealm(realmItems, tasks);
   }

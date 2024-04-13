@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:get/get.dart';
 import 'package:kitsain_frontend_spring2023/app_colors.dart';
-import 'package:kitsain_frontend_spring2023/item_controller.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/feedview.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/pantryview.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/recipeview.dart';
@@ -12,10 +10,12 @@ import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/homepage2.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/shopping_list_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -56,11 +56,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final stateController = Get.put(ItemController());
-
   @override
   void initState() {
-    stateController.addData();
     super.initState();
   }
 
@@ -124,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                                     AppLocalizations.of(context)!
                                         .pantryTabLabel,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 10),
+                                    style: const TextStyle(fontSize: 10),
                                   ),
                                 ],
                               ),
@@ -180,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                                     AppLocalizations.of(context)!
                                         .historyTabLabel,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 10),
+                                    style: const TextStyle(fontSize: 10),
                                   ),
                                 ],
                               ),
@@ -208,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                                     AppLocalizations.of(context)!
                                         .recipeTabLabel,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 10),
+                                    style: const TextStyle(fontSize: 10),
                                   ),
                                 ],
                               ),
@@ -224,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                             List<dynamic> accepted,
                             List<dynamic> rejected,
                           ) {
-                            return Container(
+                            return SizedBox(
                               height: navBarHeight,
                               child: Column(
                                 children: [
@@ -235,7 +232,7 @@ class _HomePageState extends State<HomePage> {
                                   Text(
                                     AppLocalizations.of(context)!.feedTabLabel,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 10),
+                                    style: const TextStyle(fontSize: 10),
                                   ),
                                 ],
                               ),

@@ -18,19 +18,19 @@ class Categories {
   ].map((assetString) => Image.asset(assetString)).toList();
 
   static Map<int, String> categoriesByIndex = {
-    1: 'New',
-    2: 'Meat',
-    3: 'Seafood',
-    4: 'Fruit',
-    5: 'Vegetables',
-    6: 'Frozen',
-    7: 'Drinks',
-    8: 'Bread',
-    9: 'Treats',
-    10: 'Dairy',
-    11: 'Ready meals',
-    12: 'Dry & canned goods',
-    13: 'Other'
+    0: 'No category',
+    1: 'Meat',
+    2: 'Seafood',
+    3: 'Fruit',
+    4: 'Vegetables',
+    5: 'Frozen',
+    6: 'Drinks',
+    7: 'Bread',
+    8: 'Treats',
+    9: 'Dairy',
+    10: 'Ready meals',
+    11: 'Dry & canned goods',
+    12: 'Other'
   };
 }
 

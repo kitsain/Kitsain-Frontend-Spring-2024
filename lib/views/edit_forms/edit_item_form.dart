@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/app_colors.dart';
 import 'package:kitsain_frontend_spring2023/app_typography.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
-import 'package:kitsain_frontend_spring2023/database/pantry_proxy.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 import 'package:kitsain_frontend_spring2023/controller/pantry_controller.dart';
 
 const List<String> categories = <String>[
-  'ITEM CATEGORY',
+  'No category',
   'Meat',
   'Seafood',
   'Fruit',
@@ -23,19 +22,19 @@ const List<String> categories = <String>[
 ];
 
 Map catEnglish = {
-  1: 'ITEM CATEGORY',
-  2: 'Meat',
-  3: 'Seafood',
-  4: 'Fruit',
-  5: 'Vegetables',
-  6: 'Frozen',
-  7: 'Drinks',
-  8: 'Bread',
-  9: 'Treats',
-  10: 'Dairy',
-  11: 'Ready meals',
-  12: 'Dry & canned goods',
-  13: 'Other'
+  0: 'No category',
+  1: 'Meat',
+  2: 'Seafood',
+  3: 'Fruit',
+  4: 'Vegetables',
+  5: 'Frozen',
+  6: 'Drinks',
+  7: 'Bread',
+  8: 'Treats',
+  9: 'Dairy', 
+  10: 'Ready meals',
+  11: 'Dry & canned goods',
+  12: 'Other'
 };
 
 // ignore: must_be_immutable
@@ -67,8 +66,8 @@ class _EditItemFormState extends State<EditItemForm> {
   var _googleTaskId;
 
   bool _favorite = false;
-  String _category = 'ITEM CATEGORY';
-  var _catInt;
+  String _category = 'No category';
+  var _catInt = 0;
   var _hasExpiryDate;
   final _details = TextEditingController();
 
@@ -382,8 +381,7 @@ class _EditItemFormState extends State<EditItemForm> {
                             () {
                               _category = value!;
                               _catInt = catEnglish.keys.firstWhere(
-                                      (k) => categories[k] == value) +
-                                  1;
+                                      (k) => categories[k] == value);
                             },
                           );
                         },
@@ -395,12 +393,6 @@ class _EditItemFormState extends State<EditItemForm> {
                             );
                           },
                         ).toList(),
-                        validator: (value) {
-                          if (value == categories.first) {
-                            return "Please enter a category";
-                          }
-                          return null;
-                        },
                       ),
                     ),
                   ),
@@ -564,8 +556,8 @@ class _EditItemFormState extends State<EditItemForm> {
                                   details: _details.text,
                                   googleTaskId: _googleTaskId,
                                   amount: _itemAmount.text);
-                              PantryProxy().upsertItem(item);
 
+                              ///PantryProxy().upsertItem(item);
                               _pantryController.editItemTasks(item);
                               setState(() {});
                               Navigator.pop(context);

@@ -63,8 +63,7 @@ class CommentService {
       required String content,
       required DateTime date}) async {
     // Format the expiration date of the post
-    String formattedDate =
-        DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(date.toUtc());
+    DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(date.toUtc());
 
     try {
       // Send a POST request to the server with the post data

@@ -129,7 +129,7 @@ class _UsedAndExpiredState extends State<UsedAndExpired> {
         titleBackgroundColor: AppColors.titleBackgroundGreen,
       ),
       body: DragTarget<Item>(
-        onAccept: (data) => _receiveItem(data, selectedView),
+        onAcceptWithDetails: (data) => _receiveItem(data as Item, selectedView),
         builder: (context, candidateData, rejectedData) {
           return ListView(
             children: [
@@ -186,7 +186,7 @@ class _UsedAndExpiredState extends State<UsedAndExpired> {
               SizedBox(height: MediaQuery.of(context).size.height * 0.01),
               Center(
                 child: DragTarget<Item>(
-                  onWillAccept: (data) {
+                  onWillAcceptWithDetails: (data) {
                     setState(() {
                       _selectedTabs[0] = !_selectedTabs[0];
                       _selectedTabs[1] = !_selectedTabs[1];

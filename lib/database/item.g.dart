@@ -292,16 +292,25 @@ class Item extends _Item with RealmEntity, RealmObjectBase, RealmObject {
 }
 
 class Recipe extends _Recipe with RealmEntity, RealmObjectBase, RealmObject {
+  static var _defaultsSet = false;
+
   Recipe(
     String id,
     String name, {
     String? googleTaskId,
+    bool done = false,
     Iterable<String> instructions = const [],
     Map<String, String> ingredients = const {},
   }) {
+    if (!_defaultsSet) {
+      _defaultsSet = RealmObjectBase.setDefaults<Recipe>({
+        'done': false,
+      });
+    }
     RealmObjectBase.set(this, 'id', id);
     RealmObjectBase.set(this, 'name', name);
     RealmObjectBase.set(this, 'googleTaskId', googleTaskId);
+    RealmObjectBase.set(this, 'done', done);
     RealmObjectBase.set<RealmList<String>>(
         this, 'instructions', RealmList<String>(instructions));
     RealmObjectBase.set<RealmMap<String>>(
@@ -342,6 +351,11 @@ class Recipe extends _Recipe with RealmEntity, RealmObjectBase, RealmObject {
       RealmObjectBase.set(this, 'googleTaskId', value);
 
   @override
+  bool get done => RealmObjectBase.get<bool>(this, 'done') as bool;
+  @override
+  set done(bool value) => RealmObjectBase.set(this, 'done', value);
+
+  @override
   Stream<RealmObjectChanges<Recipe>> get changes =>
       RealmObjectBase.getChanges<Recipe>(this);
 
@@ -360,6 +374,7 @@ class Recipe extends _Recipe with RealmEntity, RealmObjectBase, RealmObject {
       SchemaProperty('instructions', RealmPropertyType.string,
           collectionType: RealmCollectionType.list),
       SchemaProperty('googleTaskId', RealmPropertyType.string, optional: true),
+      SchemaProperty('done', RealmPropertyType.bool),
     ]);
   }
 }

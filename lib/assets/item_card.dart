@@ -130,12 +130,13 @@ class _ItemCardState extends State<ItemCard> {
         switch (value) {
           case _MenuValues.edit:
             _editItem(widget.item);
-
             break;
           case _MenuValues.used:
+            _pantryController.completePantryItem(widget.item);
             PantryProxy().changeLocation(widget.item, "Used");
             break;
           case _MenuValues.bin:
+            _pantryController.deletePantryItemFromTasks(widget.item);
             PantryProxy().changeLocation(widget.item, "Bin");
             break;
           // case _MenuValues.shoppinglist:
@@ -239,12 +240,15 @@ class _ItemCardState extends State<ItemCard> {
         switch (value) {
           case _MenuValues.bin:
             PantryProxy().changeLocation(widget.item, "Bin");
+            _pantryController.deletePantryItemFromTasks(widget.item);
             break;
           case _MenuValues.used:
             PantryProxy().changeLocation(widget.item, "Used");
+            _pantryController.editItemTasks(widget.item, complete: true);
             break;
           case _MenuValues.pantry:
             PantryProxy().changeLocation(widget.item, "Pantry");
+            _pantryController.editItemTasks(widget.item, returnToPantry: true);
             break;
           // case _MenuValues.shoppinglist:
           //   break;
@@ -339,7 +343,7 @@ class _ItemCardState extends State<ItemCard> {
                   ),
                   leading: Transform.translate(
                     offset: Offset(0, 0),
-                    child: Categories.categoryImages[widget.item.mainCat - 1],
+                    child: Categories.categoryImages[widget.item.mainCat],
                   ),
                 )),
             clipper: ShapeBorderClipper(
@@ -412,7 +416,7 @@ class _ItemCardState extends State<ItemCard> {
                         : popupMenuButtonHistory,
                     leading: Transform.translate(
                       offset: const Offset(0, 0),
-                      child: Categories.categoryImages[widget.item.mainCat - 1],
+                      child: Categories.categoryImages[widget.item.mainCat],
                     ),
                     children: [
                       Row(
@@ -474,18 +478,20 @@ class _ItemCardState extends State<ItemCard> {
                           ),
                           if (widget.item.favorite == true) ...[
                             IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 PantryProxy().toggleItemFavorite(widget.item);
-                                _pantryController.editItemTasks(widget.item);
+                                _pantryController.editItemTasks(widget.item,
+                                    favoritedFromPantryView: true);
                               },
                               icon: const Icon(Icons.favorite,
                                   color: Colors.black),
                             ),
                           ] else ...[
                             IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 PantryProxy().toggleItemFavorite(widget.item);
-                                _pantryController.editItemTasks(widget.item);
+                                _pantryController.editItemTasks(widget.item,
+                                    favoritedFromPantryView: true);
                               },
                               icon: const Icon(Icons.favorite_border,
                                   color: Colors.grey),

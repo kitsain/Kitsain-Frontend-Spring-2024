@@ -10,9 +10,13 @@ class NewItem {
   NewItem(this.name);
 }
 
-class PantryBuilderLogic extends State<PantryBuilder>{
+/// Class for handling the logic for pantry items selecting
+class PantryBuilderLogic extends State<PantryBuilder> {
+  /// Builds the widget tree for the UI
   @override
   Widget build(BuildContext context) => PantryBuilderWidgets(this);
+
+  /// Initializes selectedItems list
   @override
   void initState() {
     super.initState();
@@ -23,6 +27,7 @@ class PantryBuilderLogic extends State<PantryBuilder>{
       };
     });
   }
+
   late int expirationTimeInDays = 4;
   late List<Map<String, dynamic>> isSelectedAll;
   late List expiringItems = getExpiringItems();
@@ -32,8 +37,6 @@ class PantryBuilderLogic extends State<PantryBuilder>{
   late List optionalItems = [];
   late List<String> optionalItemsNames = [];
   late List<String> mustHaveItemsNames = [];
-  
-
 
   /// Gets the names of optional items
   ///
@@ -41,7 +44,11 @@ class PantryBuilderLogic extends State<PantryBuilder>{
   List<String> getOptionalItemsNames() {
     optionalItemsNames = [];
     for (var item in optionalItems) {
-      optionalItemsNames.add(item.name);
+      if (item is NewItem) {
+        optionalItemsNames.add('${item.name};');
+      } else {
+        optionalItemsNames.add(item.name + ';' + (item.amount ?? ''));
+      }
     }
     return optionalItemsNames;
   }
@@ -52,7 +59,11 @@ class PantryBuilderLogic extends State<PantryBuilder>{
   List<String> getMustHaveItemsNames() {
     mustHaveItemsNames = [];
     for (var item in mustHaveItems) {
-        mustHaveItemsNames.add(item.name);
+      if (item is NewItem) {
+        mustHaveItemsNames.add('${item.name};');
+      } else {
+        mustHaveItemsNames.add(item.name + ';' + (item.amount ?? ''));
+      }
     }
 
     return mustHaveItemsNames;
@@ -226,13 +237,13 @@ class PantryBuilderLogic extends State<PantryBuilder>{
       widget.onMustHaveItemsChanged(getMustHaveItemsNames());
     });
   }
-
 }
 
 /// Builds the choosing of ingredients part of the UI
 class PantryBuilder extends StatefulWidget {
   final RealmResults<Item> items;
-  const PantryBuilder({super.key, 
+  const PantryBuilder({
+    super.key,
     Key? widgetKey,
     required this.sortMethod,
     required this.items,
@@ -247,11 +258,14 @@ class PantryBuilder extends StatefulWidget {
   PantryBuilderLogic createState() => PantryBuilderLogic();
 }
 
+/// Builds the widget tree for the UI
 class PantryBuilderWidgets extends StatelessWidget {
   final PantryBuilderLogic state;
-   get widget => state.widget;
- 
+  get widget => state.widget;
+
+  /// Gets the state and logic handler class as an argument
   const PantryBuilderWidgets(this.state, {super.key});
+
   /// Builds the UI element for select and deselect buttons
   Widget buildSelectButtons() {
     return Row(
@@ -284,7 +298,6 @@ class PantryBuilderWidgets extends StatelessWidget {
   Widget buildExpiringIngredients() {
     return Column(
       children: [
-        // const SizedBox(height: 20),
         const Text("Expiring ingredients", style: AppTypography.heading4),
         const SizedBox(height: 5),
         Padding(
@@ -303,7 +316,8 @@ class PantryBuilderWidgets extends StatelessWidget {
               children: List.generate(
                 state.expiringItems.length,
                 (index) => GestureDetector(
-                  onTap: () => state.toggleItemSelection(state.expiringItems[index]),
+                  onTap: () =>
+                      state.toggleItemSelection(state.expiringItems[index]),
                   child: Container(
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
@@ -313,8 +327,9 @@ class PantryBuilderWidgets extends StatelessWidget {
                     child: Text(
                       (state.expiringItems[index].name +
                           " " +
-                          state.formatter.format(
-                              state.expiringItems[index].expiryDate!.toLocal())),
+                          state.formatter.format(state
+                              .expiringItems[index].expiryDate!
+                              .toLocal())),
                       style: AppTypography.heading5,
                     ),
                   ),
@@ -350,7 +365,8 @@ class PantryBuilderWidgets extends StatelessWidget {
               children: List.generate(
                 state.notExpiringItems.length,
                 (index) => GestureDetector(
-                  onTap: () => state.toggleItemSelection(state.notExpiringItems[index]),
+                  onTap: () =>
+                      state.toggleItemSelection(state.notExpiringItems[index]),
                   child: Container(
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
@@ -389,8 +405,8 @@ class PantryBuilderWidgets extends StatelessWidget {
                   height: 200, // Adjust this value as needed
                   child: Scrollbar(
                     child: ListView.builder(
-                      itemCount:
-                          state.mustHaveItems.length + 1, // Add 1 for the extra card
+                      itemCount: state.mustHaveItems.length +
+                          1, // Add 1 for the extra card
                       itemBuilder: (context, index) {
                         if (index == state.mustHaveItems.length) {
                           // Render the extra card for adding new items
@@ -398,7 +414,8 @@ class PantryBuilderWidgets extends StatelessWidget {
                             child: ListTile(
                               title: TextField(
                                 onSubmitted: (value) {
-                                  state.addItemToList(NewItem(value), state.mustHaveItems);
+                                  state.addItemToList(
+                                      NewItem(value), state.mustHaveItems);
                                 },
                                 decoration: const InputDecoration(
                                   hintText: 'Enter item',
@@ -417,15 +434,16 @@ class PantryBuilderWidgets extends StatelessWidget {
                                   const Spacer(),
                                   GestureDetector(
                                     onTap: () {
-                                      state.toggleItemSelection(state.mustHaveItems[index]);
+                                      state.toggleItemSelection(
+                                          state.mustHaveItems[index]);
                                     },
                                     child: const Icon(Icons.close),
                                   ),
                                 ],
                               ),
                               onTap: () {
-                                state.switchList(state.mustHaveItems[index], state.mustHaveItems,
-                                    state.optionalItems);
+                                state.switchList(state.mustHaveItems[index],
+                                    state.mustHaveItems, state.optionalItems);
                               },
                             ),
                           );
@@ -449,8 +467,8 @@ class PantryBuilderWidgets extends StatelessWidget {
                   height: 200, // Adjust this value as needed
                   child: Scrollbar(
                     child: ListView.builder(
-                      itemCount:
-                          state.optionalItems.length + 1, // Add 1 for the extra card
+                      itemCount: state.optionalItems.length +
+                          1, // Add 1 for the extra card
                       itemBuilder: (context, index) {
                         if (index == state.optionalItems.length) {
                           // Render the extra card for adding new items
@@ -458,7 +476,8 @@ class PantryBuilderWidgets extends StatelessWidget {
                             child: ListTile(
                               title: TextField(
                                 onSubmitted: (value) {
-                                  state.addItemToList(NewItem(value), state.optionalItems);
+                                  state.addItemToList(
+                                      NewItem(value), state.optionalItems);
                                 },
                                 decoration: const InputDecoration(
                                   hintText: 'Enter item',
@@ -477,15 +496,16 @@ class PantryBuilderWidgets extends StatelessWidget {
                                   const Spacer(),
                                   GestureDetector(
                                     onTap: () {
-                                      state.toggleItemSelection(state.optionalItems[index]);
+                                      state.toggleItemSelection(
+                                          state.optionalItems[index]);
                                     },
                                     child: const Icon(Icons.close),
                                   ),
                                 ],
                               ),
                               onTap: () {
-                                state.switchList(state.optionalItems[index], state.optionalItems,
-                                    state.mustHaveItems);
+                                state.switchList(state.optionalItems[index],
+                                    state.optionalItems, state.mustHaveItems);
                               },
                             ),
                           );

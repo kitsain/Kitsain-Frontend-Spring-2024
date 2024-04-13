@@ -12,6 +12,7 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/user_shopping_
 import 'package:kitsain_frontend_spring2023/views/edit/edit_shopping_list.dart';
 import 'package:kitsain_frontend_spring2023/views/add_forms/add_new_shopping_list_form.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
+import 'package:kitsain_frontend_spring2023/models/ShoppingListItemModel.dart';
 
 class ShoppingLists extends StatefulWidget {
   const ShoppingLists({super.key, required this.setActiveShoppingListIndex});
@@ -22,12 +23,29 @@ class ShoppingLists extends StatefulWidget {
   State<ShoppingLists> createState() => _ShoppingListsState();
 }
 
+
 class _ShoppingListsState extends State<ShoppingLists> {
   final taskListController = Get.put(TaskListController());
 
   final taskController = Get.put(TaskController());
 
   final loginController = Get.put(LoginController());
+  var tskList;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTasks();
+  }
+
+  Future<void> fetchTasks() async {
+    var taskListIndex = await findShopIndex();
+    print("taskListIndex: $taskListIndex");
+    tskList = await taskController.getTasksListStream(taskListIndex);
+    print("Tasks: $tskList");
+    setState(() {});
+  }
+
 
   void _deleteListDialog(int index) {
     showDialog(
@@ -137,6 +155,26 @@ class _ShoppingListsState extends State<ShoppingLists> {
       },
     );
   }
+  Future findShopIndex() async {
+    await taskListController.getTaskLists();
+    var shopIndex = "not";
+    if (taskListController.taskLists.value?.items != null) {
+      int length = taskListController.taskLists.value?.items!.length as int;
+      for (var i = 0; i < length; i++) {
+        print("$i: ${taskListController.taskLists.value?.items?[i].title}");
+        if (taskListController.taskLists.value?.items?[i].title ==
+            "Shopping lists") {
+          shopIndex =
+              taskListController.taskLists.value?.items?[i].id as String;
+          break;
+        }
+      }
+    }
+    return shopIndex;
+  }
+
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,76 +188,90 @@ class _ShoppingListsState extends State<ShoppingLists> {
         backgroundImageName: 'assets/images/aisle-3105629_1280_B1.jpg',
         titleBackgroundColor: AppColors.titleBackgroundBrown,
       ),
-      body: SingleChildScrollView(
-        child: Obx(() {
-          return ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical,
-            itemCount: taskListController.taskLists.value?.items?.length,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(15),
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  DragTarget<Item>(
-                    onAccept: (data) => _receiveItem(index, data),
-                    builder: (context, candidateData, rejectedData) {
-                      return Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          side: BorderSide(
-                            width: candidateData.isNotEmpty ? 4 : 1,
-                            color: candidateData.isNotEmpty
-                                ? AppColors.main1
-                                : Colors.black38,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 5, right: 0, top: 5, bottom: 5),
-                          child: ListTile(
-                              title: Row(
-                                children: [
-                                  Text(
-                                    '${taskListController.taskLists.value?.items?[index].title}',
-                                    style:
-                                        const TextStyle(fontWeight: FontWeight.bold),
-                                    //style: AppTypography.paragraph.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const Spacer(),
-                                  IconButton(
-                                    onPressed: () {
-                                      _deleteListDialog(index);
-                                    },
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: AppColors.main1,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () => _editList(
-                                        '${taskListController.taskLists.value?.items?[index].id}',
-                                        index),
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: AppColors.main1,
-                                    ),
-                                  ),
-                                ],
+      body: RefreshIndicator(onRefresh: () async {
+        print("testingrefresh");
+      },
+       child: SingleChildScrollView(
+        child: StreamBuilder<List<ShoppingListItemModel>>(
+            stream: taskController.tasksStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {  
+                final tasks = snapshot.data ?? [];
+                return ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  itemCount: tasks.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(15),
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return Column(
+                      children: [
+                        DragTarget<Item>(
+                          onAcceptWithDetails: (data) => _receiveItem(index, data as Item),
+                          builder: (context, candidateData, rejectedData) {
+                            return Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                side: BorderSide(
+                                  width: candidateData.isNotEmpty ? 4 : 1,
+                                  color: candidateData.isNotEmpty
+                                      ? AppColors.main1
+                                      : Colors.black38,
+                                ),
                               ),
-                              onTap: () => _openShoppingList(index)),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 5, right: 0, top: 5, bottom: 5),
+                                child: ListTile(
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        task.title,
+                                        style:
+                                            const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      const Spacer(),
+                                      IconButton(
+                                        onPressed: () {
+                                          _deleteListDialog(index);
+                                        },
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: AppColors.main1,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () => _editList(
+                                            task.id,
+                                            index),
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: AppColors.main1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () => _openShoppingList(index),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 5),
-                ],
-              );
+                        const SizedBox(height: 5),
+                      ],
+                    );
+                  },
+                );
+              }
             },
-          );
-        }),
+          ),
       ),
-    );
+    ));
   }
 }

@@ -28,6 +28,12 @@ analyzer:
   - lib/views/add_forms/edit_forms/edit_shopping_list_item_form.dart
   - lib/views/add_forms/help_pages/*
   - lib/views/add_forms/homepage2.dart
+  - pubspec.yaml
+  - lib/views/main_menu_pages/feed/*
+  - lib/services/post_service.dart
+  - lib/assets/post_card.dart
+  - lib/assets/commentBox.dart
+  - lib/assets/image_carousel.dart
   
 linter:
   # The lint rules applied to this project can be customized in the

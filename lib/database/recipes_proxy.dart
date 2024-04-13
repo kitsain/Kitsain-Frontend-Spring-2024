@@ -80,6 +80,7 @@ class RecipeProxy with ChangeNotifier {
       debugPrint(e.message);
     }
   }
+
   /// Deletes all recipes from the database
   void deleteAll() {
     realm.write(() {

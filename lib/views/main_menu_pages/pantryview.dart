@@ -160,8 +160,10 @@ class _PantryViewState extends State<PantryView> {
         backgroundImageName: 'assets/images/pantry_banner_B1.jpg',
         titleBackgroundColor: AppColors.titleBackgroundBrown,
       ),
-      body: DragTarget<Item>(
-        onAccept: (data) => _receiveItem(data),
+      body: RefreshIndicator(onRefresh: () async {
+        await PantryController().getPantryTasks();
+      },child: DragTarget<Item>(
+        onAcceptWithDetails: (data) => _receiveItem(data as Item),
         builder: (context, candidateData, rejectedData) {
           return ListView(
             children: [
@@ -374,6 +376,6 @@ class _PantryViewState extends State<PantryView> {
           );
         },
       ),
-    );
+    ));
   }
 }
