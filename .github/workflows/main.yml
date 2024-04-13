@@ -45,7 +45,7 @@ jobs:
       - name: Run tests
         run: flutter test test/integration_test/
       - name: Build android Apk
-        run: flutter build apk
+        run: flutter build apk --debug
       - uses: actions/upload-artifact@v1
         with:
           name: release-apk
