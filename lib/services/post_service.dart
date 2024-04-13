@@ -135,7 +135,7 @@ class PostService {
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        //logger.e(response.body);
+        logger.e(response.body);
       }
     } catch (error) {
       logger.e("ERROR: $error");
@@ -327,7 +327,7 @@ class PostService {
         expiringDate: expiringDate,
         id: id,
         userId: userId,
-        comments: await commentService.getComments(json['id']),
+        comments: await commentService.getComments(id),
         useful: useful,
       );
     } catch (e) {

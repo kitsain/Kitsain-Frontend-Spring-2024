@@ -58,12 +58,9 @@ class CommentService {
   ///
   /// Returns the created [Post] object if successful, otherwise returns null.
   Future<void> postComment(
-      {required String postID,
-      required String user,
-      required String content,
-      required DateTime date}) async {
+      {required String postID, required String content}) async {
     // Format the expiration date of the post
-    DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(date.toUtc());
+    // String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(date.toUtc());
 
     try {
       // Send a POST request to the server with the post data
@@ -88,6 +85,31 @@ class CommentService {
       }
     } catch (error) {
       logger.e("ERROR: $error");
+      // Handle any errors that occur during the request
+    }
+  }
+
+  Future<bool> deleteComment(String id, String userId) async {
+    try {
+      // Send a POST request to the server with the post data
+      final response =
+          await http.put(Uri.parse('$baseUrl/disable/$id'), headers: {
+        'Content-Type': 'application/json',
+        'accept': '*/*',
+        'Authorization': 'Bearer ${accessToken.value}',
+      });
+      if (response.statusCode == 200) {
+        logger.i("Comment removed successfully");
+        return true;
+      } else {
+        // Handle other status codes if needed
+        logger.e('Request failed with status: ${response.statusCode}');
+        //logger.e(response.body);
+        return false;
+      }
+    } catch (error) {
+      logger.e("ERROR: $error");
+      return false;
       // Handle any errors that occur during the request
     }
   }
