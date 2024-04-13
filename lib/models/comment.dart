@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 /// Class for creating a comment object.
 class Comment {
   String postID = 'NO_ID';
@@ -7,10 +5,9 @@ class Comment {
   String message = 'NO_MESSAGE';
   DateTime date = DateTime.now();
 
-  Comment({
-    required this.postID,
-    required this.author,
-    required this.message,
-    required this.date
-  });
+  Comment(
+      {required this.postID,
+      required this.author,
+      required this.message,
+      required this.date});
 }

@@ -13,8 +13,7 @@ class CreateEditPostView extends StatefulWidget {
   final Post? post;
   final List<String>? existingImages;
 
-  const CreateEditPostView({Key? key, this.post, this.existingImages})
-      : super(key: key);
+  const CreateEditPostView({super.key, this.post, this.existingImages});
 
   @override
   _CreateEditPostViewState createState() => _CreateEditPostViewState();
@@ -159,7 +158,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             padding: const EdgeInsets.all(15.0),
             child: Column(
               children: [
-                editImageWidget(
+                EditImageWidget(
                   images: tempImages,
                   stringImages: widget.existingImages ?? [],
                   feedImages: false,
@@ -178,14 +177,14 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Select Image Source'),
+                            title: const Text('Select Image Source'),
                             actions: <Widget>[
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   TextButton(
-                                    child: Text('Camera'),
+                                    child: const Text('Camera'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                       _pickImageFromCamera();
@@ -193,7 +192,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                   ),
                                   const SizedBox(height: 10),
                                   TextButton(
-                                    child: Text('Gallery'),
+                                    child: const Text('Gallery'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                       _pickImageFromGallery();
@@ -206,12 +205,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         },
                       );
                     },
-                    child: Text('Add Image'),
+                    child: const Text('Add Image'),
                   ),
                 ),
                 TextFormField(
                   focusNode: _titleFocusNode,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Title',
                   ),
                   initialValue: _title,
@@ -229,7 +228,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                 ),
                 TextFormField(
                   focusNode: _descriptionFocusNode,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                   ),
                   initialValue: _description,
@@ -274,12 +273,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   controller: _dateController,
                   readOnly: true,
                   onTap: () => _selectDate(context),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Select expiring date',
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
                     try {

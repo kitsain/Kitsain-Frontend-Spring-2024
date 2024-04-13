@@ -170,7 +170,7 @@ class PostService {
 
         // Send a PUT request to update the post on the server
         final response = await http.put(
-          Uri.parse(baseUrl + '/$id'),
+          Uri.parse('$baseUrl/$id'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ${accessToken.value}',

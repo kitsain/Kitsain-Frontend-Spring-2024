@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
-import 'package:kitsain_frontend_spring2023/assets/commentBox.dart';
+import 'package:kitsain_frontend_spring2023/assets/comment_box.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 
 /// TODO:
@@ -64,11 +64,14 @@ class _CommentSectionViewState extends State<CommentSectionView> {
 
   /// Comment object for storing info about
   /// current instance of comment.
+  ///
+/*
   Comment _createCommentObj(String author, String message, DateTime date) {
     return Comment(
         postID: widget.postID, author: author, message: message, date: date);
   }
 
+*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,8 +94,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
               return Future.delayed(
                 const Duration(seconds: 1),
                 () {
-                  setState(() {
-                  });
+                  setState(() {});
                 },
               );
             },
@@ -107,70 +109,65 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onLongPress: () {
-                      if (_currUser == _tempComments[index].author){
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text(
-                                        _formatComment(index)
-                                    ),
-                                    ListTile(
-                                      textColor: Colors.red,
-                                      iconColor: Colors.red,
-                                      leading: Icon(Icons.delete),
-                                      title: Text('Remove comment'),
-                                      onTap: (){
-                                        setState(() {
-                                          _removeComment(index);
-                                          Navigator.of(context).pop();
-                                        });
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.edit),
-                                      title: Text('Edit'),
-                                      onTap: (){
-                                        // TODO: logic for editing comment
-                                      },
-                                    ),
-                                  ]
-                              ),
-                            );
-                          }
-                        );
-                      } else {
+                      if (_currUser == _tempComments[index].author) {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
                               return Padding(
-                                padding: EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
-                                      Text(
-                                        _formatComment(index)
-                                      ),
+                                      Text(_formatComment(index)),
                                       ListTile(
-                                        leading: Icon(Icons.reply),
-                                        title: Text('Reply to comment'),
-                                        onTap: (){
-                                          // TODO: reply logic
+                                        textColor: Colors.red,
+                                        iconColor: Colors.red,
+                                        leading: const Icon(Icons.delete),
+                                        title: const Text('Remove comment'),
+                                        onTap: () {
+                                          setState(() {
+                                            _removeComment(index);
+                                            Navigator.of(context).pop();
+                                          });
                                         },
                                       ),
-                                    ]
-                                ),
+                                      ListTile(
+                                        leading: const Icon(Icons.edit),
+                                        title: const Text('Edit'),
+                                        onTap: () {
+                                          // TODO: logic for editing comment
+                                        },
+                                      ),
+                                    ]),
                               );
-                            },
-                        );}
+                            });
+                      } else {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(_formatComment(index)),
+                                    ListTile(
+                                      leading: const Icon(Icons.reply),
+                                      title: const Text('Reply to comment'),
+                                      onTap: () {
+                                        // TODO: reply logic
+                                      },
+                                    ),
+                                  ]),
+                            );
+                          },
+                        );
+                      }
                     },
                     child: CommentBox(
                       comment: _tempComments[index].message,
-                      author: 'user ${(_users.indexOf(_tempComments[index].author)+1)}',
+                      author:
+                          'user ${(_users.indexOf(_tempComments[index].author) + 1)}',
                       date: _tempComments[index].date,
                     ),
                   );
@@ -227,7 +224,8 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   /// Fetches most recent comment information from backend and updates locally.
   void _refreshComments() async {
     try {
-      List<Comment> newComments = await commentService.getComments(widget.postID);
+      List<Comment> newComments =
+          await commentService.getComments(widget.postID);
       setState(() {
         _tempComments.clear();
         _tempComments.addAll(newComments);

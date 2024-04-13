@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 /// The feed view widget that displays a list of posts.
 class FeedView extends StatefulWidget {
-  const FeedView({Key? key});
+  const FeedView({super.key});
 
   @override
   State<FeedView> createState() => _FeedViewState();
@@ -138,7 +138,8 @@ class _FeedViewState extends State<FeedView> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => CreateEditPostView(existingImages: [])),
+                builder: (context) =>
+                    const CreateEditPostView(existingImages: [])),
           ).then((newPost) async {
             if (newPost != null) {
               setState(() {

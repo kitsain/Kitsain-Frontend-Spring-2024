@@ -1,27 +1,28 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-class editImageWidget extends StatefulWidget {
+class EditImageWidget extends StatefulWidget {
   final List<File> images;
   final List<String> stringImages;
   final bool feedImages;
-  const editImageWidget(
+
+  const EditImageWidget(
       {super.key,
       required this.images,
       required this.stringImages,
       required this.feedImages});
 
   @override
-  _editImageWidgetState createState() => _editImageWidgetState();
+  _EditImageWidgetState createState() => _EditImageWidgetState();
 }
 
-class _editImageWidgetState extends State<editImageWidget> {
+class _EditImageWidgetState extends State<EditImageWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 355,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: widget.images.isNotEmpty || widget.stringImages.isNotEmpty
           ? _buildCarousel(context, widget.feedImages)
           : Container(
@@ -54,7 +55,7 @@ class _editImageWidgetState extends State<editImageWidget> {
   Widget _buildCarouselItem(
       BuildContext context, int itemIndex, bool feedImages) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Stack(
         children: <Widget>[
           ClipRRect(
