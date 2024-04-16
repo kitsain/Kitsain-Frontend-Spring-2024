@@ -41,10 +41,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   final TextEditingController _titleController = TextEditingController();
 
-  CurrencyTextInputFormatter currencyFormatter = CurrencyTextInputFormatter(
+  var currencyFormatter = CurrencyTextInputFormatter(
     decimalDigits: 2,
-    locale: 'en_US',
-    symbol: '\$',
+    locale: 'eu',
+    symbol: '€',
   );
 
   @override
