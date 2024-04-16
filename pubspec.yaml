@@ -59,6 +59,7 @@ dependencies:
   currency_text_input_formatter: ^2.1.11
   logger: ^2.1.0
   flutter_email_sender: ^6.0.2
+  google_ml_kit: ^0.16.3
 
 dev_dependencies:
   mockito: ^5.4.4
