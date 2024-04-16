@@ -41,6 +41,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   final TextEditingController _titleController = TextEditingController();
 
+  CurrencyTextInputFormatter currencyFormatter = CurrencyTextInputFormatter(
+    decimalDigits: 2,
+    locale: 'en_US',
+    symbol: '\$',
+  );
+
   @override
   void initState() {
     super.initState();
@@ -171,9 +177,9 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
         try {
           var product = await getFromJson(rawValue);
-          logger.i('Product name: ${product!.productName}');
+
           if (_titleController.text.isEmpty) {
-            _titleController.text = product.productName ?? '';
+            _titleController.text = product!.productName ?? '';
             _title = product.productName ?? '';
           }
         } catch (e) {
@@ -297,13 +303,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                 ),
                 TextFormField(
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    CurrencyTextInputFormatter(
-                      decimalDigits: 2,
-                      locale: 'eu',
-                      symbol: '€',
-                    )
-                  ],
+                  inputFormatters: [currencyFormatter],
                   decoration: const InputDecoration(
                     labelText: 'Price',
                   ),
