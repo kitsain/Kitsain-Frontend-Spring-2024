@@ -5,9 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
+import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:logger/logger.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
@@ -36,6 +39,14 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _titleFocusNode = FocusNode();
 
+  final TextEditingController _titleController = TextEditingController();
+
+  var currencyFormatter = CurrencyTextInputFormatter(
+    decimalDigits: 2,
+    locale: 'eu',
+    symbol: '€',
+  );
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +74,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       final pickedImage =
           await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedImage == null) return;
+      fetchBarCode(File(pickedImage.path));
       tempImages.add(File(pickedImage.path));
       setState(() {
         imageSelected = tempImages.isNotEmpty;
@@ -83,6 +95,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       );
 
       if (pickedImage != null) {
+        fetchBarCode(File(pickedImage.path));
         tempImages.add(File(pickedImage.path));
         setState(() {
           imageSelected = tempImages.isNotEmpty;
@@ -115,7 +128,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       for (var image in tempImages) {
         _images.add(await _postService.uploadFile(image));
       }
-
       // Check if it's an update operation
       if (widget.post != null) {
         // Update the existing post
@@ -145,8 +157,53 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
   }
 
+  Future<void> fetchBarCode(File file) async {
+    logger.i('Fetching barcode from image');
+    var barCodeScanner = GoogleMlKit.vision.barcodeScanner();
+    final inputImage = InputImage.fromFile(file);
+    final List<Barcode> barcodes =
+        await barCodeScanner.processImage(inputImage);
+    if (barcodes.isEmpty) {
+      logger.i('No barcode found');
+      return;
+    }
+    for (Barcode barcode in barcodes) {
+      if (barcode.rawValue != null) {
+        final String rawValue = barcode.rawValue!;
+        logger.i('Barcode raw value: $rawValue');
+        OpenFoodAPIConfiguration.userAgent = UserAgent(
+          name: 'Kitsain',
+        );
+
+        try {
+          var product = await getFromJson(rawValue);
+
+          if (_titleController.text.isEmpty) {
+            _titleController.text = product!.productName ?? '';
+            _title = product.productName ?? '';
+          }
+        } catch (e) {
+          // Handle any errors that occur during fetching product information
+          logger.e('Error fetching product information: $e');
+        }
+      } else {
+        logger.w('Barcode raw value is null');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _dateController.dispose();
+    _descriptionFocusNode.dispose();
+    _titleFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _titleController.text = _title;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
@@ -210,10 +267,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                 ),
                 TextFormField(
                   focusNode: _titleFocusNode,
+                  controller: _titleController,
                   decoration: const InputDecoration(
                     labelText: 'Title',
                   ),
-                  initialValue: _title,
                   onChanged: (value) {
                     setState(() {
                       _title = value;
@@ -246,13 +303,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                 ),
                 TextFormField(
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    CurrencyTextInputFormatter(
-                      decimalDigits: 2,
-                      locale: 'eu',
-                      symbol: '€',
-                    )
-                  ],
+                  inputFormatters: [currencyFormatter],
                   decoration: const InputDecoration(
                     labelText: 'Price',
                   ),

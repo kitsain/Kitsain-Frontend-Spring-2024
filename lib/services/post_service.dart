@@ -112,6 +112,9 @@ class PostService {
           'price': price,
           'images': images,
           'expiringDate': formattedDate,
+          "latitude": 0,
+          "longitude": 0,
+          "tags": []
         }),
       );
 
