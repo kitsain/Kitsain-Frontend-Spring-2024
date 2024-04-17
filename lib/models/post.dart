@@ -21,6 +21,7 @@ class Post extends ChangeNotifier {
   List<Comment> comments = [];
   String id = "";
   String userId = "";
+  String storeName="";
   //Item item;
 
   Post({

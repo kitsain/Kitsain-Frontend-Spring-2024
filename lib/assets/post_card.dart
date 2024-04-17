@@ -154,7 +154,19 @@ class _PostCardState extends State<PostCard> {
                   ),
               ],
             ),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+              Text(
+              // widget.post.storeName, // this when storeName is implemented to post object
+              "store",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color.fromARGB(255, 29, 31, 33)
+                ),
+              ),
+              ],
+            ),
             // Check if there are images to display
             // Add image holder here
             if (widget.post.images.isNotEmpty)
