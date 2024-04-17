@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -38,14 +37,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   bool imageSelected = true;
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _titleFocusNode = FocusNode();
+  final _priceFocusNode = FocusNode();
 
   final TextEditingController _titleController = TextEditingController();
-
-  var currencyFormatter = CurrencyTextInputFormatter(
-    decimalDigits: 2,
-    locale: 'eu',
-    symbol: '€',
-  );
+  final TextEditingController _priceController = TextEditingController();
 
   @override
   void initState() {
@@ -66,6 +61,20 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _expiringDate = DateTime.now();
       _dateController.text = _dateFormat.format(_expiringDate);
     }
+    _priceFocusNode.addListener(() {
+      if (!_priceFocusNode.hasFocus) {
+        final String text = _priceController.text.replaceAll(',', '.');
+        final num? value = num.tryParse(text);
+        if (value != null) {
+          _priceController.text =
+              NumberFormat.currency(locale: 'eu', symbol: '€', decimalDigits: 2)
+                  .format(value);
+          setState(() {
+            _price = _priceController.text.toString();
+          });
+        }
+      }
+    });
   }
 
   /// Function for taking an image with camera.
@@ -198,6 +207,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     _dateController.dispose();
     _descriptionFocusNode.dispose();
     _titleFocusNode.dispose();
+    _priceFocusNode.dispose();
     super.dispose();
   }
 
@@ -302,16 +312,24 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   },
                 ),
                 TextFormField(
+                  controller: _priceController,
+                  focusNode: _priceFocusNode,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [currencyFormatter],
                   decoration: const InputDecoration(
                     labelText: 'Price',
                   ),
-                  initialValue: _price,
-                  onChanged: (value) {
-                    setState(() {
-                      _price = value;
-                    });
+                  onEditingComplete: () {
+                    final String text =
+                        _priceController.text.replaceAll(',', '.');
+                    final num? value = num.tryParse(text);
+                    if (value != null) {
+                      _priceController.text = NumberFormat.currency(
+                              locale: 'eu', symbol: '€', decimalDigits: 2)
+                          .format(value);
+                      setState(() {
+                        _price = _priceController.text.toString();
+                      });
+                    }
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
