@@ -56,38 +56,46 @@ class _tagSelectViewState extends State<tagSelectView> {
           children: [
             Center(child: Text('Select tags:')),
             SizedBox(height: 10),
-            Wrap(
-              children: List.generate(_tags.length, (index) {
-                Color color;
-                if (_myTags.contains(_tags[index+1])){
-                  color = Colors.grey;
-                } else {
-                  color = Colors.white;
-                }
-                _buttonColors.add(color);
+            Expanded(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Wrap(
+                    children: List.generate(_tags.length, (index) {
+                      Color color;
+                      if (_myTags.contains(_tags[index+1])){
+                        color = Colors.grey;
+                      } else {
+                        color = Colors.white;
+                      }
+                      _buttonColors.add(color);
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _buttonColors[index]
-                    ),
-                      onPressed: () {
-                        Color BtnColor = _buttonColors[index];
-                        setState(() {
-                          if (BtnColor == Colors.white){
-                            _buttonColors[index] = Colors.grey;
-                            _myTags.add(_tags[index+1]);
-                          } else if (BtnColor == Colors.grey) {
-                            _buttonColors[index] = Colors.white;
-                            _myTags.remove(_tags[index+1]);
-                          }
-                          print(_myTags);
-                        });
-                      },
-                      child: Text('+  ${_tags[index + 1]}')),
-                );
-              }),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _buttonColors[index]
+                          ),
+                            onPressed: () {
+                              Color BtnColor = _buttonColors[index];
+                              setState(() {
+                                if (BtnColor == Colors.white){
+                                  _buttonColors[index] = Colors.grey;
+                                  _myTags.add(_tags[index+1]);
+                                } else if (BtnColor == Colors.grey) {
+                                  _buttonColors[index] = Colors.white;
+                                  _myTags.remove(_tags[index+1]);
+                                }
+                                print(_myTags);
+                              });
+                            },
+                            child: Text('+  ${_tags[index + 1]}')),
+                      );
+                    }),
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 30),
             Center(
