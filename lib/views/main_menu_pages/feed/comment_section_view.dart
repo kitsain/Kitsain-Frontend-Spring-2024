@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:kitsain_frontend_spring2023/assets/comment_box.dart';
@@ -87,8 +88,8 @@ class _CommentSectionViewState extends State<CommentSectionView> {
       body: Padding(
         padding: const EdgeInsets.only(bottom: 85),
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 1,
-          width: MediaQuery.of(context).size.width * 1,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
           child: RefreshIndicator(
             onRefresh: () {
               return Future.delayed(
@@ -164,12 +165,14 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                         );
                       }
                     },
-                    child: CommentBox(
+                    child: _tempComments[index].message != 'null#800020'
+                    ? CommentBox(
                       comment: _tempComments[index].message,
                       author:
                           'user ${(_users.indexOf(_tempComments[index].author) + 1)}',
                       date: _tempComments[index].date,
-                    ),
+                    )
+                    : Container(),
                   );
                 },
               ),
@@ -237,8 +240,13 @@ class _CommentSectionViewState extends State<CommentSectionView> {
 
   /// Removes comment from the backend.
   void _removeComment(int index) {
-    commentService.deleteComment(_tempComments[index].postID, _currUser);
-    _tempComments.removeAt(index);
+    //commentService.deleteComment(_tempComments[index].Id, _currUser);
+    _tempComments[index].message = 'null#800020';
+    commentService.putComment(
+        _tempComments[index].id,
+        _currUser,
+        widget.postID
+    );
   }
 
   /// Formats comment for modal bottom sheet.
@@ -248,7 +256,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   String _formatComment(int i) {
     Comment comment = _tempComments[i];
     int userIndex = (_users.indexOf(comment.author)) + 1;
-    String message = comment.message;
+    String? message = comment.message;
 
     return '"user $userIndex": "$message"';
   }

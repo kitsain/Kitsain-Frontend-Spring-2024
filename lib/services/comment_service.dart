@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
 import 'package:logger/logger.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
+import 'package:realm/realm.dart';
 
 class CommentService {
   final accessToken = Get.put(AuthService()).accessToken;
@@ -113,10 +114,42 @@ class CommentService {
     }
   }
 
+  Future<bool> putComment(String id, String userId, String postId) async {
+    try {
+      // Send a POST request to the server with the post data
+      final response =
+      await http.put(Uri.parse('$baseUrl/$id'),
+          headers: {
+        'Content-Type': 'application/json',
+        'accept': '*/*',
+        'Authorization': 'Bearer ${accessToken.value}',
+      },
+      body: jsonEncode({
+            'content': 'null#800020',
+            'postId': postId
+          }));
+
+      if (response.statusCode == 200) {
+        logger.i("Comment removed successfully");
+        return true;
+      } else {
+        // Handle other status codes if needed
+        logger.e('Request failed with status: ${response.statusCode}');
+        print(postId);
+        logger.e(response.body);
+        return false;
+      }
+    } catch (error) {
+      logger.e("ERROR: $error");
+      return false;
+      // Handle any errors that occur during the request
+    }
+  }
+
   Future<Comment> parseComment(Map<String, dynamic> json) async {
     try {
       return Comment(
-        postID: json['id'],
+        id: json['id'],
         author: json['userId'],
         message: json['content'],
         date: DateTime.parse(json['createdDate']),
