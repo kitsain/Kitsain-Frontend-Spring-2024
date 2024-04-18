@@ -7,7 +7,7 @@ import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
-import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tagSelectView.dart';
+import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_select_view.dart';
 import 'package:logger/logger.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
