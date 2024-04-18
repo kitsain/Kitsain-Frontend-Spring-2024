@@ -23,6 +23,8 @@ class tagSelectView extends StatefulWidget {
 }
 
 class _tagSelectViewState extends State<tagSelectView> {
+  PostService postService = PostService();
+  //List<String> _tags = [];
   final Map _tags = CategoryMaps().catEnglish;
   late List<String> _myTags = [];
   final List<Color> _buttonColors = [];
@@ -32,6 +34,11 @@ class _tagSelectViewState extends State<tagSelectView> {
     super.initState();
     _myTags = widget.myTags;
     // markTagsSelected();
+    //loadTags();
+  }
+
+  void loadTags() async {
+    // _tags = await postService.getTags();
   }
 
   bool _isSelected(String tag) {

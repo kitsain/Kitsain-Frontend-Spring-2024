@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:kitsain_frontend_spring2023/assets/tag.dart';
 import 'package:kitsain_frontend_spring2023/login_controller.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
@@ -200,39 +201,63 @@ class _PostCardState extends State<PostCard> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.thumb_up_alt_outlined),
-                    onPressed: () {
-                      markPostUseful();
-                    },
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.thumb_up_alt_outlined),
+                        onPressed: () {
+                          markPostUseful();
+                        },
+                      ),
+                      Text(widget.post.useful.toString()),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: const Icon(Icons.comment_rounded),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) {
+                              List<Comment> comments =
+                                  widget.post.comments.cast<Comment>();
+                              if (comments.isEmpty) {
+                                return CommentSectionView(
+                                    postID: widget.post.id, comments: const []);
+                              } else {
+                                return CommentSectionView(
+                                    postID: widget.post.id, comments: comments);
+                              }
+                            }),
+                          ).then((updatedComments) {
+                            setState(() {
+                              widget.post.comments = updatedComments;
+                            });
+                          });
+                        },
+                      ),
+                      Text(widget.post.comments.length.toString())
+                    ],
                   ),
-                  Text(widget.post.useful.toString()),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.comment_rounded),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          List<Comment> comments =
-                              widget.post.comments.cast<Comment>();
-                          if (comments.isEmpty) {
-                            return CommentSectionView(
-                                postID: widget.post.id, comments: const []);
-                          } else {
-                            return CommentSectionView(
-                                postID: widget.post.id, comments: comments);
-                          }
-                        }),
-                      ).then((updatedComments) {
-                        setState(() {
-                          widget.post.comments = updatedComments;
-                        });
-                      });
-                    },
-                  ),
-                  Text(widget.post.comments.length.toString())
+                  Row(
+                    children: [
+                      widget.post.tags.isNotEmpty
+                      ? /*widget.post.tags.length > 1
+                        ? Row(
+                          children: [
+                            Tag(text: widget.post.tags[0]),
+                            SizedBox(width: 3),
+                            Tag(text: widget.post.tags[1])
+                          ],
+                        )
+                        : Tag(text: widget.post.tags[0])*/
+                      Tag(text: widget.post.tags[0])
+                      : Text('No tags'),
+                      widget.post.tags.isNotEmpty
+                        ? Text(' +${widget.post.tags.length-1}')
+                        : Text('')
+                    ],
+                  )
                 ],
               ),
             ),

@@ -21,6 +21,7 @@ class Post extends ChangeNotifier {
   List<Comment> comments = [];
   String id = "";
   String userId = "";
+  List<String> tags = [];
   String storeName="";
   //Item item;
 
@@ -34,6 +35,7 @@ class Post extends ChangeNotifier {
     required this.userId,
     this.useful = 0,
     this.comments = const [],
+    this.tags = const [],
   });
   // Serialize the Post object to a JSON map
   Map<String, dynamic> toJson() {

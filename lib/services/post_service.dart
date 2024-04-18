@@ -92,10 +92,14 @@ class PostService {
       required String title,
       required String description,
       required String price,
-      required DateTime expiringDate}) async {
+      required DateTime expiringDate,
+      List<String> tags = const []}) async {
     // Format the expiration date of the post
     String formattedDate =
         DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
+    List<String> formattedTags = tags.map((e) =>
+        e.toUpperCase().replaceAll(' ', '_')).toList();
+    print(formattedTags);
 
     try {
       // Send a POST request to the server with the post data
@@ -114,7 +118,7 @@ class PostService {
           'expiringDate': formattedDate,
           "latitude": 0,
           "longitude": 0,
-          "tags": []
+          'tags': formattedTags
         }),
       );
 
@@ -158,6 +162,7 @@ class PostService {
     required String description,
     required String price,
     required DateTime expiringDate,
+    List<String> tags = const []
   }) async {
     try {
       // Get the existing post by ID
@@ -170,6 +175,7 @@ class PostService {
         existingPost.price = price;
         existingPost.expiringDate = expiringDate;
         existingPost.images = images;
+        existingPost.tags = tags;
 
         // Send a PUT request to update the post on the server
         final response = await http.put(
@@ -190,6 +196,7 @@ class PostService {
         } else {
           // Handle other status codes if needed
           logger.e('Failed to update post: ${response.statusCode}');
+          // logger.e(response.body);
         }
       } else {
         // Handle case when existing post is null
@@ -320,6 +327,12 @@ class PostService {
       String id = json['id'] ?? '';
       String userId = json['user'] != null ? json['user']['id'] ?? '' : '';
       int useful = json['favourite'] ?? false;
+      List<dynamic> tags = json['tags'];
+
+      List<String> formattedTags = tags.map((e) {
+        String substring = e.substring(1);
+        return e.replaceRange(1, e.length, substring.toLowerCase()).toString();
+      }).toList();
 
       // Create and return the Post object
       return Post(
@@ -332,6 +345,9 @@ class PostService {
         userId: userId,
         comments: await commentService.getComments(id),
         useful: useful,
+        //tags: tags.map((e) => e.toString()).toList()
+        tags: formattedTags
+
       );
     } catch (e) {
       throw Exception('Error parsing post: $e');
@@ -387,6 +403,40 @@ class PostService {
       }
     } catch (e) {
       logger.e('Error marking post as useful: $e');
+    }
+  }
+
+  Future<List<String>> getTags() async {
+    try {
+      var uri = Uri.parse('$baseUrl/tags');
+      var response = await http.get(
+        uri.replace(queryParameters: {
+          'limit': "10",
+          'offset': "0",
+        }),
+        headers: {
+          'accept': '*/*',
+          'Authorization': 'Bearer ${accessToken.value}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        dynamic responseData = json.decode(utf8.decode(response.bodyBytes));
+
+        List<dynamic> tagsData = responseData['details']['records'];
+        List<String> tags = tagsData.map((e) => e.toString()).toList();
+
+        print(tags);
+
+        logger.i("Tags loaded successfully");
+
+        return tags;
+      } else {
+        throw Exception(
+            'Failed to load tags: ${response.statusCode} /n ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching tags: $e');
     }
   }
 }

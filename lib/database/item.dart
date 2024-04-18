@@ -59,7 +59,13 @@ class CategoryMaps {
     9: 'Dairy', 
     10: 'Ready meals',
     11: 'Dry & canned goods',
-    12: 'Other'
+    12: 'Dessert',
+    13: 'Gluten free',
+    14: 'Healthy',
+    15: 'Fast food',
+    16: 'Milk',
+    17: 'Lactose free',
+    18: 'Other'
   };
 
   Map catFinnish = {

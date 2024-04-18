@@ -6,12 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
-import 'package:kitsain_frontend_spring2023/assets/tagSelectView.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
+import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tagSelectView.dart';
 import 'package:logger/logger.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
+
+import '../../../assets/tag.dart';
 
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
@@ -32,7 +34,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   String _description = '';
   String _price = '';
   DateTime _expiringDate = DateTime.now();
-  late List<String> _myTags = [];
+  List<String> _myTags = [];
   List<File> tempImages = [];
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
   final TextEditingController _dateController = TextEditingController();
@@ -56,6 +58,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _price = widget.post!.price;
       _expiringDate = widget.post!.expiringDate;
       _dateController.text = _dateFormat.format(_expiringDate);
+      _myTags = widget.post!.tags;
     } else {
       _images = [];
       _title = '';
@@ -151,6 +154,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           description: _description,
           price: _price,
           expiringDate: _expiringDate,
+          tags: _myTags
         );
       } else {
         // Create a new post
@@ -160,6 +164,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           description: _description,
           price: _price,
           expiringDate: _expiringDate,
+          tags: _myTags
         );
       }
     } catch (error) {
@@ -381,11 +386,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                     children: List.generate(_myTags.length, (index) {
                       return _myTags.isEmpty ? Text('NoTags') : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                        child: ElevatedButton(
-                            onPressed: null,
-                            child: Text(_myTags[index])
-                        ),
-                      );
+                        child: Tag(text: _myTags[index])
+                        );
                     })
                   ),
                 ),
