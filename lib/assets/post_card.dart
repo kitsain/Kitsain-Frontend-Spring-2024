@@ -252,10 +252,10 @@ class _PostCardState extends State<PostCard> {
                         )
                         : Tag(text: widget.post.tags[0])*/
                       Tag(text: widget.post.tags[0])
-                      : Text('No tags'),
+                      : const Text('No tags'),
                       widget.post.tags.isNotEmpty
                         ? Text(' +${widget.post.tags.length-1}')
-                        : Text('')
+                        : const Text('')
                     ],
                   )
                 ],

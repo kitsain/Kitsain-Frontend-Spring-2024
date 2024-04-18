@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
@@ -356,17 +355,17 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Tags'),
+                    const Text('Tags'),
                     ElevatedButton(
                       onPressed: () {
                         showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
-                              return tagSelectView(myTags: _myTags);
+                              return TagSelectView(myTags: _myTags);
                             }).then((tags) {
                               setState(() {
                                 if (tags != null){
@@ -376,7 +375,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                               print(_myTags);
                             });
                       },
-                      child: Text('Set tags'),
+                      child: const Text('Set tags'),
                     ),
                   ],
                 ),
@@ -384,15 +383,15 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   alignment: Alignment.centerLeft,
                   child: Wrap(
                     children: List.generate(_myTags.length, (index) {
-                      return _myTags.isEmpty ? Text('NoTags') : Padding(
+                      return _myTags.isEmpty ? const Text('NoTags') : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2.0),
                         child: Tag(text: _myTags[index])
                         );
                     })
                   ),
                 ),
-                Divider(),
-                SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
                     try {
