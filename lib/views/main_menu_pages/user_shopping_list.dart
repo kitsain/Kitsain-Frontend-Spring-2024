@@ -5,7 +5,6 @@ import 'package:kitsain_frontend_spring2023/app_typography.dart';
 import 'package:kitsain_frontend_spring2023/assets/shopping_list_item.dart';
 import 'package:kitsain_frontend_spring2023/assets/top_bar.dart';
 import 'package:kitsain_frontend_spring2023/controller/task_controller.dart';
-import 'package:kitsain_frontend_spring2023/item_controller.dart';
 import 'package:kitsain_frontend_spring2023/views/help_pages/user_shopping_list_help_page.dart';
 import 'package:kitsain_frontend_spring2023/views/add_forms/add_new_shopping_list_item_form.dart';
 import 'package:kitsain_frontend_spring2023/database/pantry_proxy.dart';
@@ -29,11 +28,7 @@ class UserShoppingList extends StatefulWidget {
 }
 
 class _UserShoppingListState extends State<UserShoppingList> {
-  final _stateController = Get.put(ItemController());
-
   _receiveItem(String data) {
-    _stateController.shoppingLists[widget.taskListIndex].add(data);
-
     setState(
       () {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -97,14 +92,16 @@ class _UserShoppingListState extends State<UserShoppingList> {
     taskController.tasksListRemove.value?.forEach(
       (element) {
         taskController.shoppingListItem.value?[element].checkBox = false;
-        print('$element' '${taskController.shoppingListItem.value?[element].checkBox}');
+        print('$element'
+            '${taskController.shoppingListItem.value?[element].checkBox}');
       },
     );
 
     taskController.tasksListRemove.value?.forEach(
       (element) {
         taskController.shoppingListItem.value?[element].checkBox = false;
-        print('$element' '${taskController.shoppingListItem.value?[element].checkBox}');
+        print('$element'
+            '${taskController.shoppingListItem.value?[element].checkBox}');
       },
     );
     taskController.tasksListRemove.value?.clear();
@@ -195,8 +192,7 @@ class _UserShoppingListState extends State<UserShoppingList> {
                 const SizedBox(width: 2),
                 const Icon(
                   Icons.arrow_forward_ios,
-                  size:
-                      16,
+                  size: 16,
                 ),
                 const SizedBox(width: 2),
                 Text(widget.taskListName, style: AppTypography.paragraph),
@@ -219,7 +215,7 @@ class _UserShoppingListState extends State<UserShoppingList> {
               ],
             ),
             DragTarget<String>(
-              onAccept: (data) => _receiveItem(data),
+              onAcceptWithDetails: (data) => _receiveItem(data as String),
               builder: (context, candidateData, rejectedData) {
                 return Obx(
                   () {

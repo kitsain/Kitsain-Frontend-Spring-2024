@@ -2,21 +2,25 @@ import 'package:get/get.dart';
 import 'package:googleapis/tasks/v1.dart';
 import 'package:kitsain_frontend_spring2023/login_controller.dart';
 import 'package:kitsain_frontend_spring2023/models/ShoppingListItemModel.dart';
+import 'dart:async';
 
 class TaskController extends GetxController {
   var tasksListRemove = Rx<List<int>?>([]);
   var shoppingListItem = Rx<List<ShoppingListItemModel>?>([]);
 
   final loginController = Get.put(LoginController());
+  final _tasksStreamController = StreamController<List<ShoppingListItemModel>>.broadcast();
+
+  Stream<List<ShoppingListItemModel>> get tasksStream => _tasksStreamController.stream;
 
   /// Returns list of created tasks in a task list
   ///
   /// [taskListId] is the google tasks id of the task list.
   /// Returns the contents (= tasks) of the task list as Tasks object
-  getTasksList(String taskListId) async {
+  getTasksList(String taskListId, {bool pantryList = false}) async {
     var tskList = await loginController.taskApiAuthenticated.value?.tasks
         .list(taskListId, showHidden: true);
-    shoppingListItem.value?.clear();
+
     tskList?.items?.forEach((element) {
       var newItem = ShoppingListItemModel(
           '${element.title}',
@@ -29,6 +33,33 @@ class TaskController extends GetxController {
     shoppingListItem.refresh();
 
     return tskList;
+  }
+
+  getTasksListStream(String taskListId) async {
+    var tskList = await loginController.taskApiAuthenticated.value?.tasks
+        .list(taskListId, showHidden: true);
+    shoppingListItem.value?.clear();
+    tskList?.items?.forEach((element) {
+      if (element.parent == null) {
+        print(element);
+        var newItem = ShoppingListItemModel(
+            element.title ?? '',
+            element.notes ?? '',
+            false,
+            element.id ?? '');
+        shoppingListItem.value?.add(newItem);
+      }
+    });
+    _tasksStreamController.add(shoppingListItem.value ?? []);
+    shoppingListItem.refresh();
+
+    return tskList;
+  }
+
+  @override
+  void onClose() {
+    _tasksStreamController.close();
+    super.onClose();
   }
 
   /// Sends created task to the google tasks API
@@ -85,7 +116,7 @@ class TaskController extends GetxController {
   /// [due] is the optional expiry date of a pantry item task.
   editTask(String itemName, String description, String taskListId,
       String taskId, int index,
-      [String? due, String? amount]) async {
+      [String? due, String? amount, bool? completed]) async {
     var itemAmount = amount;
     print("editAmount: ${amount}");
     if (amount == null) {
@@ -94,14 +125,19 @@ class TaskController extends GetxController {
     var newItem = ShoppingListItemModel(itemName, description, false, taskId);
     shoppingListItem.value?.insert(index, newItem);
 
+    print("completed: ${completed}");
+
     var newTask = Task(
-        title: itemName, notes: description, status: "needsAction", id: taskId);
+        title: itemName,
+        notes: description,
+        status: completed! ? "completed" : "needsAction",
+        id: taskId);
 
     if (due != null) {
       DateTime dueDateTime = DateTime.parse(due);
       // Add one day more to prevent the UTC conversion problem
       dueDateTime =
-          DateTime(dueDateTime.year, dueDateTime.month, dueDateTime.day + 2);
+          DateTime(dueDateTime.year, dueDateTime.month, dueDateTime.day + 1);
       // Convert to UTC
       DateTime dueUtcDateTime = dueDateTime.toUtc();
       // Format as ISO 8601 string
@@ -109,6 +145,7 @@ class TaskController extends GetxController {
       // Assign formatted due date to newTask
       newTask.due = formattedDueDate;
     }
+
     // print('tlid ' + taskListId + ' tid ' + taskId);
     var googleTaskId;
     await loginController.taskApiAuthenticated.value!.tasks

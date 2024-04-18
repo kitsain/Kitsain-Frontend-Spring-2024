@@ -8,7 +8,6 @@ import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_section_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
-import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:logger/logger.dart';
 
 import 'image_carousel.dart';
@@ -20,11 +19,11 @@ class PostCard extends StatefulWidget {
   final Function(Post) onEditPost;
 
   const PostCard({
-    Key? key,
+    super.key,
     required this.post,
     required this.onRemovePost,
     required this.onEditPost,
-  }) : super(key: key);
+  });
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -155,11 +154,21 @@ class _PostCardState extends State<PostCard> {
                   ),
               ],
             ),
-
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  // widget.post.storeName, // this when storeName is implemented to post object
+                  "store",
+                  style: TextStyle(
+                      fontSize: 14, color: Color.fromARGB(255, 29, 31, 33)),
+                ),
+              ],
+            ),
             // Check if there are images to display
             // Add image holder here
             if (widget.post.images.isNotEmpty)
-              editImageWidget(
+              EditImageWidget(
                   images: const [],
                   stringImages: widget.post.images,
                   feedImages: true),
@@ -171,11 +180,11 @@ class _PostCardState extends State<PostCard> {
                 children: [
                   Text(
                     'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Price: ${widget.post.price}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

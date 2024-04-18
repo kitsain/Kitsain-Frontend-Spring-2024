@@ -112,6 +112,9 @@ class PostService {
           'price': price,
           'images': images,
           'expiringDate': formattedDate,
+          "latitude": 0,
+          "longitude": 0,
+          "tags": []
         }),
       );
 
@@ -135,7 +138,7 @@ class PostService {
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        //logger.e(response.body);
+        logger.e(response.body);
       }
     } catch (error) {
       logger.e("ERROR: $error");
@@ -170,7 +173,7 @@ class PostService {
 
         // Send a PUT request to update the post on the server
         final response = await http.put(
-          Uri.parse(baseUrl + '/$id'),
+          Uri.parse('$baseUrl/$id'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ${accessToken.value}',

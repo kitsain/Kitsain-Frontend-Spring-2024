@@ -6,6 +6,7 @@ import 'package:kitsain_frontend_spring2023/database/item.dart';
 import 'package:kitsain_frontend_spring2023/database/openaibackend.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:kitsain_frontend_spring2023/controller/recipe_controller.dart';
+import 'package:realm/realm.dart';
 
 class LoadingDialogWithTimeout extends StatefulWidget {
   const LoadingDialogWithTimeout({super.key});
@@ -39,13 +40,11 @@ const Color nullTextColor = Color(0xff979797);
 
 class RecipeCard extends StatefulWidget {
   const RecipeCard({super.key, required this.recipe});
-  
+
   final Recipe recipe;
   @override
   State<RecipeCard> createState() => _RecipeCardState();
 }
-
-
 
 class _RecipeCardState extends State<RecipeCard> {
   bool showAbbreviation = true;
@@ -214,7 +213,18 @@ class _RecipeCardState extends State<RecipeCard> {
   ///
   /// Includes [details] presenting the details of the recipe. [recipeName] describes the name of the recipe whose details
   /// are shown. Returns the details screen as alert dialog.
+
   Widget _buildDetailsScreen(BuildContext context, Recipe recipe) {
+    TextEditingController recipeNameController =
+        TextEditingController(text: recipe.name);
+    String ingredientsString = recipe.ingredients.entries
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join('\n');
+    TextEditingController ingredientsController =
+        TextEditingController(text: ingredientsString);
+    TextEditingController instructionsController =
+        TextEditingController(text: recipe.instructions.join('\n'));
+
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -222,7 +232,7 @@ class _RecipeCardState extends State<RecipeCard> {
         children: [
           Expanded(
             child: Text(
-              recipe.name,
+              'Recipe',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -235,17 +245,24 @@ class _RecipeCardState extends State<RecipeCard> {
         ],
       ),
       content: SingleChildScrollView(
-        child:Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
-            for (var entry in recipe.ingredients.entries)
-              Text('${entry.key}: ${entry.value}'),
-            SizedBox(height: 10),
-            Text('Steps:', style: TextStyle(fontWeight: FontWeight.bold)),
-            for (int i = 0; i < recipe.instructions.length; i++)
-              Text(recipe.instructions[i].toString()),
+            TextFormField(
+              controller: recipeNameController,
+              decoration: InputDecoration(labelText: 'Recipe Name'),
+            ),
+            TextFormField(
+              controller: ingredientsController,
+              decoration: InputDecoration(labelText: 'Ingredients'),
+              maxLines: null, // Allow multiple lines for ingredients
+            ),
+            TextFormField(
+              controller: instructionsController,
+              decoration: InputDecoration(labelText: 'Instructions'),
+              maxLines: null, // Allow multiple lines for instructions
+            ),
           ],
         ),
       ),
@@ -253,6 +270,33 @@ class _RecipeCardState extends State<RecipeCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            ElevatedButton(
+              onPressed: () {
+                var navigator = Navigator.of(context);
+                String name = recipeNameController.text;
+
+                print("icontroller ${ingredientsController.text}");
+                Map<String, String> ingredients = {
+                  for (var line in ingredientsController.text.split('\n'))
+                    line.split(':')[0].trim(): line.split(':')[1].trim()
+                };
+
+                List<String> instructions =
+                    instructionsController.text.split('\n');
+
+                var recipe = Recipe(
+                  ObjectId().toString(),
+                  name,
+                  ingredients: ingredients,
+                  instructions: instructions,
+                );
+
+                RecipeController().createRecipeTask(recipe);
+                navigator.pop();
+                // Close the dialog
+              },
+              child: Text('Save'),
+            ),
             _buildChangeButton("Change", Colors.grey[200], recipe.name),
             _buildDeleteButton("Delete", Colors.grey[200], recipe.name),
           ],
@@ -350,7 +394,6 @@ class _RecipeCardState extends State<RecipeCard> {
             ),
             onPressed: () {
               _recipeController.deleteRecipe(widget.recipe);
-              Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
             child: const Text('Delete'),

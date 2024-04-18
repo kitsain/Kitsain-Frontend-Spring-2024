@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       home: CreateNewRecipeForm(),
     ));
-    // Verify initial state
+    // Verify initial statee
     expect(find.text('GENERATE A NEW RECIPE'), findsOneWidget);
 
     // Tap on cancel button

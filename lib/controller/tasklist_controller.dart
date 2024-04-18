@@ -47,27 +47,29 @@ class TaskListController extends GetxController {
     });
   }
 
-  deleteRecipeTaskList() async {
-    final id = await checkIfRecipeListExists();
-    await loginController.taskApiAuthenticated.value!.tasklists
-        .delete(id);
-      taskLists.refresh(); 
-  }  
+ deleteRecipeTaskList() async {
+  final id = await checkIfRecipeListExists();
+  if (id != "not") {
+    var tasks = await loginController.taskApiAuthenticated.value!.tasks.list(id);
+    for (var task in tasks.items!) {
+      await loginController.taskApiAuthenticated.value!.tasks.delete(id, task.id!);
+    }
+    taskLists.refresh();
+  }
+}
+
   Future checkIfRecipeListExists() async {
-      await getTaskLists();
-      var recipeIndex = "not";
-      if (taskLists.value?.items != null) {
-        int length = taskLists.value?.items!.length as int;
-        for (var i = 0; i < length; i++) {
-          if (taskLists.value?.items?[i].title ==
-              "My Recipes") {
-            recipeIndex =
-                taskLists.value?.items?[i].id as String;
-            break;
-          }
+    await getTaskLists();
+    var recipeIndex = "not";
+    if (taskLists.value?.items != null) {
+      int length = taskLists.value?.items!.length as int;
+      for (var i = 0; i < length; i++) {
+        if (taskLists.value?.items?[i].title == "My Recipes") {
+          recipeIndex = taskLists.value?.items?[i].id as String;
+          break;
         }
       }
+    }
     return recipeIndex;
   }
-
 }

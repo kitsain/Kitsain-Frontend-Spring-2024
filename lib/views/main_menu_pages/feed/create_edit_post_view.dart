@@ -1,22 +1,23 @@
 import 'dart:io';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
+import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 import 'package:kitsain_frontend_spring2023/assets/tagSelectView.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:logger/logger.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
   final List<String>? existingImages;
 
-  const CreateEditPostView({Key? key, this.post, this.existingImages})
-      : super(key: key);
+  const CreateEditPostView({super.key, this.post, this.existingImages});
 
   @override
   _CreateEditPostViewState createState() => _CreateEditPostViewState();
@@ -39,6 +40,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   bool imageSelected = true;
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _titleFocusNode = FocusNode();
+  final _priceFocusNode = FocusNode();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
 
   @override
   void initState() {
@@ -60,10 +65,20 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _dateController.text = _dateFormat.format(_expiringDate);
       _myTags = [];
     }
-  }
-
-  void loadTags() async {
-    // _tags = await _postService.getTags();
+    _priceFocusNode.addListener(() {
+      if (!_priceFocusNode.hasFocus) {
+        final String text = _priceController.text.replaceAll(',', '.');
+        final num? value = num.tryParse(text);
+        if (value != null) {
+          _priceController.text =
+              NumberFormat.currency(locale: 'eu', symbol: '€', decimalDigits: 2)
+                  .format(value);
+          setState(() {
+            _price = _priceController.text.toString();
+          });
+        }
+      }
+    });
   }
 
   /// Function for taking an image with camera.
@@ -72,6 +87,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       final pickedImage =
           await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedImage == null) return;
+      fetchBarCode(File(pickedImage.path));
       tempImages.add(File(pickedImage.path));
       setState(() {
         imageSelected = tempImages.isNotEmpty;
@@ -92,6 +108,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       );
 
       if (pickedImage != null) {
+        fetchBarCode(File(pickedImage.path));
         tempImages.add(File(pickedImage.path));
         setState(() {
           imageSelected = tempImages.isNotEmpty;
@@ -124,7 +141,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       for (var image in tempImages) {
         _images.add(await _postService.uploadFile(image));
       }
-
       // Check if it's an update operation
       if (widget.post != null) {
         // Update the existing post
@@ -154,8 +170,54 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
   }
 
+  Future<void> fetchBarCode(File file) async {
+    logger.i('Fetching barcode from image');
+    var barCodeScanner = GoogleMlKit.vision.barcodeScanner();
+    final inputImage = InputImage.fromFile(file);
+    final List<Barcode> barcodes =
+        await barCodeScanner.processImage(inputImage);
+    if (barcodes.isEmpty) {
+      logger.i('No barcode found');
+      return;
+    }
+    for (Barcode barcode in barcodes) {
+      if (barcode.rawValue != null) {
+        final String rawValue = barcode.rawValue!;
+        logger.i('Barcode raw value: $rawValue');
+        OpenFoodAPIConfiguration.userAgent = UserAgent(
+          name: 'Kitsain',
+        );
+
+        try {
+          var product = await getFromJson(rawValue);
+
+          if (_titleController.text.isEmpty) {
+            _titleController.text = product!.productName ?? '';
+            _title = product.productName ?? '';
+          }
+        } catch (e) {
+          // Handle any errors that occur during fetching product information
+          logger.e('Error fetching product information: $e');
+        }
+      } else {
+        logger.w('Barcode raw value is null');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _dateController.dispose();
+    _descriptionFocusNode.dispose();
+    _titleFocusNode.dispose();
+    _priceFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _titleController.text = _title;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
@@ -167,7 +229,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             padding: const EdgeInsets.all(15.0),
             child: Column(
               children: [
-                editImageWidget(
+                EditImageWidget(
                   images: tempImages,
                   stringImages: widget.existingImages ?? [],
                   feedImages: false,
@@ -186,14 +248,14 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Select Image Source'),
+                            title: const Text('Select Image Source'),
                             actions: <Widget>[
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   TextButton(
-                                    child: Text('Camera'),
+                                    child: const Text('Camera'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                       _pickImageFromCamera();
@@ -201,7 +263,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                   ),
                                   const SizedBox(height: 10),
                                   TextButton(
-                                    child: Text('Gallery'),
+                                    child: const Text('Gallery'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                       _pickImageFromGallery();
@@ -214,15 +276,15 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         },
                       );
                     },
-                    child: Text('Add Image'),
+                    child: const Text('Add Image'),
                   ),
                 ),
                 TextFormField(
                   focusNode: _titleFocusNode,
-                  decoration: InputDecoration(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
                     labelText: 'Title',
                   ),
-                  initialValue: _title,
                   onChanged: (value) {
                     setState(() {
                       _title = value;
@@ -237,7 +299,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                 ),
                 TextFormField(
                   focusNode: _descriptionFocusNode,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                   ),
                   initialValue: _description,
@@ -254,22 +316,24 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   },
                 ),
                 TextFormField(
+                  controller: _priceController,
+                  focusNode: _priceFocusNode,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    CurrencyTextInputFormatter(
-                      decimalDigits: 2,
-                      locale: 'eu',
-                      symbol: '€',
-                    )
-                  ],
                   decoration: const InputDecoration(
                     labelText: 'Price',
                   ),
-                  initialValue: _price,
-                  onChanged: (value) {
-                    setState(() {
-                      _price = value;
-                    });
+                  onEditingComplete: () {
+                    final String text =
+                        _priceController.text.replaceAll(',', '.');
+                    final num? value = num.tryParse(text);
+                    if (value != null) {
+                      _priceController.text = NumberFormat.currency(
+                              locale: 'eu', symbol: '€', decimalDigits: 2)
+                          .format(value);
+                      setState(() {
+                        _price = _priceController.text.toString();
+                      });
+                    }
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -282,7 +346,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   controller: _dateController,
                   readOnly: true,
                   onTap: () => _selectDate(context),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Select expiring date',
                     suffixIcon: Icon(Icons.calendar_today),
                   ),

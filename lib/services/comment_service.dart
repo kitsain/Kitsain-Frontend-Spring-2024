@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:http/http.dart' as http;
 import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
@@ -58,8 +57,7 @@ class CommentService {
   ///
   /// Returns the created [Post] object if successful, otherwise returns null.
   Future<void> postComment(
-      {required String postID,
-      required String content}) async {
+      {required String postID, required String content}) async {
     // Format the expiration date of the post
     // String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(date.toUtc());
 
@@ -95,9 +93,9 @@ class CommentService {
       // Send a POST request to the server with the post data
       final response =
           await http.put(Uri.parse('$baseUrl/disable/$id'), headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*',
-          'Authorization': 'Bearer ${accessToken.value}',
+        'Content-Type': 'application/json',
+        'accept': '*/*',
+        'Authorization': 'Bearer ${accessToken.value}',
       });
       if (response.statusCode == 200) {
         logger.i("Comment removed successfully");
@@ -106,7 +104,7 @@ class CommentService {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
         //logger.e(response.body);
-         return false;
+        return false;
       }
     } catch (error) {
       logger.e("ERROR: $error");

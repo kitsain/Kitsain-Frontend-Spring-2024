@@ -11,23 +11,25 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
-  - lib/app_colors.dart
-  - lib/assets/itembuilder.dart
-  - lib/assets/statuscolor.dart
-  - lib/assets/top_bar.dart
-  - lib/controller/task_controller.dart
-  - lib/controller/tasklist_controller.dart
-  - lib/controller/task_controller.dart
-  - lib/database/app_services.dart
-  - lib/l10n/l10n.dart
-  - lib/models/*
-  - lib/views/add_forms/add_new_shopping_list_form.dart
-  - lib/views/add_forms/add_new_shopping_list_item_form.dart
-  - lib/views/add_forms/edit/*
-  - lib/views/add_forms/edit_forms/edit_shopping_list_form.dart
-  - lib/views/add_forms/edit_forms/edit_shopping_list_item_form.dart
-  - lib/views/add_forms/help_pages/*
-  - lib/views/add_forms/homepage2.dart
+    - lib/app_colors.dart
+    - lib/assets/itembuilder.dart
+    - lib/assets/statuscolor.dart
+    - lib/assets/top_bar.dart
+    - lib/controller/task_controller.dart
+    - lib/controller/tasklist_controller.dart
+    - lib/controller/task_controller.dart
+    - lib/l10n/l10n.dart
+    - lib/models/ShoppingListItemModel.dart
+    - lib/models/TaskList.dart
+    - lib/views/add_forms/add_new_shopping_list_form.dart
+    - lib/views/add_forms/add_new_shopping_list_item_form.dart
+    - lib/views/add_forms/edit/*
+    - lib/views/add_forms/edit_forms/edit_shopping_list_form.dart
+    - lib/views/add_forms/edit_forms/edit_shopping_list_item_form.dart
+    - lib/views/add_forms/help_pages/*
+    - lib/views/add_forms/homepage2.dart
+    - pubspec.yaml
+
   
 linter:
   # The lint rules applied to this project can be customized in the

@@ -4,17 +4,15 @@ import 'package:kitsain_frontend_spring2023/app_typography.dart';
 import 'package:kitsain_frontend_spring2023/categories.dart';
 import 'package:kitsain_frontend_spring2023/controller/pantry_controller.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
-import 'package:kitsain_frontend_spring2023/database/pantry_proxy.dart';
 import 'package:realm/realm.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
 
 import 'package:kitsain_frontend_spring2023/controller/tasklist_controller.dart';
-import 'package:kitsain_frontend_spring2023/controller/task_controller.dart';
 import 'package:get/get.dart';
 
 const List<String> categories = <String>[
-  'Choose category',
+  'No category',
   'Meat',
   'Seafood',
   'Fruit',
@@ -44,7 +42,6 @@ class _NewItemFormState extends State<NewItemForm> {
   final _itemName = TextEditingController();
   final _itemAmount = TextEditingController();
   final _taskListController = Get.put(TaskListController());
-  final _taskController = Get.put(TaskController());
   final _pantryController = PantryController();
 
   // These dates control the date string user sees in the form
@@ -57,13 +54,12 @@ class _NewItemFormState extends State<NewItemForm> {
 
   bool _favorite = false;
   bool _hasExpiryDate = false;
-  String _category = "Choose category";
-  var _catInt;
+  String _category = "No category";
+  var _catInt = 0;
   final _details = TextEditingController();
 
   var _offData;
   final UnfocusDisposition _disposition = UnfocusDisposition.scope;
-
 
   Future checkIfPantryListExists() async {
     await _taskListController.getTaskLists();
@@ -382,8 +378,7 @@ class _NewItemFormState extends State<NewItemForm> {
                               _category = value!;
                               _catInt = Categories.categoriesByIndex.keys
                                       .firstWhere(
-                                          (key) => categories[key] == value) +
-                                  1;
+                                          (key) => categories[key] == value);
                             },
                           );
                         },
@@ -395,12 +390,6 @@ class _NewItemFormState extends State<NewItemForm> {
                             );
                           },
                         ).toList(),
-                        validator: (value) {
-                          if (value == categories.first) {
-                            return "Please enter a category";
-                          }
-                          return null;
-                        },
                       ),
                     ),
                   ),

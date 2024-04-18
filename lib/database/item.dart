@@ -42,38 +42,39 @@ class _Recipe {
   late Map<String, String> ingredients;
   late List<String> instructions;
   late String? googleTaskId;
+  late bool done = false;
 }
 
 class CategoryMaps {
   Map catEnglish = {
-    1: 'New',
-    2: 'Meat',
-    3: 'Seafood',
-    4: 'Fruit',
-    5: 'Vegetables',
-    6: 'Frozen',
-    7: 'Drinks',
-    8: 'Bread',
-    9: 'Treats',
-    10: 'Dairy',
-    11: 'Ready meals',
-    12: 'Dry & canned goods',
-    13: 'Other'
+    0: 'No category',
+    1: 'Meat',
+    2: 'Seafood',
+    3: 'Fruit',
+    4: 'Vegetables',
+    5: 'Frozen',
+    6: 'Drinks',
+    7: 'Bread',
+    8: 'Treats',
+    9: 'Dairy', 
+    10: 'Ready meals',
+    11: 'Dry & canned goods',
+    12: 'Other'
   };
 
   Map catFinnish = {
-    1: 'Uudet',
-    2: 'Liha',
-    3: 'Merenantimet',
-    4: 'Hedelmät',
-    5: 'Vihannekset',
-    6: 'Pakasteet',
-    7: 'Juomat',
-    8: 'Leivät',
-    9: 'Herkut',
-    10: 'Maitotuotteet',
-    11: 'Valmisateriat',
-    12: 'Kuivatuotteet',
-    13: 'Muut'
+    0: 'Ei kategoriaa',
+    1: 'Liha',
+    2: 'Merenantimet',
+    3: 'Hedelmät',
+    4: 'Vihannekset',
+    5: 'Pakasteet',
+    6: 'Juomat',
+    7: 'Leivät',
+    8: 'Herkut',
+    9: 'Maitotuotteet',
+    10: 'Valmisateriat',
+    11: 'Kuivatuotteet',
+    12: 'Muut'
   };
 }
