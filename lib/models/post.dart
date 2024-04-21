@@ -22,7 +22,7 @@ class Post extends ChangeNotifier {
   String id = "";
   String userId = "";
   List<String> tags = [];
-  String storeName="";
+  String storeId = "";
   //Item item;
 
   Post({
@@ -36,6 +36,7 @@ class Post extends ChangeNotifier {
     this.useful = 0,
     this.comments = const [],
     this.tags = const [],
+    this.storeId = "",
   });
   // Serialize the Post object to a JSON map
   Map<String, dynamic> toJson() {
@@ -58,7 +59,8 @@ class Post extends ChangeNotifier {
         price: json['price'],
         expiringDate: DateTime.parse(json['expiringDate']),
         images: List<String>.from(json['images']),
-        userId: json['userId']);
+        userId: json['userId'],
+        storeId: json['storeId']);
   }
 }
 

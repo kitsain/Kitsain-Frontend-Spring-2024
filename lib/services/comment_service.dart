@@ -42,7 +42,7 @@ class CommentService {
           return await parseComment(json);
         }));
 
-        logger.i("Comments loaded successfully");
+        //logger.i("Comments loaded successfully");
         return comments.reversed.toList();
       } else {
         throw Exception(
@@ -76,7 +76,7 @@ class CommentService {
           }));
 
       if (response.statusCode == 200) {
-        logger.i("Comment posted successfully");
+        //logger.i("Comment posted successfully");
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
@@ -98,7 +98,7 @@ class CommentService {
         'Authorization': 'Bearer ${accessToken.value}',
       });
       if (response.statusCode == 200) {
-        logger.i("Comment removed successfully");
+        //logger.i("Comment removed successfully");
         return true;
       } else {
         // Handle other status codes if needed

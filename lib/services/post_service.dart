@@ -44,7 +44,7 @@ class PostService {
           return await parsePost(json);
         }));
 
-        logger.i("Posts loaded successfully");
+        //logger.i("Posts loaded successfully");
         return posts;
       } else {
         throw Exception(
@@ -93,12 +93,13 @@ class PostService {
       required String description,
       required String price,
       required DateTime expiringDate,
-      List<String> tags = const []}) async {
+      List<String> tags = const [],
+      required String storeId}) async {
     // Format the expiration date of the post
     String formattedDate =
         DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
-    List<String> formattedTags = tags.map((e) =>
-        e.toUpperCase().replaceAll(' ', '_')).toList();
+    List<String> formattedTags =
+        tags.map((e) => e.toUpperCase().replaceAll(' ', '_')).toList();
     print(formattedTags);
 
     try {
@@ -118,12 +119,13 @@ class PostService {
           'expiringDate': formattedDate,
           "latitude": 0,
           "longitude": 0,
-          'tags': formattedTags
+          'tags': formattedTags,
+          'storeId': storeId,
         }),
       );
 
       if (response.statusCode == 200) {
-        logger.i("Post created successfully");
+        //logger.i("Post created successfully");
         Map<String, dynamic> postResponse =
             jsonDecode(response.body)['details'];
 
@@ -131,14 +133,14 @@ class PostService {
         String user = postResponse['user']['id'];
 
         return Post(
-          images: images,
-          title: title,
-          description: description,
-          price: price,
-          expiringDate: expiringDate,
-          id: id,
-          userId: user,
-        );
+            images: images,
+            title: title,
+            description: description,
+            price: price,
+            expiringDate: expiringDate,
+            id: id,
+            userId: user,
+            storeId: storeId);
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
@@ -155,15 +157,14 @@ class PostService {
   ///
   /// Returns the updated [Post] object if successful, otherwise returns null.
   /// Currently gives an error even tho it does update the post
-  Future<Post?> updatePost({
-    required String id,
-    required List<String> images,
-    required String title,
-    required String description,
-    required String price,
-    required DateTime expiringDate,
-    List<String> tags = const []
-  }) async {
+  Future<Post?> updatePost(
+      {required String id,
+      required List<String> images,
+      required String title,
+      required String description,
+      required String price,
+      required DateTime expiringDate,
+      List<String> tags = const []}) async {
     try {
       // Get the existing post by ID
       Post? existingPost = await getPostById(id);
@@ -189,7 +190,7 @@ class PostService {
         );
 
         if (response.statusCode == 200) {
-          logger.i("Post updated successfully");
+          // logger.i("Post updated successfully");
           // Deserialize the updated post and return it
           Map<String, dynamic> postResponse = jsonDecode(response.body);
           return Post.fromJson(postResponse);
@@ -227,7 +228,7 @@ class PostService {
       });
 
       if (response.statusCode == 200) {
-        logger.i("Post removed successfully");
+        // logger.i("Post removed successfully");
         return true;
       } else {
         // Handle other status codes if needed
@@ -272,7 +273,7 @@ class PostService {
 
       // Handle response from the backend
       if (response.statusCode == 200) {
-        logger.i("File uploaded successfully");
+        //logger.i("File uploaded successfully");
 
         // Decode the response body
         dynamic responseData = jsonDecode(response.body);
@@ -336,19 +337,18 @@ class PostService {
 
       // Create and return the Post object
       return Post(
-        images: images,
-        title: title,
-        description: description,
-        price: price,
-        expiringDate: expiringDate,
-        id: id,
-        userId: userId,
-        comments: await commentService.getComments(id),
-        useful: useful,
-        //tags: tags.map((e) => e.toString()).toList()
-        tags: formattedTags
-
-      );
+          images: images,
+          title: title,
+          description: description,
+          price: price,
+          expiringDate: expiringDate,
+          id: id,
+          userId: userId,
+          comments: await commentService.getComments(id),
+          useful: useful,
+          //tags: tags.map((e) => e.toString()).toList()
+          tags: formattedTags,
+          storeId: json['storeId'] ?? '');
     } catch (e) {
       throw Exception('Error parsing post: $e');
     }
@@ -396,7 +396,7 @@ class PostService {
       });
 
       if (response.statusCode == 200) {
-        logger.i("Post marked as useful");
+        //logger.i("Post marked as useful");
       } else {
         logger.e(
             'Failed to mark post as useful: ${response.statusCode} /n ${response.body}');
@@ -428,7 +428,7 @@ class PostService {
 
         print(tags);
 
-        logger.i("Tags loaded successfully");
+        //logger.i("Tags loaded successfully");
 
         return tags;
       } else {

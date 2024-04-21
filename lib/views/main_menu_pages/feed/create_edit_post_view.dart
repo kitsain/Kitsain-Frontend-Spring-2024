@@ -5,8 +5,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/assets/image_carousel.dart';
 import 'package:kitsain_frontend_spring2023/database/openfoodfacts.dart';
+import 'package:kitsain_frontend_spring2023/models/city.dart';
+import 'package:kitsain_frontend_spring2023/models/district.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
+import 'package:kitsain_frontend_spring2023/models/store.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
+import 'package:kitsain_frontend_spring2023/services/store_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_select_view.dart';
 import 'package:logger/logger.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -27,6 +31,8 @@ class CreateEditPostView extends StatefulWidget {
 class _CreateEditPostViewState extends State<CreateEditPostView> {
   var logger = Logger(printer: PrettyPrinter());
   final PostService _postService = PostService();
+  final StoreService _storeService = StoreService();
+
   late List<String> _images = [];
   String _id = '';
   String _title = '';
@@ -46,6 +52,15 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
+  String? _selectedCityValue;
+  String? _selectedDistrictValue;
+  String? _selectedStoreValue;
+  List<City> cities = [];
+  List<District> districts = [];
+  List<Store> stores = [];
+
+  bool dataReady = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +69,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _images = List.from(widget.existingImages ?? []);
       _title = widget.post!.title;
       _description = widget.post!.description;
-      _price = widget.post!.price;
+      _priceController.text = widget.post!.price;
       _expiringDate = widget.post!.expiringDate;
       _dateController.text = _dateFormat.format(_expiringDate);
       _myTags = widget.post!.tags;
@@ -81,6 +96,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
         }
       }
     });
+
+    fetchCityData();
   }
 
   /// Function for taking an image with camera.
@@ -147,24 +164,23 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       if (widget.post != null) {
         // Update the existing post
         return await _postService.updatePost(
-          id: _id,
-          images: _images,
-          title: _title,
-          description: _description,
-          price: _price,
-          expiringDate: _expiringDate,
-          tags: _myTags
-        );
+            id: _id,
+            images: _images,
+            title: _title,
+            description: _description,
+            price: _price,
+            expiringDate: _expiringDate,
+            tags: _myTags);
       } else {
         // Create a new post
         return await _postService.createPost(
-          images: _images,
-          title: _title,
-          description: _description,
-          price: _price,
-          expiringDate: _expiringDate,
-          tags: _myTags
-        );
+            images: _images,
+            title: _title,
+            description: _description,
+            price: _price,
+            expiringDate: _expiringDate,
+            tags: _myTags,
+            storeId: _selectedStoreValue!);
       }
     } catch (error) {
       // Handle errors
@@ -175,19 +191,19 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   }
 
   Future<void> fetchBarCode(File file) async {
-    logger.i('Fetching barcode from image');
+    //logger.i('Fetching barcode from image');
     var barCodeScanner = GoogleMlKit.vision.barcodeScanner();
     final inputImage = InputImage.fromFile(file);
     final List<Barcode> barcodes =
         await barCodeScanner.processImage(inputImage);
     if (barcodes.isEmpty) {
-      logger.i('No barcode found');
+      //logger.i('No barcode found');
       return;
     }
     for (Barcode barcode in barcodes) {
       if (barcode.rawValue != null) {
         final String rawValue = barcode.rawValue!;
-        logger.i('Barcode raw value: $rawValue');
+        //logger.i('Barcode raw value: $rawValue');
         OpenFoodAPIConfiguration.userAgent = UserAgent(
           name: 'Kitsain',
         );
@@ -209,6 +225,35 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
   }
 
+  Future<void> fetchCityData() async {
+    final allCities = await _storeService.getCities();
+    final citiesToRemove = <City>[];
+
+    for (City city in allCities) {
+      final districts = await _storeService.getDistricts(city.cityId);
+      final districtsToRemove = <District>[];
+
+      for (District district in districts) {
+        if (!district.hasStores) {
+          districtsToRemove.add(district);
+        }
+      }
+
+      if (districts.length == districtsToRemove.length) {
+        citiesToRemove.add(city);
+      }
+    }
+
+    for (City city in citiesToRemove) {
+      allCities.remove(city);
+    }
+
+    setState(() {
+      cities = allCities;
+      dataReady = true;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -227,192 +272,258 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
         title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
       ),
       body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              children: [
-                EditImageWidget(
-                  images: tempImages,
-                  stringImages: widget.existingImages ?? [],
-                  feedImages: false,
-                ),
-                if ((widget.existingImages?.isEmpty ?? true) && !imageSelected)
-                  const Text(
-                    'Select at least one image to create a post.',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                const SizedBox(height: 5),
-                Padding(
+        child: dataReady
+            ? Form(
+                key: _formKey,
+                child: Padding(
                   padding: const EdgeInsets.all(15.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Select Image Source'),
-                            actions: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  TextButton(
-                                    child: const Text('Camera'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      _pickImageFromCamera();
-                                    },
-                                  ),
-                                  const SizedBox(height: 10),
-                                  TextButton(
-                                    child: const Text('Gallery'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      _pickImageFromGallery();
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
+                  child: Column(
+                    children: [
+                      EditImageWidget(
+                        images: tempImages,
+                        stringImages: widget.existingImages ?? [],
+                        feedImages: false,
+                      ),
+                      if ((widget.existingImages?.isEmpty ?? true) &&
+                          !imageSelected)
+                        const Text(
+                          'Select at least one image to create a post.',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      const SizedBox(height: 5),
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Select Image Source'),
+                                  actions: <Widget>[
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        TextButton(
+                                          child: const Text('Camera'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            _pickImageFromCamera();
+                                          },
+                                        ),
+                                        const SizedBox(height: 10),
+                                        TextButton(
+                                          child: const Text('Gallery'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            _pickImageFromGallery();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: const Text('Add Image'),
+                        ),
+                      ),
+                      TextFormField(
+                        focusNode: _titleFocusNode,
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _title = value;
+                          });
                         },
-                      );
-                    },
-                    child: const Text('Add Image'),
-                  ),
-                ),
-                TextFormField(
-                  focusNode: _titleFocusNode,
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _title = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter title";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  focusNode: _descriptionFocusNode,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                  ),
-                  initialValue: _description,
-                  onChanged: (value) {
-                    setState(() {
-                      _description = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter description";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _priceController,
-                  focusNode: _priceFocusNode,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                  ),
-                  onEditingComplete: () {
-                    final String text =
-                        _priceController.text.replaceAll(',', '.');
-                    final num? value = num.tryParse(text);
-                    if (value != null) {
-                      _priceController.text = NumberFormat.currency(
-                              locale: 'eu', symbol: '€', decimalDigits: 2)
-                          .format(value);
-                      setState(() {
-                        _price = _priceController.text.toString();
-                      });
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter price";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _dateController,
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
-                  decoration: const InputDecoration(
-                    labelText: 'Select expiring date',
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Tags'),
-                    ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return TagSelectView(myTags: _myTags);
-                            }).then((tags) {
-                              setState(() {
-                                if (tags != null){
-                                  _myTags = tags;
-                                }
-                              });
-                              print(_myTags);
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter title";
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        focusNode: _descriptionFocusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                        ),
+                        initialValue: _description,
+                        onChanged: (value) {
+                          setState(() {
+                            _description = value;
+                          });
+                        },
+                      ),
+                      TextFormField(
+                        controller: _priceController,
+                        focusNode: _priceFocusNode,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Price',
+                        ),
+                        onEditingComplete: () {
+                          final String text =
+                              _priceController.text.replaceAll(',', '.');
+                          final num? value = num.tryParse(text);
+                          if (value != null) {
+                            _priceController.text = NumberFormat.currency(
+                                    locale: 'eu', symbol: '€', decimalDigits: 2)
+                                .format(value);
+                            setState(() {
+                              _price = _priceController.text.toString();
                             });
-                      },
-                      child: const Text('Set tags'),
-                    ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Wrap(
-                    children: List.generate(_myTags.length, (index) {
-                      return _myTags.isEmpty ? const Text('NoTags') : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                        child: Tag(text: _myTags[index])
-                        );
-                    })
+                          }
+                        },
+                      ),
+                      TextFormField(
+                        controller: _dateController,
+                        readOnly: true,
+                        onTap: () => _selectDate(context),
+                        decoration: const InputDecoration(
+                          labelText: 'Select expiring date',
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Tags'),
+                          ElevatedButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return TagSelectView(myTags: _myTags);
+                                  }).then((tags) {
+                                setState(() {
+                                  if (tags != null) {
+                                    _myTags = tags;
+                                  }
+                                });
+                                print(_myTags);
+                              });
+                            },
+                            child: const Text('Set tags'),
+                          ),
+                        ],
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                            children: List.generate(_myTags.length, (index) {
+                          return _myTags.isEmpty
+                              ? const Text('NoTags')
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 2.0),
+                                  child: Tag(text: _myTags[index]));
+                        })),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          DropdownButton<String>(
+                            value: _selectedCityValue,
+                            hint: const Text('City'),
+                            items: cities.map((City city) {
+                              return DropdownMenuItem<String>(
+                                value: city.cityId,
+                                child: Text(city.cityName),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) async {
+                              setState(() {
+                                _selectedCityValue = newValue!;
+                                // Reset the selected district value when the city changes
+                                _selectedDistrictValue = null;
+                                _selectedStoreValue = null;
+                                stores = [];
+                                districts = [];
+                              });
+                              // Fetch districts for the newly selected city
+                              var allDistricts =
+                                  await _storeService.getDistricts(newValue!);
+                              for (District district in allDistricts) {
+                                if (district.hasStores) {
+                                  districts.add(district);
+                                }
+                              }
+                              setState(() {
+                                // Update the state with the fetched districts
+                              });
+                            },
+                          ),
+                          DropdownButton<String>(
+                            value: _selectedDistrictValue,
+                            hint: const Text('District'),
+                            items: districts.map((District district) {
+                              return DropdownMenuItem<String>(
+                                value: district.districtId,
+                                child: Text(district.districtName),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) async {
+                              setState(() {
+                                _selectedDistrictValue = newValue!;
+                                // Reset the selected district value when the city changes
+                                _selectedStoreValue = null;
+                                stores = [];
+                              });
+                              // Fetch districts for the newly selected city
+                              stores = await _storeService.getStores(newValue!);
+                              setState(() {
+                                // Update the state with the fetched districts
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      DropdownButton<String>(
+                        value: _selectedStoreValue,
+                        hint: const Text('Select Store'),
+                        items: stores.map((Store store) {
+                          return DropdownMenuItem<String>(
+                            value: store.storeId,
+                            child: Text(store.storeName),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedStoreValue = newValue!;
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            setState(() {
+                              imageSelected = tempImages.isNotEmpty;
+                            });
+                            if (_formKey.currentState!.validate() &&
+                                tempImages.isNotEmpty) {
+                              Post? updatedPost = await _updateOrCreatePost();
+                              Navigator.pop(context, updatedPost);
+                            }
+                          } catch (e) {
+                            print(e);
+                          }
+                        },
+                        child: Text(widget.post != null ? 'Update' : 'Create'),
+                      ),
+                    ],
                   ),
                 ),
-                const Divider(),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      setState(() {
-                        imageSelected = tempImages.isNotEmpty;
-                      });
-                      if (_formKey.currentState!.validate() &&
-                          tempImages.isNotEmpty) {
-                        Post? updatedPost = await _updateOrCreatePost();
-                        Navigator.pop(context, updatedPost);
-                      }
-                    } catch (e) {
-                      print(e);
-                    }
-                  },
-                  child: Text(widget.post != null ? 'Update' : 'Create'),
-                ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : const CircularProgressIndicator(),
       ),
     );
   }

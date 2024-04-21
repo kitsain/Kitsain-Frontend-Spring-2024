@@ -7,6 +7,7 @@ import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
+import 'package:kitsain_frontend_spring2023/services/store_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_section_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
 import 'package:logger/logger.dart';
@@ -36,14 +37,30 @@ class _PostCardState extends State<PostCard> {
   final authService = Get.put(AuthService());
   var logger = Logger(printer: PrettyPrinter());
   final postService = PostService();
+  final StoreService storeService = StoreService();
   late String userId;
   bool isOwner = false;
+  String storeName = "";
 
   @override
   void initState() {
     super.initState();
     fetchUserId();
+    fetchStoreName();
     //loadComments();
+  }
+
+  Future<void> fetchStoreName() async {
+    if (widget.post.storeId == '') {
+      setState(() {
+        storeName = 'No store';
+      });
+      return;
+    }
+    final storeNameFromId = await storeService.getStore(widget.post.storeId);
+    setState(() {
+      storeName = storeNameFromId.storeName;
+    });
   }
 
   Future<void> fetchUserId() async {
@@ -155,16 +172,10 @@ class _PostCardState extends State<PostCard> {
                   ),
               ],
             ),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  // widget.post.storeName, // this when storeName is implemented to post object
-                  "store",
-                  style: TextStyle(
-                      fontSize: 14, color: Color.fromARGB(255, 29, 31, 33)),
-                ),
-              ],
+            Text(
+              storeName,
+              style: const TextStyle(
+                  fontSize: 14, color: Color.fromARGB(255, 29, 31, 33)),
             ),
             // Check if there are images to display
             // Add image holder here
@@ -242,7 +253,7 @@ class _PostCardState extends State<PostCard> {
                   Row(
                     children: [
                       widget.post.tags.isNotEmpty
-                      ? /*widget.post.tags.length > 1
+                          ? /*widget.post.tags.length > 1
                         ? Row(
                           children: [
                             Tag(text: widget.post.tags[0]),
@@ -251,11 +262,11 @@ class _PostCardState extends State<PostCard> {
                           ],
                         )
                         : Tag(text: widget.post.tags[0])*/
-                      Tag(text: widget.post.tags[0])
-                      : const Text('No tags'),
+                          Tag(text: widget.post.tags[0])
+                          : const Text('No tags'),
                       widget.post.tags.isNotEmpty
-                        ? Text(' +${widget.post.tags.length-1}')
-                        : const Text('')
+                          ? Text(' +${widget.post.tags.length - 1}')
+                          : const Text('')
                     ],
                   )
                 ],
