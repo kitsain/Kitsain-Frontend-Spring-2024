@@ -8,6 +8,7 @@ import 'package:kitsain_frontend_spring2023/models/store.dart';
 import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
 import 'package:logger/logger.dart';
 
+/// A service class for handling store-related operations.
 class StoreService {
   final accessToken = Get.put(AuthService()).accessToken;
   var logger = Logger(printer: PrettyPrinter());
@@ -15,6 +16,10 @@ class StoreService {
   // Base URL for the API
   final String baseUrl = 'http://nocng.id.vn:9090/api/v1';
 
+  /// Fetches a list of cities from the API.
+  ///
+  /// Returns a list of [City] objects representing the cities.
+  /// Throws an exception if the API request fails.
   Future<List<City>> getCities() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/cities'), headers: {
@@ -44,6 +49,10 @@ class StoreService {
     }
   }
 
+  /// Fetches a list of districts for a given city from the API.
+  ///
+  /// Returns a list of [District] objects representing the districts.
+  /// Throws an exception if the API request fails.
   Future<List<District>> getDistricts(String cityId) async {
     try {
       final response =
@@ -75,6 +84,10 @@ class StoreService {
     }
   }
 
+  /// Fetches a list of stores for a given district from the API.
+  ///
+  /// Returns a list of [Store] objects representing the stores.
+  /// Throws an exception if the API request fails.
   Future<List<Store>> getStores(String districtId) async {
     try {
       final response = await http
@@ -109,6 +122,10 @@ class StoreService {
     }
   }
 
+  /// Fetches a store with the given store ID from the API.
+  ///
+  /// Returns a [Store] object representing the store.
+  /// Throws an exception if the API request fails.
   Future<Store> getStore(String storeId) async {
     try {
       final response =

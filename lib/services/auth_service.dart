@@ -30,7 +30,7 @@ class AuthService extends GetxController {
 
       accessToken.value = responseData['accessToken'].toString();
       // Log the access token if needed in development
-      logger.i(responseData['accessToken'].toString());
+      //logger.i(responseData['accessToken'].toString());
     } catch (error) {
       logger.e("error");
       // Handle any errors that occur during the request
