@@ -168,6 +168,10 @@ class PostService {
       // Get the existing post by ID
       Post? existingPost = await getPostById(id);
 
+      // Tags formatted to uppercase to match enums in backend
+      List<String> formattedTags = tags.map((e) =>
+          e.replaceAll(' ', '_').toUpperCase()).toList();
+
       if (existingPost != null) {
         // Update only if the existing post is not null
         existingPost.title = title;
@@ -175,7 +179,7 @@ class PostService {
         existingPost.price = price;
         existingPost.expiringDate = expiringDate;
         existingPost.images = images;
-        existingPost.tags = tags;
+        existingPost.tags = formattedTags;
         existingPost.storeId = storeId;
 
         // Send a PUT request to update the post on the server
@@ -197,7 +201,7 @@ class PostService {
         } else {
           // Handle other status codes if needed
           logger.e('Failed to update post: ${response.statusCode}');
-          //logger.e(response.body);
+          logger.e(response.body);
         }
       } else {
         // Handle case when existing post is null

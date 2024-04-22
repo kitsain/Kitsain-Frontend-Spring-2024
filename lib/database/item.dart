@@ -58,7 +58,7 @@ class CategoryMaps {
     8: 'Treats',
     9: 'Dairy', 
     10: 'Ready meals',
-    11: 'Dry & canned goods',
+    11: 'Dry n canned goods',
     12: 'Dessert',
     13: 'Gluten free',
     14: 'Healthy',
