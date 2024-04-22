@@ -125,6 +125,14 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
+  int _commentCount() {
+    int count = 0;
+    for (var element in widget.post.comments) {
+      if(element.message != 'null#800020') count++;
+    }
+    return count;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -247,7 +255,7 @@ class _PostCardState extends State<PostCard> {
                           });
                         },
                       ),
-                      Text(widget.post.comments.length.toString())
+                      Text(_commentCount().toString())
                     ],
                   ),
                   Row(
