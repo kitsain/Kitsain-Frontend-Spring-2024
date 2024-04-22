@@ -42,6 +42,11 @@ class _PostCardState extends State<PostCard> {
   bool isOwner = false;
   String storeName = "";
 
+  // Stuff for extended postcard
+  Widget extendedPostCard = Container();
+  bool isExtended = false;
+  Icon extendButtonIcon = Icon(Icons.keyboard_arrow_down);
+
   @override
   void initState() {
     super.initState();
@@ -172,11 +177,6 @@ class _PostCardState extends State<PostCard> {
                   ),
               ],
             ),
-            Text(
-              storeName,
-              style: const TextStyle(
-                  fontSize: 14, color: Color.fromARGB(255, 29, 31, 33)),
-            ),
             // Check if there are images to display
             // Add image holder here
             if (widget.post.images.isNotEmpty)
@@ -201,14 +201,24 @@ class _PostCardState extends State<PostCard> {
                 ],
               ),
             ),
-            Padding(
+            /*Padding(
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 widget.post.description,
                 style: const TextStyle(fontSize: 14),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 8),*/
+            Padding(
+              padding: EdgeInsets.only(left: 4.0),
+              child: Text(
+                'Location: $storeName',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color.fromARGB(255, 29, 31, 33)),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -250,31 +260,99 @@ class _PostCardState extends State<PostCard> {
                       Text(widget.post.comments.length.toString())
                     ],
                   ),
-                  Row(
-                    children: [
-                      widget.post.tags.isNotEmpty
-                          ? /*widget.post.tags.length > 1
-                        ? Row(
-                          children: [
-                            Tag(text: widget.post.tags[0]),
-                            SizedBox(width: 3),
-                            Tag(text: widget.post.tags[1])
-                          ],
-                        )
-                        : Tag(text: widget.post.tags[0])*/
-                          Tag(text: widget.post.tags[0])
-                          : const Text('No tags'),
-                      widget.post.tags.isNotEmpty
-                          ? Text(' +${widget.post.tags.length - 1}')
-                          : const Text('')
-                    ],
-                  )
+                  OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        alignment: Alignment.centerRight
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (isExtended == false) {
+                            extendedPostCard = ExtendedPostCard(
+                                post: widget.post
+                            );
+                            isExtended = true;
+                            extendButtonIcon = Icon(Icons.keyboard_arrow_up);
+                          } else {
+                            extendedPostCard = Container();
+                            isExtended = false;
+                            extendButtonIcon = Icon(Icons.keyboard_arrow_down);
+                          }
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          Text('Show details'),
+                          extendButtonIcon
+                        ],
+                      ),
+                  ),
                 ],
               ),
             ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 0),
+              child: extendedPostCard,
+            )
           ],
         ),
       ),
     );
   }
 }
+
+class ExtendedPostCard extends StatelessWidget {
+  final Post post;
+
+  const ExtendedPostCard({
+    super.key,
+    required this.post
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(
+          color: Colors.grey
+        ),
+        SizedBox(height: 10),
+        Text(
+            'Description:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Color.fromARGB(255, 29, 31, 33)
+          ),
+        ),
+        Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(post.description)
+        ),
+        Text(
+          'Tags:',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Color.fromARGB(255, 29, 31, 33)
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8),
+          child: Wrap(
+            children: List.generate(post.tags.length, (index) {
+              List<String> tags = post.tags;
+              return tags.isEmpty
+              ? const Text('NoTags')
+              : Padding(
+              padding: const EdgeInsets.symmetric(
+              horizontal: 2.0),
+              child: Tag(text: tags[index]));
+              })
+          ),
+        ),
+      ],
+    );
+  }
+}
+
