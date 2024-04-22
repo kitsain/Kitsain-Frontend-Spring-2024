@@ -37,7 +37,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   String _id = '';
   String _title = '';
   String _description = '';
-  String _price = '';
   DateTime _expiringDate = DateTime.now();
   List<String> _myTags = [];
   List<File> tempImages = [];
@@ -78,7 +77,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _images = [];
       _title = '';
       _description = '';
-      _price = '';
+      _priceController.text = '';
       _expiringDate = DateTime.now();
       _dateController.text = _dateFormat.format(_expiringDate);
       _myTags = [];
@@ -92,9 +91,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           _priceController.text =
               NumberFormat.currency(locale: 'eu', symbol: '€', decimalDigits: 2)
                   .format(value);
-          setState(() {
-            _price = _priceController.text.toString();
-          });
+          setState(() {});
         }
       }
     });
@@ -413,9 +410,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                             _priceController.text = NumberFormat.currency(
                                     locale: 'eu', symbol: '€', decimalDigits: 2)
                                 .format(value);
-                            setState(() {
-                              _price = _priceController.text.toString();
-                            });
+                            setState(() {});
                           }
                         },
                       ),
