@@ -67,7 +67,7 @@ class PostService {
       });
 
       if (response.statusCode == 200) {
-        logger.i("Post loaded successfully");
+        //logger.i("Post loaded successfully");
         Map<String, dynamic> postResponse =
             jsonDecode(response.body)['details'];
 
@@ -116,9 +116,7 @@ class PostService {
           'description': description,
           'price': price,
           'images': images,
-          'expiringDate': formattedDate,
-          "latitude": 0,
-          "longitude": 0,
+          'expringDate': formattedDate,
           'tags': formattedTags,
           'storeId': storeId,
         }),
@@ -164,7 +162,8 @@ class PostService {
       required String description,
       required String price,
       required DateTime expiringDate,
-      List<String> tags = const []}) async {
+      List<String> tags = const [],
+      required String storeId}) async {
     try {
       // Get the existing post by ID
       Post? existingPost = await getPostById(id);
@@ -177,6 +176,7 @@ class PostService {
         existingPost.expiringDate = expiringDate;
         existingPost.images = images;
         existingPost.tags = tags;
+        existingPost.storeId = storeId;
 
         // Send a PUT request to update the post on the server
         final response = await http.put(
@@ -193,11 +193,11 @@ class PostService {
           // logger.i("Post updated successfully");
           // Deserialize the updated post and return it
           Map<String, dynamic> postResponse = jsonDecode(response.body);
-          return Post.fromJson(postResponse);
+          return Post.fromJson(postResponse['details']);
         } else {
           // Handle other status codes if needed
           logger.e('Failed to update post: ${response.statusCode}');
-          // logger.e(response.body);
+          //logger.e(response.body);
         }
       } else {
         // Handle case when existing post is null

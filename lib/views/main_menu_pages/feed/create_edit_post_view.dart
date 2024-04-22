@@ -73,6 +73,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _expiringDate = widget.post!.expiringDate;
       _dateController.text = _dateFormat.format(_expiringDate);
       _myTags = widget.post!.tags;
+      _selectedStoreValue = widget.post!.storeId;
     } else {
       _images = [];
       _title = '';
@@ -81,6 +82,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _expiringDate = DateTime.now();
       _dateController.text = _dateFormat.format(_expiringDate);
       _myTags = [];
+      _selectedStoreValue = null;
     }
     _priceFocusNode.addListener(() {
       if (!_priceFocusNode.hasFocus) {
@@ -168,19 +170,20 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             images: _images,
             title: _title,
             description: _description,
-            price: _price,
+            price: _priceController.text,
             expiringDate: _expiringDate,
-            tags: _myTags);
+            tags: _myTags,
+            storeId: _selectedStoreValue ?? "");
       } else {
         // Create a new post
         return await _postService.createPost(
             images: _images,
             title: _title,
             description: _description,
-            price: _price,
+            price: _priceController.text,
             expiringDate: _expiringDate,
             tags: _myTags,
-            storeId: _selectedStoreValue!);
+            storeId: _selectedStoreValue ?? "");
       }
     } catch (error) {
       // Handle errors
@@ -225,6 +228,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
   }
 
+  /// Fetches city data and updates the state with the fetched data.
+  /// If a post is provided, it sets the selected city, district, and store based on the post's store ID.
+  /// If no post is provided, it fetches all cities and districts and sets the state accordingly.
+  /// Removes cities and districts that do not have any stores.
+  ///
+  /// Returns: A [Future] that completes when the city data is fetched and the state is updated.
   Future<void> fetchCityData() async {
     final allCities = await _storeService.getCities();
     final citiesToRemove = <City>[];
@@ -248,7 +257,36 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       allCities.remove(city);
     }
 
+    if (widget.post != null) {
+      for (City city in allCities) {
+        final allDistricts = await _storeService.getDistricts(city.cityId);
+        for (District dist in allDistricts) {
+          if (dist.hasStores) {
+            stores = await _storeService.getStores(dist.districtId);
+            if (stores.isNotEmpty) {
+              for (Store store in stores) {
+                if (store.storeId == widget.post!.storeId) {
+                  setState(() {
+                    cities = allCities;
+                    districts = allDistricts
+                        .where((district) => district.hasStores)
+                        .toList();
+                    _selectedCityValue = city.cityId;
+                    _selectedDistrictValue = dist.districtId;
+                    _selectedStoreValue = store.storeId;
+                    dataReady = true;
+                  });
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     setState(() {
+      logger.i('Store: ');
       cities = allCities;
       dataReady = true;
     });
@@ -458,7 +496,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                 }
                               }
                               setState(() {
-                                // Update the state with the fetched districts
+                                _selectedCityValue = newValue;
                               });
                             },
                           ),
@@ -481,7 +519,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                               // Fetch districts for the newly selected city
                               stores = await _storeService.getStores(newValue!);
                               setState(() {
-                                // Update the state with the fetched districts
+                                _selectedDistrictValue = newValue;
                               });
                             },
                           ),
