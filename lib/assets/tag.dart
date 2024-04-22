@@ -21,7 +21,7 @@ class Tag extends StatelessWidget {
         height:37,
         decoration: BoxDecoration(
           color: Colors.grey[500],
-          borderRadius: BorderRadius.all(Radius.circular(30)),
+          borderRadius: const BorderRadius.all(Radius.circular(30)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12,8,12,8),
