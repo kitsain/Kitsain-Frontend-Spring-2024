@@ -11,7 +11,6 @@ import 'package:kitsain_frontend_spring2023/services/store_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_section_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
 import 'package:logger/logger.dart';
-
 import 'image_carousel.dart';
 
 /// A card widget that displays a post.
@@ -45,7 +44,7 @@ class _PostCardState extends State<PostCard> {
   // Stuff for extended postcard
   Widget extendedPostCard = Container();
   bool isExtended = false;
-  Icon extendButtonIcon = Icon(Icons.keyboard_arrow_down);
+  Icon extendButtonIcon = const Icon(Icons.keyboard_arrow_down);
 
   @override
   void initState() {
@@ -218,7 +217,7 @@ class _PostCardState extends State<PostCard> {
             ),
             const SizedBox(height: 8),*/
             Padding(
-              padding: EdgeInsets.only(left: 4.0),
+              padding: const EdgeInsets.only(left: 4.0),
               child: Text(
                 'Location: $storeName',
                 style: const TextStyle(
@@ -279,17 +278,17 @@ class _PostCardState extends State<PostCard> {
                                 post: widget.post
                             );
                             isExtended = true;
-                            extendButtonIcon = Icon(Icons.keyboard_arrow_up);
+                            extendButtonIcon = const Icon(Icons.keyboard_arrow_up);
                           } else {
                             extendedPostCard = Container();
                             isExtended = false;
-                            extendButtonIcon = Icon(Icons.keyboard_arrow_down);
+                            extendButtonIcon = const Icon(Icons.keyboard_arrow_down);
                           }
                         });
                       },
                       child: Row(
                         children: [
-                          Text('Show details'),
+                          const Text('Show details'),
                           extendButtonIcon
                         ],
                       ),
@@ -321,11 +320,11 @@ class ExtendedPostCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(
+        const Divider(
           color: Colors.grey
         ),
-        SizedBox(height: 10),
-        Text(
+        const SizedBox(height: 10),
+        const Text(
             'Description:',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -334,10 +333,10 @@ class ExtendedPostCard extends StatelessWidget {
           ),
         ),
         Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: Text(post.description)
         ),
-        Text(
+        const Text(
           'Tags:',
           style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -346,7 +345,7 @@ class ExtendedPostCard extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: Wrap(
             children: List.generate(post.tags.length, (index) {
               List<String> tags = post.tags;
@@ -363,4 +362,3 @@ class ExtendedPostCard extends StatelessWidget {
     );
   }
 }
-

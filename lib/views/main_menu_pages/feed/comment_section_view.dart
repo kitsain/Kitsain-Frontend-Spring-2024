@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:kitsain_frontend_spring2023/assets/comment_box.dart';

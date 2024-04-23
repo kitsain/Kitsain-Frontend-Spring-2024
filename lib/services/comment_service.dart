@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:kitsain_frontend_spring2023/services/auth_service.dart';
 import 'package:logger/logger.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
-import 'package:realm/realm.dart';
 
 class CommentService {
   final accessToken = Get.put(AuthService()).accessToken;
