@@ -7,6 +7,7 @@ import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:kitsain_frontend_spring2023/views/help_pages/pantry_help_page.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
+import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_select_view.dart';
 import 'package:logger/logger.dart';
 
 /// The feed view widget that displays a list of posts.
@@ -115,23 +116,51 @@ class _FeedViewState extends State<FeedView> {
         backgroundImageName: 'assets/images/pantry_banner_B1.jpg',
         titleBackgroundColor: AppColors.titleBackgroundBrown,
       ),
-      body: RefreshIndicator(
-        onRefresh: refreshPosts,
-        child: ListView.builder(
-          controller: _scrollController,
-          itemCount: postProvider.posts.length,
-          itemBuilder: (context, index) {
-            return PostCard(
-              post: postProvider.posts[index],
-              onRemovePost: (Post removedPost) {
-                removePost(removedPost);
-              },
-              onEditPost: (Post updatedPost) {
-                editPost(updatedPost);
-              },
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: 50,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text('Filter'),
+                  IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (buildContext) {
+                              return Container();
+                            });
+                      },
+                      icon: Icon(Icons.sort))
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: refreshPosts,
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: postProvider.posts.length,
+                itemBuilder: (context, index) {
+                  return PostCard(
+                    post: postProvider.posts[index],
+                    onRemovePost: (Post removedPost) {
+                      removePost(removedPost);
+                    },
+                    onEditPost: (Post updatedPost) {
+                      editPost(updatedPost);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
