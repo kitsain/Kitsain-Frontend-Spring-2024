@@ -62,16 +62,61 @@ class _CommentSectionViewState extends State<CommentSectionView> {
     }
   }
 
-  /// Comment object for storing info about
-  /// current instance of comment.
-  ///
-/*
-  Comment _createCommentObj(String author, String message, DateTime date) {
-    return Comment(
-        postID: widget.postID, author: author, message: message, date: date);
+  /// Sets the position to the top of the scroll view.
+  void _scrollToTop() {
+    _scrollController.animateTo(_scrollController.position.minScrollExtent,
+        duration: const Duration(seconds: 1), curve: Curves.decelerate);
   }
 
-*/
+  /// Adds  a new comment to the backend and updates information locally
+  void _addComment(String message) async {
+    await commentService.postComment(
+      postID: widget.postID,
+      content: message,
+    );
+
+    _refreshComments();
+  }
+
+  /// Fetches most recent comment information from backend and updates locally.
+  void _refreshComments() async {
+    try {
+      List<Comment> newComments =
+      await commentService.getComments(widget.postID);
+      setState(() {
+        _tempComments.clear();
+        _tempComments.addAll(newComments);
+        _users.clear();
+        _usersList();
+      });
+    } catch (e) {
+      debugPrint('Error loading posts: $e');
+    }
+  }
+
+  /// Removes comment from the backend.
+  void _removeComment(int index) {
+    //commentService.deleteComment(_tempComments[index].Id, _currUser);
+    _tempComments[index].message = 'null#800020';
+    commentService.putComment(
+        _tempComments[index].id,
+        _currUser,
+        widget.postID
+    );
+  }
+
+  /// Formats comment for modal bottom sheet.
+  ///
+  /// Displayed when user tries to remove a
+  /// comment or reply to other users' comment
+  String _formatComment(int i) {
+    Comment comment = _tempComments[i];
+    int userIndex = (_users.indexOf(comment.author)) + 1;
+    String? message = comment.message;
+
+    return '"user $userIndex": "$message"';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,8 +132,8 @@ class _CommentSectionViewState extends State<CommentSectionView> {
       body: Padding(
         padding: const EdgeInsets.only(bottom: 85),
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 1,
-          width: MediaQuery.of(context).size.width * 1,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
           child: RefreshIndicator(
             onRefresh: () {
               return Future.delayed(
@@ -164,12 +209,14 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                         );
                       }
                     },
-                    child: CommentBox(
+                    child: _tempComments[index].message != 'null#800020'
+                    ? CommentBox(
                       comment: _tempComments[index].message,
                       author:
                           'user ${(_users.indexOf(_tempComments[index].author) + 1)}',
                       date: _tempComments[index].date,
-                    ),
+                    )
+                    : Container(),
                   );
                 },
               ),
@@ -204,53 +251,6 @@ class _CommentSectionViewState extends State<CommentSectionView> {
         ),
       ),
     );
-  }
-
-  /// Sets the position to the top of the scroll view.
-  void _scrollToTop() {
-    _scrollController.animateTo(_scrollController.position.minScrollExtent,
-        duration: const Duration(seconds: 1), curve: Curves.decelerate);
-  }
-
-  /// Adds  a new comment to the backend and updates information locally
-  void _addComment(String message) async {
-    await commentService.postComment(
-      postID: widget.postID,
-      content: message,
-    );
-    _refreshComments();
-  }
-
-  /// Fetches most recent comment information from backend and updates locally.
-  void _refreshComments() async {
-    try {
-      List<Comment> newComments =
-          await commentService.getComments(widget.postID);
-      setState(() {
-        _tempComments.clear();
-        _tempComments.addAll(newComments);
-      });
-    } catch (e) {
-      debugPrint('Error loading posts: $e');
-    }
-  }
-
-  /// Removes comment from the backend.
-  void _removeComment(int index) {
-    commentService.deleteComment(_tempComments[index].postID, _currUser);
-    _tempComments.removeAt(index);
-  }
-
-  /// Formats comment for modal bottom sheet.
-  ///
-  /// Displayed when user tries to remove a
-  /// comment or reply to other users' comment
-  String _formatComment(int i) {
-    Comment comment = _tempComments[i];
-    int userIndex = (_users.indexOf(comment.author)) + 1;
-    String message = comment.message;
-
-    return '"user $userIndex": "$message"';
   }
 
   @override

@@ -8,14 +8,16 @@ class CommentBox extends StatelessWidget {
   // TODO: connect author to actual user
 
   final String author;
-  final String comment;
+  final String? comment;
   final DateTime date;
+  final bool isUser;
 
   const CommentBox(
       {super.key,
       required this.author,
       required this.comment,
-      required this.date});
+      required this.date,
+      this.isUser = false});
 
   /// Converts the time into a pretty string.
   /// > If comment was posted within 7 days -> display days ago
@@ -68,7 +70,7 @@ class CommentBox extends StatelessWidget {
                       ],
                     )),
                 const SizedBox(height: 15),
-                Align(alignment: Alignment.centerLeft, child: Text(comment)),
+                Align(alignment: Alignment.centerLeft, child: Text(comment.toString())),
               ],
             ),
           ),
