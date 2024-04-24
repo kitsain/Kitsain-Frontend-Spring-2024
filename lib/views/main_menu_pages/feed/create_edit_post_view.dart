@@ -37,7 +37,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   String _id = '';
   String _title = '';
   String _description = '';
-  DateTime _expiringDate = DateTime.now();
+  DateTime _expiringDate = DateTime(2000, 1, 2);
   List<String> _myTags = [];
   List<File> tempImages = [];
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
@@ -70,7 +70,9 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _description = widget.post!.description;
       _priceController.text = widget.post!.price;
       _expiringDate = widget.post!.expiringDate;
-      _dateController.text = _dateFormat.format(_expiringDate);
+      _dateController.text = _expiringDate != DateTime(2000, 1, 2)
+          ? _dateFormat.format(_expiringDate)
+          : '';
       _myTags = widget.post!.tags;
       _selectedStoreValue = widget.post!.storeId;
     } else {
@@ -78,8 +80,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _title = '';
       _description = '';
       _priceController.text = '';
-      _expiringDate = DateTime.now();
-      _dateController.text = _dateFormat.format(_expiringDate);
+      _expiringDate = DateTime(2000, 1, 2);
+      _dateController.text = '';
       _myTags = [];
       _selectedStoreValue = null;
     }
@@ -141,11 +143,21 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _expiringDate,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _expiringDate) {
+      final DateTime now = DateTime.now();
+      final DateTime yesterday = DateTime(now.year, now.month, now.day);
+      if (picked.isBefore(yesterday)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expiration date cannot be in the past.'),
+          ),
+        );
+        return;
+      }
       setState(() {
         _expiringDate = picked;
         _dateController.text = _dateFormat.format(_expiringDate);
@@ -520,20 +532,29 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           ),
                         ],
                       ),
-                      DropdownButton<String>(
-                        value: _selectedStoreValue,
-                        hint: const Text('Select Store'),
-                        items: stores.map((Store store) {
-                          return DropdownMenuItem<String>(
-                            value: store.storeId,
-                            child: Text(store.storeName),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedStoreValue = newValue!;
-                          });
-                        },
+                      SizedBox(
+                        width: 240,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedStoreValue,
+                          hint: const Text('Select Store'),
+                          items: stores.map((Store store) {
+                            return DropdownMenuItem<String>(
+                              value: store.storeId,
+                              child: Text(store.storeName),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedStoreValue = newValue!;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter city, district and store";
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () async {

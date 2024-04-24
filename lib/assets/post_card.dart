@@ -40,6 +40,7 @@ class _PostCardState extends State<PostCard> {
   late String userId;
   bool isOwner = false;
   String storeName = "";
+  String expiringDate = "";
 
   // Stuff for extended postcard
   Widget extendedPostCard = Container();
@@ -52,6 +53,12 @@ class _PostCardState extends State<PostCard> {
     fetchUserId();
     fetchStoreName();
     //loadComments();
+    if (widget.post.expiringDate != DateTime(2000, 1, 2)) {
+      expiringDate =
+          'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}';
+    } else {
+      expiringDate = '';
+    }
   }
 
   Future<void> fetchStoreName() async {
@@ -132,7 +139,7 @@ class _PostCardState extends State<PostCard> {
   int _commentCount() {
     int count = 0;
     for (var element in widget.post.comments) {
-      if(element.message != 'null#800020') count++;
+      if (element.message != 'null#800020') count++;
     }
     return count;
   }
@@ -197,14 +204,20 @@ class _PostCardState extends State<PostCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Price: ${widget.post.price}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  if (expiringDate != '')
+                    Flexible(
+                      child: Text(
+                        expiringDate,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  if (widget.post.price != '')
+                    Flexible(
+                      child: Text(
+                        'Price: ${widget.post.price}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -268,30 +281,27 @@ class _PostCardState extends State<PostCard> {
                     ],
                   ),
                   OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        alignment: Alignment.centerRight
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (isExtended == false) {
-                            extendedPostCard = ExtendedPostCard(
-                                post: widget.post
-                            );
-                            isExtended = true;
-                            extendButtonIcon = const Icon(Icons.keyboard_arrow_up);
-                          } else {
-                            extendedPostCard = Container();
-                            isExtended = false;
-                            extendButtonIcon = const Icon(Icons.keyboard_arrow_down);
-                          }
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          const Text('Show details'),
-                          extendButtonIcon
-                        ],
-                      ),
+                    style: OutlinedButton.styleFrom(
+                        alignment: Alignment.centerRight),
+                    onPressed: () {
+                      setState(() {
+                        if (isExtended == false) {
+                          extendedPostCard =
+                              ExtendedPostCard(post: widget.post);
+                          isExtended = true;
+                          extendButtonIcon =
+                              const Icon(Icons.keyboard_arrow_up);
+                        } else {
+                          extendedPostCard = Container();
+                          isExtended = false;
+                          extendButtonIcon =
+                              const Icon(Icons.keyboard_arrow_down);
+                        }
+                      });
+                    },
+                    child: Row(
+                      children: [const Text('Show details'), extendButtonIcon],
+                    ),
                   ),
                 ],
               ),
@@ -310,53 +320,42 @@ class _PostCardState extends State<PostCard> {
 class ExtendedPostCard extends StatelessWidget {
   final Post post;
 
-  const ExtendedPostCard({
-    super.key,
-    required this.post
-  });
+  const ExtendedPostCard({super.key, required this.post});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(
-          color: Colors.grey
-        ),
+        const Divider(color: Colors.grey),
         const SizedBox(height: 10),
         const Text(
-            'Description:',
-            style: TextStyle(
+          'Description:',
+          style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)
-          ),
+              color: Color.fromARGB(255, 29, 31, 33)),
         ),
         Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(post.description)
-        ),
+            padding: const EdgeInsets.all(8), child: Text(post.description)),
         const Text(
           'Tags:',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)
-          ),
+              color: Color.fromARGB(255, 29, 31, 33)),
         ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: Wrap(
-            children: List.generate(post.tags.length, (index) {
-              List<String> tags = post.tags;
-              return tags.isEmpty
-              ? const Text('NoTags')
-              : Padding(
-              padding: const EdgeInsets.symmetric(
-              horizontal: 2.0),
-              child: Tag(text: tags[index]));
-              })
-          ),
+              children: List.generate(post.tags.length, (index) {
+            List<String> tags = post.tags;
+            return tags.isEmpty
+                ? const Text('NoTags')
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Tag(text: tags[index]));
+          })),
         ),
       ],
     );

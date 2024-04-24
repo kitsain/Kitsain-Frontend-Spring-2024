@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 
 /// A class for an object that handles information about a post
@@ -41,11 +42,13 @@ class Post extends ChangeNotifier {
 
   // Serialize the Post object to a JSON map
   Map<String, dynamic> toJson() {
+    String formattedDate =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
     return {
       'title': title,
       'description': description,
       'price': price,
-      'expringDate': expiringDate.toIso8601String(),
+      'expringDate': expiringDate != DateTime(2000, 1, 2) ? formattedDate : "",
       'images': images,
       'tags': tags,
       'storeId': storeId,
@@ -59,7 +62,9 @@ class Post extends ChangeNotifier {
         title: json['title'],
         description: json['description'],
         price: json['price'],
-        expiringDate: DateTime.parse(json['expringDate']),
+        expiringDate: json['expringDate'] != null
+            ? DateTime.parse(json['expringDate'])
+            : DateTime(2000, 1, 2),
         images: List<String>.from(json['images']),
         userId: json['user']['id'],
         tags: List<String>.from(json['tags']),

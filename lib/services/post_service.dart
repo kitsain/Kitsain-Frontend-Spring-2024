@@ -96,6 +96,7 @@ class PostService {
       List<String> tags = const [],
       required String storeId}) async {
     // Format the expiration date of the post
+
     String formattedDate =
         DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
     List<String> formattedTags =
@@ -116,7 +117,8 @@ class PostService {
           'description': description,
           'price': price,
           'images': images,
-          'expringDate': formattedDate,
+          'expringDate':
+              expiringDate != DateTime(2000, 1, 2) ? formattedDate : "",
           'tags': formattedTags,
           'storeId': storeId,
         }),
@@ -169,8 +171,8 @@ class PostService {
       Post? existingPost = await getPostById(id);
 
       // Tags formatted to uppercase to match enums in backend
-      List<String> formattedTags = tags.map((e) =>
-          e.replaceAll(' ', '_').toUpperCase()).toList();
+      List<String> formattedTags =
+          tags.map((e) => e.replaceAll(' ', '_').toUpperCase()).toList();
 
       if (existingPost != null) {
         // Update only if the existing post is not null
@@ -328,7 +330,7 @@ class PostService {
       String price = json['price'] ?? '';
       DateTime expiringDate = json['expringDate'] != null
           ? DateTime.parse(json['expringDate'])
-          : DateTime.now();
+          : DateTime(2000, 1, 2);
       String id = json['id'] ?? '';
       String userId = json['user'] != null ? json['user']['id'] ?? '' : '';
       int useful = json['favourite'] ?? false;
