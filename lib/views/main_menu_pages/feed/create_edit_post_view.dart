@@ -35,7 +35,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   late List<String> _images = [];
   String _id = '';
-  String _title = '';
   String _description = '';
   DateTime _expiringDate = DateTime(2000, 1, 2);
   List<String> _myTags = [];
@@ -68,7 +67,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     if (widget.post != null) {
       _id = widget.post!.id;
       _images = List.from(widget.existingImages ?? []);
-      _title = widget.post!.title;
+      _titleController.text = widget.post!.title;
       _description = widget.post!.description;
       _priceController.text = widget.post!.price;
       _expiringDate = widget.post!.expiringDate;
@@ -80,7 +79,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _barcodeController.text = widget.post!.productBarcode;
     } else {
       _images = [];
-      _title = '';
+      _titleController.text = '';
       _description = '';
       _priceController.text = '';
       _expiringDate = DateTime(2000, 1, 2);
@@ -181,7 +180,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
         return await _postService.updatePost(
             id: _id,
             images: _images,
-            title: _title,
+            title: _titleController.text,
             description: _description,
             price: _priceController.text,
             expiringDate: _expiringDate,
@@ -192,7 +191,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
         // Create a new post
         return await _postService.createPost(
             images: _images,
-            title: _title,
+            title: _titleController.text,
             description: _description,
             price: _priceController.text,
             expiringDate: _expiringDate,
@@ -221,18 +220,16 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     for (Barcode barcode in barcodes) {
       if (barcode.rawValue != null) {
         final String rawValue = barcode.rawValue!;
-        //logger.i('Barcode raw value: $rawValue');
+
         OpenFoodAPIConfiguration.userAgent = UserAgent(
           name: 'Kitsain',
         );
 
         try {
+          _barcodeController.text = rawValue;
           var product = await getFromJson(rawValue);
 
-          if (_titleController.text.isEmpty) {
-            _titleController.text = product!.productName ?? '';
-            _title = product.productName ?? '';
-          }
+          _titleController.text = product!.productName ?? '';
         } catch (e) {
           // Handle any errors that occur during fetching product information
           logger.e('Error fetching product information: $e');
@@ -319,7 +316,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   @override
   Widget build(BuildContext context) {
-    _titleController.text = _title;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
@@ -391,7 +387,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         ),
                         onChanged: (value) {
                           setState(() {
-                            _title = value;
+                            _titleController.text = value;
                           });
                         },
                         validator: (value) {
