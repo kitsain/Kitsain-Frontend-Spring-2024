@@ -7,7 +7,7 @@ import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:kitsain_frontend_spring2023/views/help_pages/pantry_help_page.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
-import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_select_view.dart';
+import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/filter_view.dart';
 import 'package:logger/logger.dart';
 
 /// The feed view widget that displays a list of posts.
@@ -20,10 +20,19 @@ class FeedView extends StatefulWidget {
 
 class _FeedViewState extends State<FeedView> {
   var logger = Logger(printer: PrettyPrinter());
+
   var postProvider = PostProvider();
   final PostService postService = PostService();
+  List<Post> _posts = [];
+
   bool isLoading = false;
+  bool isFiltering = false;
+
   final ScrollController _scrollController = ScrollController();
+
+  // Parameters for filtering
+  List<List<String?>> _filtering = [];
+
 
   @override
   void initState() {
@@ -32,6 +41,9 @@ class _FeedViewState extends State<FeedView> {
 
     // Add listener to scroll controller
     _scrollController.addListener(_scrollListener);
+
+    // Assign posts to local variable
+    _posts = postProvider.posts;
   }
 
   @override
@@ -106,6 +118,34 @@ class _FeedViewState extends State<FeedView> {
     });
   }
 
+  /// filters post according to determined parameters.
+  /// User can now filter posts by:
+  ///  * tags
+  ///  * location <- TODO
+  void filterPosts(){
+    List<Post> filteredPosts = [];
+    List<String?> tags = _filtering[0];
+    List<String?> location = _filtering[1];
+
+    isFiltering = true;
+    for (Post post in postProvider.posts) {
+      if (tags.every((element) => post.tags.contains(element))){
+        filteredPosts.add(post);
+      }
+      // TODO: filter location
+    }
+
+    if (filteredPosts.isNotEmpty){
+      setState(() {
+        _posts = filteredPosts;
+      });
+    } else {
+      setState(() {
+        _posts = postProvider.posts;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +158,7 @@ class _FeedViewState extends State<FeedView> {
       ),
       body: Column(
         children: [
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width,
             height: 50,
             child: Padding(
@@ -126,7 +166,32 @@ class _FeedViewState extends State<FeedView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('Filter'),
+                const Text('Filter: ',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+                  IconButton(
+                    icon: const Icon(Icons.tune),
+                    onPressed: () {
+                      // Open a view for picking filters
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (buildContext) {
+                          return FilterView(parameters: _filtering);
+                      }). then((parameters) {
+                        parameters != null
+                            ? _filtering = parameters
+                            : parameters = [];
+                        filterPosts();
+                      });
+                    },
+                  ),
+                  const Text('Sort: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
                   IconButton(
                       onPressed: () {
                         showModalBottomSheet(
@@ -135,7 +200,8 @@ class _FeedViewState extends State<FeedView> {
                               return Container();
                             });
                       },
-                      icon: Icon(Icons.sort))
+                      icon: const Icon(Icons.filter_list)
+                  )
                 ],
               ),
             ),
@@ -145,10 +211,10 @@ class _FeedViewState extends State<FeedView> {
               onRefresh: refreshPosts,
               child: ListView.builder(
                 controller: _scrollController,
-                itemCount: postProvider.posts.length,
+                itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   return PostCard(
-                    post: postProvider.posts[index],
+                    post: _posts[index],
                     onRemovePost: (Post removedPost) {
                       removePost(removedPost);
                     },
