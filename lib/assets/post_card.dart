@@ -319,15 +319,20 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-class ExtendedPostCard extends StatelessWidget {
+class ExtendedPostCard extends StatefulWidget {
   final Post post;
 
   const ExtendedPostCard({super.key, required this.post});
 
+  @override
+  State<ExtendedPostCard> createState() => _ExtendedPostCardState();
+}
+
+class _ExtendedPostCardState extends State<ExtendedPostCard> {
   Future<void> _launchUrl(context, target) async {
     if (target == 'google') {
-      final Uri url =
-          Uri.parse('https://www.google.com/search?q=6415712506032');
+      final Uri url = Uri.parse(
+          'https://www.google.com/search?q=${widget.post.productBarcode}');
       if (!await launchUrl(url)) {
         throw Exception('Could not launch $url');
       }
@@ -346,7 +351,7 @@ class ExtendedPostCard extends StatelessWidget {
                 TextButton(
                   onPressed: () async {
                     final Uri url = Uri.parse(
-                        'https://world.openfoodfacts.org/product/6415712506032');
+                        'https://world.openfoodfacts.org/product/${widget.post.productBarcode}');
                     if (!await launchUrl(url)) {
                       throw Exception('Could not launch $url');
                     }
@@ -371,8 +376,8 @@ class ExtendedPostCard extends StatelessWidget {
           },
         ));
       } else {
-        final Uri url =
-            Uri.parse('https://world.openfoodfacts.org/product/6415712506032');
+        final Uri url = Uri.parse(
+            'https://world.openfoodfacts.org/product/${widget.post.productBarcode}');
         if (!await launchUrl(url)) {
           throw Exception('Could not launch $url');
         }
@@ -395,7 +400,8 @@ class ExtendedPostCard extends StatelessWidget {
               color: Color.fromARGB(255, 29, 31, 33)),
         ),
         Padding(
-            padding: const EdgeInsets.all(8), child: Text(post.description)),
+            padding: const EdgeInsets.all(8),
+            child: Text(widget.post.description)),
         const Text(
           'Tags:',
           style: TextStyle(
@@ -406,8 +412,8 @@ class ExtendedPostCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8),
           child: Wrap(
-              children: List.generate(post.tags.length, (index) {
-            List<String> tags = post.tags;
+              children: List.generate(widget.post.tags.length, (index) {
+            List<String> tags = widget.post.tags;
             return tags.isEmpty
                 ? const Text('NoTags')
                 : Padding(
@@ -415,54 +421,53 @@ class ExtendedPostCard extends StatelessWidget {
                     child: Tag(text: tags[index]));
           })),
         ),
-        const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text(
-            "Product barcode: 6415712506032",
-            style: TextStyle(
+        if (widget.post.productBarcode != '')
+          Text(
+            "Product barcode: ${widget.post.productBarcode}",
+            style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
                 color: Color.fromARGB(255, 29, 31, 33)),
           ),
-        ),
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                ),
-                onPressed: () async {
-                  _launchUrl(context, 'openFoodFacts');
-                },
-                child: SvgPicture.asset(
-                  'assets/icons/openFoodFactsIcon.svg', // Your SVG file path
-                  semanticsLabel: 'Icon',
-                  width: 24, // Adjust size as needed
-                  height: 24,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                ),
-                onPressed: () async {
-                  _launchUrl(context, 'google');
-                },
-                child: SvgPicture.asset(
-                  'assets/icons/googleIcon.svg', // Your SVG file path
-                  semanticsLabel: 'Icon',
-                  width: 24, // Adjust size as needed
-                  height: 24,
+        if (widget.post.productBarcode != '')
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: () async {
+                    _launchUrl(context, 'openFoodFacts');
+                  },
+                  child: SvgPicture.asset(
+                    'assets/icons/openFoodFactsIcon.svg', // Your SVG file path
+                    semanticsLabel: 'Icon',
+                    width: 24, // Adjust size as needed
+                    height: 24,
+                  ),
                 ),
               ),
-            ),
-          ],
-        )
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
+                  onPressed: () async {
+                    _launchUrl(context, 'google');
+                  },
+                  child: SvgPicture.asset(
+                    'assets/icons/googleIcon.svg', // Your SVG file path
+                    semanticsLabel: 'Icon',
+                    width: 24, // Adjust size as needed
+                    height: 24,
+                  ),
+                ),
+              ),
+            ],
+          )
       ],
     );
   }
