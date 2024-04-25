@@ -319,9 +319,13 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
+/// A widget that represents an extended post card.
 class ExtendedPostCard extends StatefulWidget {
   final Post post;
 
+  /// Constructs an [ExtendedPostCard] widget.
+  ///
+  /// The [post] parameter is required and represents the post data.
   const ExtendedPostCard({super.key, required this.post});
 
   @override
@@ -329,6 +333,12 @@ class ExtendedPostCard extends StatefulWidget {
 }
 
 class _ExtendedPostCardState extends State<ExtendedPostCard> {
+  /// Launches the URL based on the given [target].
+  ///
+  /// If the [target] is 'google', it launches a Google search URL with the product barcode.
+  /// If the [target] is 'openFoodFacts', it checks if the OpenFoodFacts app is installed.
+  /// If the app is installed, it launches the OpenFoodFacts URL with the product barcode.
+  /// If the app is not installed, it shows a dialog with options to open in the browser or download the app.
   Future<void> _launchUrl(context, target) async {
     if (target == 'google') {
       final Uri url = Uri.parse(
@@ -346,7 +356,7 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
             return AlertDialog(
               title: const Text('Choose an option'),
               content: const Text(
-                  'Do you want to donwload OpenFoodFacts app or open in the browser?'),
+                  'Do you want to download OpenFoodFacts app or open in the browser?'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () async {

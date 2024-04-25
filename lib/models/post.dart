@@ -54,7 +54,7 @@ class Post extends ChangeNotifier {
       'images': images,
       'tags': tags,
       'storeId': storeId,
-      'productBarCode': productBarcode,
+      'productBarcode': productBarcode,
     };
   }
 
@@ -72,7 +72,7 @@ class Post extends ChangeNotifier {
         userId: json['user']['id'],
         tags: List<String>.from(json['tags']),
         storeId: json['storeId'],
-        productBarcode: json['productBarCode']);
+        productBarcode: json['productBarcode']);
   }
 }
 

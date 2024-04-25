@@ -122,7 +122,7 @@ class PostService {
               expiringDate != DateTime(2000, 1, 2) ? formattedDate : "",
           'tags': formattedTags,
           'storeId': storeId,
-          'productBarCode': productBarcode
+          'productBarcode': productBarcode
         }),
       );
 
@@ -340,7 +340,7 @@ class PostService {
       String userId = json['user'] != null ? json['user']['id'] ?? '' : '';
       int useful = json['favourite'] ?? false;
       List<dynamic> tags = json['tags'];
-      String productBarcode = json['productBarCode'] ?? '';
+      String productBarcode = json['productBarcode'] ?? '';
 
       List<String> formattedTags = tags.map((e) {
         String substring = e.substring(1);

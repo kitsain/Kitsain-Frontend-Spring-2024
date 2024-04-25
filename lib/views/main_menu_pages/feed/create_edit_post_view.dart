@@ -298,7 +298,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
 
     setState(() {
-      logger.i('Store: ');
       cities = allCities;
       dataReady = true;
     });
