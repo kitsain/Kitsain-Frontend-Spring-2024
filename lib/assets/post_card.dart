@@ -11,7 +11,10 @@ import 'package:kitsain_frontend_spring2023/services/store_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_section_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
 import 'package:logger/logger.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'image_carousel.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// A card widget that displays a post.
 class PostCard extends StatefulWidget {
@@ -41,7 +44,6 @@ class _PostCardState extends State<PostCard> {
   bool isOwner = false;
   String storeName = "";
   String expiringDate = "";
-
   // Stuff for extended postcard
   Widget extendedPostCard = Container();
   bool isExtended = false;
@@ -322,6 +324,62 @@ class ExtendedPostCard extends StatelessWidget {
 
   const ExtendedPostCard({super.key, required this.post});
 
+  Future<void> _launchUrl(context, target) async {
+    if (target == 'google') {
+      final Uri url =
+          Uri.parse('https://www.google.com/search?q=6415712506032');
+      if (!await launchUrl(url)) {
+        throw Exception('Could not launch $url');
+      }
+    } else if (target == 'openFoodFacts') {
+      var isAppInstalledResult = await LaunchApp.isAppInstalled(
+          androidPackageName: 'org.openfoodfacts.scanner');
+      if (!isAppInstalledResult) {
+        return (showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Choose an option'),
+              content: const Text(
+                  'Do you want to donwload OpenFoodFacts app or open in the browser?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () async {
+                    final Uri url = Uri.parse(
+                        'https://world.openfoodfacts.org/product/6415712506032');
+                    if (!await launchUrl(url)) {
+                      throw Exception('Could not launch $url');
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Browser'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    var openAppResult = await LaunchApp.openApp(
+                      androidPackageName: 'org.openfoodfacts.scanner',
+                      // openStore: false
+                    );
+                    print(
+                        'openAppResult => $openAppResult ${openAppResult.runtimeType}');
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Download app'),
+                ),
+              ],
+            );
+          },
+        ));
+      } else {
+        final Uri url =
+            Uri.parse('https://world.openfoodfacts.org/product/6415712506032');
+        if (!await launchUrl(url)) {
+          throw Exception('Could not launch $url');
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -357,6 +415,54 @@ class ExtendedPostCard extends StatelessWidget {
                     child: Tag(text: tags[index]));
           })),
         ),
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: Text(
+            "Product barcode: 6415712506032",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Color.fromARGB(255, 29, 31, 33)),
+          ),
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                ),
+                onPressed: () async {
+                  _launchUrl(context, 'openFoodFacts');
+                },
+                child: SvgPicture.asset(
+                  'assets/icons/openFoodFactsIcon.svg', // Your SVG file path
+                  semanticsLabel: 'Icon',
+                  width: 24, // Adjust size as needed
+                  height: 24,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                ),
+                onPressed: () async {
+                  _launchUrl(context, 'google');
+                },
+                child: SvgPicture.asset(
+                  'assets/icons/googleIcon.svg', // Your SVG file path
+                  semanticsLabel: 'Icon',
+                  width: 24, // Adjust size as needed
+                  height: 24,
+                ),
+              ),
+            ),
+          ],
+        )
       ],
     );
   }
