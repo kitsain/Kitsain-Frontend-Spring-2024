@@ -24,6 +24,7 @@ class Post extends ChangeNotifier {
   String userId = "";
   List<String> tags = [];
   String storeId = "";
+  String productBarcode = "";
   //Item item;
 
   Post({
@@ -34,6 +35,7 @@ class Post extends ChangeNotifier {
     required this.expiringDate,
     required this.id,
     required this.userId,
+    this.productBarcode = "",
     this.useful = 0,
     this.comments = const [],
     this.tags = const [],
@@ -52,6 +54,7 @@ class Post extends ChangeNotifier {
       'images': images,
       'tags': tags,
       'storeId': storeId,
+      'productBarCode': productBarcode,
     };
   }
 
@@ -68,7 +71,8 @@ class Post extends ChangeNotifier {
         images: List<String>.from(json['images']),
         userId: json['user']['id'],
         tags: List<String>.from(json['tags']),
-        storeId: json['storeId']);
+        storeId: json['storeId'],
+        productBarcode: json['productBarCode']);
   }
 }
 

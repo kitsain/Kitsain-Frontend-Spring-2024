@@ -46,10 +46,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   bool imageSelected = true;
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _barcodeFocusNode = FocusNode();
   final _priceFocusNode = FocusNode();
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _barcodeController = TextEditingController();
 
   String? _selectedCityValue;
   String? _selectedDistrictValue;
@@ -75,6 +77,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           : '';
       _myTags = widget.post!.tags;
       _selectedStoreValue = widget.post!.storeId;
+      _barcodeController.text = widget.post!.productBarcode;
     } else {
       _images = [];
       _title = '';
@@ -84,6 +87,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _dateController.text = '';
       _myTags = [];
       _selectedStoreValue = null;
+      _barcodeController.text = '';
     }
     _priceFocusNode.addListener(() {
       if (!_priceFocusNode.hasFocus) {
@@ -182,7 +186,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             price: _priceController.text,
             expiringDate: _expiringDate,
             tags: _myTags,
-            storeId: _selectedStoreValue ?? "");
+            storeId: _selectedStoreValue ?? "",
+            productBarcode: _barcodeController.text);
       } else {
         // Create a new post
         return await _postService.createPost(
@@ -192,7 +197,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             price: _priceController.text,
             expiringDate: _expiringDate,
             tags: _myTags,
-            storeId: _selectedStoreValue ?? "");
+            storeId: _selectedStoreValue ?? "",
+            productBarcode: _barcodeController.text);
       }
     } catch (error) {
       // Handle errors
@@ -434,6 +440,18 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           labelText: 'Select expiring date',
                           suffixIcon: Icon(Icons.calendar_today),
                         ),
+                      ),
+                      TextFormField(
+                        focusNode: _barcodeFocusNode,
+                        controller: _barcodeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Product barcode',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _barcodeController.text = value;
+                          });
+                        },
                       ),
                       const SizedBox(height: 10),
                       Row(
