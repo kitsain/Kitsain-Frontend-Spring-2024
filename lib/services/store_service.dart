@@ -42,10 +42,10 @@ class StoreService {
         return cities;
       } else {
         throw Exception(
-            'Failed to load posts: ${response.statusCode} /n ${response.body}');
+            'Failed to load cities: ${response.statusCode} /n ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error fetching posts: $e');
+      throw Exception('Error fetching cities: $e');
     }
   }
 
@@ -77,10 +77,10 @@ class StoreService {
         return districts;
       } else {
         throw Exception(
-            'Failed to load posts: ${response.statusCode} /n ${response.body}');
+            'Failed to load districts: ${response.statusCode} /n ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error fetching posts: $e');
+      throw Exception('Error fetching districts: $e');
     }
   }
 
@@ -115,10 +115,10 @@ class StoreService {
         return stores;
       } else {
         throw Exception(
-            'Failed to load posts: ${response.statusCode} /n ${response.body}');
+            'Failed to load stores: ${response.statusCode} /n ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error fetching posts: $e');
+      throw Exception('Error fetching stores: $e');
     }
   }
 
@@ -154,7 +154,7 @@ class StoreService {
             'Failed to load store name: ${response.statusCode} /n ${response.body}');
       }
     } catch (e) {
-      throw Exception('Error fetching posts: $e');
+      throw Exception('Error fetching store name: $e');
     }
   }
 }

@@ -94,8 +94,10 @@ class PostService {
       required String price,
       required DateTime expiringDate,
       List<String> tags = const [],
-      required String storeId}) async {
+      required String storeId,
+      required String productBarcode}) async {
     // Format the expiration date of the post
+
     String formattedDate =
         DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
     List<String> formattedTags =
@@ -116,9 +118,11 @@ class PostService {
           'description': description,
           'price': price,
           'images': images,
-          'expringDate': formattedDate,
+          'expringDate':
+              expiringDate != DateTime(2000, 1, 2) ? formattedDate : "",
           'tags': formattedTags,
           'storeId': storeId,
+          'productBarcode': productBarcode
         }),
       );
 
@@ -138,7 +142,8 @@ class PostService {
             expiringDate: expiringDate,
             id: id,
             userId: user,
-            storeId: storeId);
+            storeId: storeId,
+            productBarcode: productBarcode);
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
@@ -163,14 +168,15 @@ class PostService {
       required String price,
       required DateTime expiringDate,
       List<String> tags = const [],
-      required String storeId}) async {
+      required String storeId,
+      required String productBarcode}) async {
     try {
       // Get the existing post by ID
       Post? existingPost = await getPostById(id);
 
       // Tags formatted to uppercase to match enums in backend
-      List<String> formattedTags = tags.map((e) =>
-          e.replaceAll(' ', '_').toUpperCase()).toList();
+      List<String> formattedTags =
+          tags.map((e) => e.replaceAll(' ', '_').toUpperCase()).toList();
 
       if (existingPost != null) {
         // Update only if the existing post is not null
@@ -181,6 +187,7 @@ class PostService {
         existingPost.images = images;
         existingPost.tags = formattedTags;
         existingPost.storeId = storeId;
+        existingPost.productBarcode = productBarcode;
 
         // Send a PUT request to update the post on the server
         final response = await http.put(
@@ -328,11 +335,12 @@ class PostService {
       String price = json['price'] ?? '';
       DateTime expiringDate = json['expringDate'] != null
           ? DateTime.parse(json['expringDate'])
-          : DateTime.now();
+          : DateTime(2000, 1, 2);
       String id = json['id'] ?? '';
       String userId = json['user'] != null ? json['user']['id'] ?? '' : '';
       int useful = json['favourite'] ?? false;
       List<dynamic> tags = json['tags'];
+      String productBarcode = json['productBarcode'] ?? '';
 
       List<String> formattedTags = tags.map((e) {
         String substring = e.substring(1);
@@ -352,7 +360,8 @@ class PostService {
           useful: useful,
           //tags: tags.map((e) => e.toString()).toList()
           tags: formattedTags,
-          storeId: json['storeId'] ?? '');
+          storeId: json['storeId'] ?? '',
+          productBarcode: productBarcode);
     } catch (e) {
       throw Exception('Error parsing post: $e');
     }

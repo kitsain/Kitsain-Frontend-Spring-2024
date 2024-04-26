@@ -95,6 +95,7 @@ class _FeedViewState extends State<FeedView> {
       setState(() {
         postProvider.deletePost(post);
       });
+      refreshPosts();
     }
   }
 

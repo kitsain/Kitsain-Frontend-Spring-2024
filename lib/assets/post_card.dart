@@ -11,7 +11,10 @@ import 'package:kitsain_frontend_spring2023/services/store_service.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/comment_section_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
 import 'package:logger/logger.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'image_carousel.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// A card widget that displays a post.
 class PostCard extends StatefulWidget {
@@ -40,7 +43,7 @@ class _PostCardState extends State<PostCard> {
   late String userId;
   bool isOwner = false;
   String storeName = "";
-
+  String expiringDate = "";
   // Stuff for extended postcard
   Widget extendedPostCard = Container();
   bool isExtended = false;
@@ -52,6 +55,12 @@ class _PostCardState extends State<PostCard> {
     fetchUserId();
     fetchStoreName();
     //loadComments();
+    if (widget.post.expiringDate != DateTime(2000, 1, 2)) {
+      expiringDate =
+          'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}';
+    } else {
+      expiringDate = '';
+    }
   }
 
   Future<void> fetchStoreName() async {
@@ -132,7 +141,7 @@ class _PostCardState extends State<PostCard> {
   int _commentCount() {
     int count = 0;
     for (var element in widget.post.comments) {
-      if(element.message != 'null#800020') count++;
+      if (element.message != 'null#800020') count++;
     }
     return count;
   }
@@ -197,14 +206,20 @@ class _PostCardState extends State<PostCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Price: ${widget.post.price}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  if (expiringDate != '')
+                    Flexible(
+                      child: Text(
+                        expiringDate,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  if (widget.post.price != '')
+                    Flexible(
+                      child: Text(
+                        'Price: ${widget.post.price}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -268,30 +283,27 @@ class _PostCardState extends State<PostCard> {
                     ],
                   ),
                   OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        alignment: Alignment.centerRight
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (isExtended == false) {
-                            extendedPostCard = ExtendedPostCard(
-                                post: widget.post
-                            );
-                            isExtended = true;
-                            extendButtonIcon = const Icon(Icons.keyboard_arrow_up);
-                          } else {
-                            extendedPostCard = Container();
-                            isExtended = false;
-                            extendButtonIcon = const Icon(Icons.keyboard_arrow_down);
-                          }
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          const Text('Show details'),
-                          extendButtonIcon
-                        ],
-                      ),
+                    style: OutlinedButton.styleFrom(
+                        alignment: Alignment.centerRight),
+                    onPressed: () {
+                      setState(() {
+                        if (isExtended == false) {
+                          extendedPostCard =
+                              ExtendedPostCard(post: widget.post);
+                          isExtended = true;
+                          extendButtonIcon =
+                              const Icon(Icons.keyboard_arrow_up);
+                        } else {
+                          extendedPostCard = Container();
+                          isExtended = false;
+                          extendButtonIcon =
+                              const Icon(Icons.keyboard_arrow_down);
+                        }
+                      });
+                    },
+                    child: Row(
+                      children: [const Text('Show details'), extendButtonIcon],
+                    ),
                   ),
                 ],
               ),
@@ -307,57 +319,165 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-class ExtendedPostCard extends StatelessWidget {
+/// A widget that represents an extended post card.
+class ExtendedPostCard extends StatefulWidget {
   final Post post;
 
-  const ExtendedPostCard({
-    super.key,
-    required this.post
-  });
+  /// Constructs an [ExtendedPostCard] widget.
+  ///
+  /// The [post] parameter is required and represents the post data.
+  const ExtendedPostCard({super.key, required this.post});
+
+  @override
+  State<ExtendedPostCard> createState() => _ExtendedPostCardState();
+}
+
+class _ExtendedPostCardState extends State<ExtendedPostCard> {
+  /// Launches the URL based on the given [target].
+  ///
+  /// If the [target] is 'google', it launches a Google search URL with the product barcode.
+  /// If the [target] is 'openFoodFacts', it checks if the OpenFoodFacts app is installed.
+  /// If the app is installed, it launches the OpenFoodFacts URL with the product barcode.
+  /// If the app is not installed, it shows a dialog with options to open in the browser or download the app.
+  Future<void> _launchUrl(context, target) async {
+    if (target == 'google') {
+      final Uri url = Uri.parse(
+          'https://www.google.com/search?q=${widget.post.productBarcode}');
+      if (!await launchUrl(url)) {
+        throw Exception('Could not launch $url');
+      }
+    } else if (target == 'openFoodFacts') {
+      var isAppInstalledResult = await LaunchApp.isAppInstalled(
+          androidPackageName: 'org.openfoodfacts.scanner');
+      if (!isAppInstalledResult) {
+        return (showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Choose an option'),
+              content: const Text(
+                  'Do you want to download OpenFoodFacts app or open in the browser?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () async {
+                    final Uri url = Uri.parse(
+                        'https://world.openfoodfacts.org/product/${widget.post.productBarcode}');
+                    if (!await launchUrl(url)) {
+                      throw Exception('Could not launch $url');
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Browser'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    var openAppResult = await LaunchApp.openApp(
+                      androidPackageName: 'org.openfoodfacts.scanner',
+                      // openStore: false
+                    );
+                    print(
+                        'openAppResult => $openAppResult ${openAppResult.runtimeType}');
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Download app'),
+                ),
+              ],
+            );
+          },
+        ));
+      } else {
+        final Uri url = Uri.parse(
+            'https://world.openfoodfacts.org/product/${widget.post.productBarcode}');
+        if (!await launchUrl(url)) {
+          throw Exception('Could not launch $url');
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(
-          color: Colors.grey
-        ),
+        const Divider(color: Colors.grey),
         const SizedBox(height: 10),
         const Text(
-            'Description:',
-            style: TextStyle(
+          'Description:',
+          style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)
-          ),
+              color: Color.fromARGB(255, 29, 31, 33)),
         ),
         Padding(
             padding: const EdgeInsets.all(8),
-            child: Text(post.description)
-        ),
+            child: Text(widget.post.description)),
         const Text(
           'Tags:',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)
-          ),
+              color: Color.fromARGB(255, 29, 31, 33)),
         ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: Wrap(
-            children: List.generate(post.tags.length, (index) {
-              List<String> tags = post.tags;
-              return tags.isEmpty
-              ? const Text('NoTags')
-              : Padding(
-              padding: const EdgeInsets.symmetric(
-              horizontal: 2.0),
-              child: Tag(text: tags[index]));
-              })
-          ),
+              children: List.generate(widget.post.tags.length, (index) {
+            List<String> tags = widget.post.tags;
+            return tags.isEmpty
+                ? const Text('NoTags')
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Tag(text: tags[index]));
+          })),
         ),
+        if (widget.post.productBarcode != '')
+          Text(
+            "Product barcode: ${widget.post.productBarcode}",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Color.fromARGB(255, 29, 31, 33)),
+          ),
+        if (widget.post.productBarcode != '')
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: () async {
+                    _launchUrl(context, 'openFoodFacts');
+                  },
+                  child: SvgPicture.asset(
+                    'assets/icons/openFoodFactsIcon.svg', // Your SVG file path
+                    semanticsLabel: 'Icon',
+                    width: 24, // Adjust size as needed
+                    height: 24,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
+                  onPressed: () async {
+                    _launchUrl(context, 'google');
+                  },
+                  child: SvgPicture.asset(
+                    'assets/icons/googleIcon.svg', // Your SVG file path
+                    semanticsLabel: 'Icon',
+                    width: 24, // Adjust size as needed
+                    height: 24,
+                  ),
+                ),
+              ),
+            ],
+          )
       ],
     );
   }

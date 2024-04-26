@@ -35,9 +35,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   late List<String> _images = [];
   String _id = '';
-  String _title = '';
   String _description = '';
-  DateTime _expiringDate = DateTime.now();
+  DateTime _expiringDate = DateTime(2000, 1, 2);
   List<String> _myTags = [];
   List<File> tempImages = [];
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
@@ -46,10 +45,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   bool imageSelected = true;
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _barcodeFocusNode = FocusNode();
   final _priceFocusNode = FocusNode();
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _barcodeController = TextEditingController();
 
   String? _selectedCityValue;
   String? _selectedDistrictValue;
@@ -66,22 +67,26 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     if (widget.post != null) {
       _id = widget.post!.id;
       _images = List.from(widget.existingImages ?? []);
-      _title = widget.post!.title;
+      _titleController.text = widget.post!.title;
       _description = widget.post!.description;
       _priceController.text = widget.post!.price;
       _expiringDate = widget.post!.expiringDate;
-      _dateController.text = _dateFormat.format(_expiringDate);
+      _dateController.text = _expiringDate != DateTime(2000, 1, 2)
+          ? _dateFormat.format(_expiringDate)
+          : '';
       _myTags = widget.post!.tags;
       _selectedStoreValue = widget.post!.storeId;
+      _barcodeController.text = widget.post!.productBarcode;
     } else {
       _images = [];
-      _title = '';
+      _titleController.text = '';
       _description = '';
       _priceController.text = '';
-      _expiringDate = DateTime.now();
-      _dateController.text = _dateFormat.format(_expiringDate);
+      _expiringDate = DateTime(2000, 1, 2);
+      _dateController.text = '';
       _myTags = [];
       _selectedStoreValue = null;
+      _barcodeController.text = '';
     }
     _priceFocusNode.addListener(() {
       if (!_priceFocusNode.hasFocus) {
@@ -141,11 +146,21 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _expiringDate,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _expiringDate) {
+      final DateTime now = DateTime.now();
+      final DateTime yesterday = DateTime(now.year, now.month, now.day);
+      if (picked.isBefore(yesterday)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expiration date cannot be in the past.'),
+          ),
+        );
+        return;
+      }
       setState(() {
         _expiringDate = picked;
         _dateController.text = _dateFormat.format(_expiringDate);
@@ -165,22 +180,24 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
         return await _postService.updatePost(
             id: _id,
             images: _images,
-            title: _title,
+            title: _titleController.text,
             description: _description,
             price: _priceController.text,
             expiringDate: _expiringDate,
             tags: _myTags,
-            storeId: _selectedStoreValue ?? "");
+            storeId: _selectedStoreValue ?? "",
+            productBarcode: _barcodeController.text);
       } else {
         // Create a new post
         return await _postService.createPost(
             images: _images,
-            title: _title,
+            title: _titleController.text,
             description: _description,
             price: _priceController.text,
             expiringDate: _expiringDate,
             tags: _myTags,
-            storeId: _selectedStoreValue ?? "");
+            storeId: _selectedStoreValue ?? "",
+            productBarcode: _barcodeController.text);
       }
     } catch (error) {
       // Handle errors
@@ -203,18 +220,16 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     for (Barcode barcode in barcodes) {
       if (barcode.rawValue != null) {
         final String rawValue = barcode.rawValue!;
-        //logger.i('Barcode raw value: $rawValue');
+
         OpenFoodAPIConfiguration.userAgent = UserAgent(
           name: 'Kitsain',
         );
 
         try {
+          _barcodeController.text = rawValue;
           var product = await getFromJson(rawValue);
 
-          if (_titleController.text.isEmpty) {
-            _titleController.text = product!.productName ?? '';
-            _title = product.productName ?? '';
-          }
+          _titleController.text = product!.productName ?? '';
         } catch (e) {
           // Handle any errors that occur during fetching product information
           logger.e('Error fetching product information: $e');
@@ -283,7 +298,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     }
 
     setState(() {
-      logger.i('Store: ');
       cities = allCities;
       dataReady = true;
     });
@@ -301,7 +315,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   @override
   Widget build(BuildContext context) {
-    _titleController.text = _title;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
@@ -373,7 +386,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         ),
                         onChanged: (value) {
                           setState(() {
-                            _title = value;
+                            _titleController.text = value;
                           });
                         },
                         validator: (value) {
@@ -422,6 +435,18 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           labelText: 'Select expiring date',
                           suffixIcon: Icon(Icons.calendar_today),
                         ),
+                      ),
+                      TextFormField(
+                        focusNode: _barcodeFocusNode,
+                        controller: _barcodeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Product barcode',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _barcodeController.text = value;
+                          });
+                        },
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -520,20 +545,29 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           ),
                         ],
                       ),
-                      DropdownButton<String>(
-                        value: _selectedStoreValue,
-                        hint: const Text('Select Store'),
-                        items: stores.map((Store store) {
-                          return DropdownMenuItem<String>(
-                            value: store.storeId,
-                            child: Text(store.storeName),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedStoreValue = newValue!;
-                          });
-                        },
+                      SizedBox(
+                        width: 240,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedStoreValue,
+                          hint: const Text('Select Store'),
+                          items: stores.map((Store store) {
+                            return DropdownMenuItem<String>(
+                              value: store.storeId,
+                              child: Text(store.storeName),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedStoreValue = newValue!;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter city, district and store";
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () async {
