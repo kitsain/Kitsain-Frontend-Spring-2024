@@ -15,6 +15,7 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_selec
 import 'package:logger/logger.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import '../../../assets/tag.dart';
 
@@ -104,39 +105,55 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     fetchCityData();
   }
 
-  /// Function for taking an image with camera.
-  Future<void> _pickImageFromCamera() async {
+  /// Picks an image from either the camera or the gallery and performs image cropping.
+  ///
+  /// The [source] parameter determines whether the image is picked from the camera or the gallery.
+  ///
+  /// If the image is not null, it is passed to the [fetchBarCode] function to fetch the barcode from the image.
+  ///
+  /// The UI settings for the cropping screen are customized using [AndroidUiSettings].
+  Future<void> _pickImage(source) async {
+    var pickedImage;
+    CroppedFile? croppedFile;
     try {
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.camera);
-      if (pickedImage == null) return;
-      fetchBarCode(File(pickedImage.path));
-      tempImages.add(File(pickedImage.path));
-      setState(() {
-        imageSelected = tempImages.isNotEmpty;
-      });
-    } on PlatformException catch (e) {
-      debugPrint('Failed to pick Image: $e');
-    }
-  }
-
-  /// Function for selecting a picture from gallery.
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final pickedImage = await ImagePicker().pickImage(
-        imageQuality: 100,
-        maxHeight: 1000,
-        maxWidth: 1000,
-        source: ImageSource.gallery,
-      );
+      if (source == 'camera') {
+        pickedImage = await ImagePicker().pickImage(source: ImageSource.camera);
+        if (pickedImage == null) return;
+      } else {
+        pickedImage = await ImagePicker().pickImage(
+          imageQuality: 100,
+          maxHeight: 1000,
+          maxWidth: 1000,
+          source: ImageSource.gallery,
+        );
+      }
 
       if (pickedImage != null) {
         fetchBarCode(File(pickedImage.path));
-        tempImages.add(File(pickedImage.path));
-        setState(() {
-          imageSelected = tempImages.isNotEmpty;
-        });
+        croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedImage.path,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: const Color.fromARGB(255, 255, 255, 255),
+              toolbarWidgetColor: const Color.fromARGB(255, 0, 0, 0),
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: true,
+              hideBottomControls: true,
+            ),
+          ],
+        );
       }
+
+      fetchBarCode(File(pickedImage.path));
+
+      tempImages.add(File(croppedFile!.path));
+      setState(() {
+        imageSelected = tempImages.isNotEmpty;
+      });
     } on PlatformException catch (e) {
       debugPrint('Failed to pick Image: $e');
     }
@@ -357,7 +374,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                           child: const Text('Camera'),
                                           onPressed: () {
                                             Navigator.of(context).pop();
-                                            _pickImageFromCamera();
+                                            _pickImage('camera');
                                           },
                                         ),
                                         const SizedBox(height: 10),
@@ -365,7 +382,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                           child: const Text('Gallery'),
                                           onPressed: () {
                                             Navigator.of(context).pop();
-                                            _pickImageFromGallery();
+                                            _pickImage('gallery');
                                           },
                                         ),
                                       ],

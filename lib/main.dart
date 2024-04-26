@@ -16,10 +16,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  // Print out environment variables
-  print('WEB_APIKEY: ${dotenv.env['WEB_APIKEY']}');
-  print('ANDROID_APIKEY: ${dotenv.env['ANDROID_APIKEY']}');
-  print('IOS_APIKEY: ${dotenv.env['IOS_APIKEY']}');
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
