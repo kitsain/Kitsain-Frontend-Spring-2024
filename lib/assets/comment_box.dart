@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
 /// Class for individual comment boxes.
 ///
@@ -70,7 +71,10 @@ class CommentBox extends StatelessWidget {
                       ],
                     )),
                 const SizedBox(height: 15),
-                Align(alignment: Alignment.centerLeft, child: Text(comment.toString())),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(comment.toString(),
+                        style: AppTypography.postCommentText)),
               ],
             ),
           ),
