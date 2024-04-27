@@ -146,6 +146,22 @@ class _FeedViewState extends State<FeedView> {
       });
     }
   }
+  
+  void _sortPosts(String order) {
+    List<Post> temp = _posts;
+    if (order == 'exp_OLDEST') {
+      temp.sort((a,b){return a.expiringDate.compareTo(b.expiringDate);});
+    } else if (order == 'exp_NEWEST') {
+      temp.sort((a,b){return b.expiringDate.compareTo(a.expiringDate);});
+    } else if (order == 'posted_OLDEST'){
+      temp = postProvider.posts.reversed.toList();
+    } else if (order == "posted_NEWEST" || order == 'default') {
+      temp = postProvider.posts;
+    }
+    setState(() {
+      _posts = temp;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,16 +209,35 @@ class _FeedViewState extends State<FeedView> {
                       fontWeight: FontWeight.bold
                     ),
                   ),
-                  IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (buildContext) {
-                              return Container();
-                            });
-                      },
-                      icon: const Icon(Icons.filter_list)
-                  )
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.filter_list),
+                    onSelected: (value) {
+                      _sortPosts(value);
+                    },
+                    itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'exp_OLDEST',
+                        child: Text('Expiry date (closest first)'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'exp_NEWEST',
+                        child: Text('Expiry date (farthest first)'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'posted_OLDEST',
+                        child: Text('Date posted (oldest)'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'posted_NEWEST',
+                        child: Text('Date posted (newest)'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'default',
+                        child: Text('Default'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
