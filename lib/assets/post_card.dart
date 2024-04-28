@@ -65,6 +65,7 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> fetchStoreName() async {
+    if (!mounted) return; // Check if widget is still mounted
     if (widget.post.storeId == '') {
       setState(() {
         storeName = 'No store';
@@ -78,6 +79,7 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> fetchUserId() async {
+    if (!mounted) return; // Check if widget is still mounted
     final fetchedUserId = await postService.getUserId();
     setState(() {
       userId = fetchedUserId;

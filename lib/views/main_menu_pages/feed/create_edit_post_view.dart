@@ -24,7 +24,7 @@ class CreateEditPostView extends StatefulWidget {
   final Post? post;
   final List<String>? existingImages;
 
-  const CreateEditPostView({super.key, this.post, this.existingImages});
+  const CreateEditPostView({Key? key, this.post, this.existingImages}) : super(key: key);
 
   @override
   _CreateEditPostViewState createState() => _CreateEditPostViewState();
@@ -352,7 +352,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                       EditImageWidget(
                         images: tempImages,
                         stringImages: widget.existingImages ?? [],
-                        feedImages: false,
+                        feedImages: true,
                       ),
                       if ((widget.existingImages?.isEmpty ?? true) &&
                           !imageSelected)
@@ -453,6 +453,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                 .format(value);
                             setState(() {});
                           }
+                          _priceFocusNode.unfocus();
                         },
                       ),
                       TextFormField(
