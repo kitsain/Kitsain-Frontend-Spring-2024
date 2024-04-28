@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kitsain_frontend_spring2023/app_typography.dart';
 import 'package:kitsain_frontend_spring2023/models/comment.dart';
 import 'package:kitsain_frontend_spring2023/services/comment_service.dart';
 import 'package:kitsain_frontend_spring2023/assets/comment_box.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 
 /// TODO:
 /// - Connect user information to comment box; an identifier
@@ -82,7 +84,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   void _refreshComments() async {
     try {
       List<Comment> newComments =
-      await commentService.getComments(widget.postID);
+          await commentService.getComments(widget.postID);
       setState(() {
         _tempComments.clear();
         _tempComments.addAll(newComments);
@@ -99,10 +101,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
     //commentService.deleteComment(_tempComments[index].Id, _currUser);
     _tempComments[index].message = 'null#800020';
     commentService.putComment(
-        _tempComments[index].id,
-        _currUser,
-        widget.postID
-    );
+        _tempComments[index].id, _currUser, widget.postID);
   }
 
   /// Formats comment for modal bottom sheet.
@@ -121,7 +120,8 @@ class _CommentSectionViewState extends State<CommentSectionView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
+        title: Text(AppLocalizations.of(context)!.commentsViewTitle,
+            style: AppTypography.heading4),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -168,7 +168,11 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                         textColor: Colors.red,
                                         iconColor: Colors.red,
                                         leading: const Icon(Icons.delete),
-                                        title: const Text('Remove comment'),
+                                        title: Text(
+                                            AppLocalizations.of(context)!
+                                                .commentsViewRemoveComment,
+                                            style: AppTypography
+                                                .postCommentTitles),
                                         onTap: () {
                                           setState(() {
                                             _removeComment(index);
@@ -178,7 +182,11 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                       ),
                                       ListTile(
                                         leading: const Icon(Icons.edit),
-                                        title: const Text('Edit'),
+                                        title: Text(
+                                            AppLocalizations.of(context)!
+                                                .commentsViewEditComment,
+                                            style: AppTypography
+                                                .postCommentTitles),
                                         onTap: () {
                                           // TODO: logic for editing comment
                                         },
@@ -198,7 +206,8 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                     Text(_formatComment(index)),
                                     ListTile(
                                       leading: const Icon(Icons.reply),
-                                      title: const Text('Reply to comment'),
+                                      title: Text(AppLocalizations.of(context)!
+                                          .commentsViewReply),
                                       onTap: () {
                                         // TODO: reply logic
                                       },
@@ -210,13 +219,13 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                       }
                     },
                     child: _tempComments[index].message != 'null#800020'
-                    ? CommentBox(
-                      comment: _tempComments[index].message,
-                      author:
-                          'user ${(_users.indexOf(_tempComments[index].author) + 1)}',
-                      date: _tempComments[index].date,
-                    )
-                    : Container(),
+                        ? CommentBox(
+                            comment: _tempComments[index].message,
+                            author:
+                                'user ${(_users.indexOf(_tempComments[index].author) + 1)}',
+                            date: _tempComments[index].date,
+                          )
+                        : Container(),
                   );
                 },
               ),
@@ -231,7 +240,11 @@ class _CommentSectionViewState extends State<CommentSectionView> {
             Flexible(
               child: TextField(
                 controller: _textFieldController,
-                decoration: const InputDecoration(labelText: 'New comment...'),
+                decoration: InputDecoration(
+                  labelText:
+                      AppLocalizations.of(context)!.commentsViewNewComment,
+                  labelStyle: AppTypography.postCommentTitles,
+                ),
               ),
             ),
             IconButton(

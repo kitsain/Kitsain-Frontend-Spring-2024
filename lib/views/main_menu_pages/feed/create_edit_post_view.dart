@@ -15,8 +15,10 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_selec
 import 'package:logger/logger.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
-
+import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import '../../../assets/tag.dart';
+import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
@@ -104,39 +106,55 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     fetchCityData();
   }
 
-  /// Function for taking an image with camera.
-  Future<void> _pickImageFromCamera() async {
+  /// Picks an image from either the camera or the gallery and performs image cropping.
+  ///
+  /// The [source] parameter determines whether the image is picked from the camera or the gallery.
+  ///
+  /// If the image is not null, it is passed to the [fetchBarCode] function to fetch the barcode from the image.
+  ///
+  /// The UI settings for the cropping screen are customized using [AndroidUiSettings].
+  Future<void> _pickImage(source) async {
+    var pickedImage;
+    CroppedFile? croppedFile;
     try {
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.camera);
-      if (pickedImage == null) return;
-      fetchBarCode(File(pickedImage.path));
-      tempImages.add(File(pickedImage.path));
-      setState(() {
-        imageSelected = tempImages.isNotEmpty;
-      });
-    } on PlatformException catch (e) {
-      debugPrint('Failed to pick Image: $e');
-    }
-  }
-
-  /// Function for selecting a picture from gallery.
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final pickedImage = await ImagePicker().pickImage(
-        imageQuality: 100,
-        maxHeight: 1000,
-        maxWidth: 1000,
-        source: ImageSource.gallery,
-      );
+      if (source == 'camera') {
+        pickedImage = await ImagePicker().pickImage(source: ImageSource.camera);
+        if (pickedImage == null) return;
+      } else {
+        pickedImage = await ImagePicker().pickImage(
+          imageQuality: 100,
+          maxHeight: 1000,
+          maxWidth: 1000,
+          source: ImageSource.gallery,
+        );
+      }
 
       if (pickedImage != null) {
         fetchBarCode(File(pickedImage.path));
-        tempImages.add(File(pickedImage.path));
-        setState(() {
-          imageSelected = tempImages.isNotEmpty;
-        });
+        croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedImage.path,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: const Color.fromARGB(255, 255, 255, 255),
+              toolbarWidgetColor: const Color.fromARGB(255, 0, 0, 0),
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: true,
+              hideBottomControls: true,
+            ),
+          ],
+        );
       }
+
+      fetchBarCode(File(pickedImage.path));
+
+      tempImages.add(File(croppedFile!.path));
+      setState(() {
+        imageSelected = tempImages.isNotEmpty;
+      });
     } on PlatformException catch (e) {
       debugPrint('Failed to pick Image: $e');
     }
@@ -155,8 +173,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       final DateTime yesterday = DateTime(now.year, now.month, now.day);
       if (picked.isBefore(yesterday)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expiration date cannot be in the past.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.expiringDatePast),
           ),
         );
         return;
@@ -317,8 +335,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.post != null ? 'Edit Post' : 'Create Post'),
-      ),
+          title: Text(
+        widget.post != null
+            ? AppLocalizations.of(context)!.editPostAppBarTitle
+            : AppLocalizations.of(context)!.createPostAppBarTitle,
+        style: AppTypography.heading4,
+      )),
       body: SingleChildScrollView(
         child: dataReady
             ? Form(
@@ -330,59 +352,63 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                       EditImageWidget(
                         images: tempImages,
                         stringImages: widget.existingImages ?? [],
-                        feedImages: false,
+                        feedImages: true,
                       ),
                       if ((widget.existingImages?.isEmpty ?? true) &&
                           !imageSelected)
-                        const Text(
-                          'Select at least one image to create a post.',
-                          style: TextStyle(color: Colors.red),
+                        Text(
+                          AppLocalizations.of(context)!.imageValidation,
+                          style: const TextStyle(
+                              color: Color.fromARGB(255, 195, 47, 36)),
                         ),
                       const SizedBox(height: 5),
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: ElevatedButton(
                           onPressed: () {
-                            showDialog(
+                            showModalBottomSheet(
                               context: context,
                               builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Select Image Source'),
-                                  actions: <Widget>[
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        TextButton(
-                                          child: const Text('Camera'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            _pickImageFromCamera();
-                                          },
-                                        ),
-                                        const SizedBox(height: 10),
-                                        TextButton(
-                                          child: const Text('Gallery'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            _pickImageFromGallery();
-                                          },
-                                        ),
-                                      ],
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    ListTile(
+                                      leading: const Icon(Icons.camera_alt),
+                                      title: Text(
+                                          AppLocalizations.of(context)!
+                                              .cameraSelection,
+                                          style: AppTypography.createPostHints),
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        _pickImage('camera');
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.image),
+                                      title: Text(
+                                          AppLocalizations.of(context)!
+                                              .gallerySelection,
+                                          style: AppTypography.createPostHints),
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        _pickImage('gallery');
+                                      },
                                     ),
                                   ],
                                 );
                               },
                             );
                           },
-                          child: const Text('Add Image'),
+                          child: Text(
+                              AppLocalizations.of(context)!.addImageButton),
                         ),
                       ),
                       TextFormField(
                         focusNode: _titleFocusNode,
                         controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Title',
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.titleHint,
+                          labelStyle: AppTypography.createPostHints,
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -391,16 +417,18 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "Please enter title";
+                            return AppLocalizations.of(context)!
+                                .titleValidation;
                           }
                           return null;
                         },
                       ),
                       TextFormField(
                         focusNode: _descriptionFocusNode,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                        ),
+                        decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)!.descriptionHint,
+                            labelStyle: AppTypography.createPostHints),
                         initialValue: _description,
                         onChanged: (value) {
                           setState(() {
@@ -412,9 +440,9 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         controller: _priceController,
                         focusNode: _priceFocusNode,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Price',
-                        ),
+                        decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.priceHint,
+                            labelStyle: AppTypography.createPostHints),
                         onEditingComplete: () {
                           final String text =
                               _priceController.text.replaceAll(',', '.');
@@ -425,23 +453,26 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                 .format(value);
                             setState(() {});
                           }
+                          _priceFocusNode.unfocus();
                         },
                       ),
                       TextFormField(
                         controller: _dateController,
                         readOnly: true,
                         onTap: () => _selectDate(context),
-                        decoration: const InputDecoration(
-                          labelText: 'Select expiring date',
-                          suffixIcon: Icon(Icons.calendar_today),
+                        decoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.expiringDateHint,
+                          labelStyle: AppTypography.createPostHints,
+                          suffixIcon: const Icon(Icons.calendar_today),
                         ),
                       ),
                       TextFormField(
                         focusNode: _barcodeFocusNode,
                         controller: _barcodeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Product barcode',
-                        ),
+                        decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.barcode,
+                            labelStyle: AppTypography.createPostHints),
                         onChanged: (value) {
                           setState(() {
                             _barcodeController.text = value;
@@ -452,7 +483,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Tags'),
+                          Text(
+                            AppLocalizations.of(context)!.tagsHint,
+                            style: AppTypography.createPostHints,
+                          ),
                           ElevatedButton(
                             onPressed: () {
                               showModalBottomSheet(
@@ -468,7 +502,9 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                 print(_myTags);
                               });
                             },
-                            child: const Text('Set tags'),
+                            child: Text(
+                                AppLocalizations.of(context)!.setTagButton,
+                                style: AppTypography.createPostHints),
                           ),
                         ],
                       ),
@@ -491,11 +527,13 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         children: [
                           DropdownButton<String>(
                             value: _selectedCityValue,
-                            hint: const Text('City'),
+                            hint: Text(AppLocalizations.of(context)!.cityHint,
+                                style: AppTypography.createPostHints),
                             items: cities.map((City city) {
                               return DropdownMenuItem<String>(
                                 value: city.cityId,
-                                child: Text(city.cityName),
+                                child: Text(city.cityName,
+                                    style: AppTypography.createPostHints),
                               );
                             }).toList(),
                             onChanged: (newValue) async {
@@ -522,11 +560,14 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           ),
                           DropdownButton<String>(
                             value: _selectedDistrictValue,
-                            hint: const Text('District'),
+                            hint: Text(
+                                AppLocalizations.of(context)!.districtHint,
+                                style: AppTypography.createPostHints),
                             items: districts.map((District district) {
                               return DropdownMenuItem<String>(
                                 value: district.districtId,
-                                child: Text(district.districtName),
+                                child: Text(district.districtName,
+                                    style: AppTypography.createPostHints),
                               );
                             }).toList(),
                             onChanged: (newValue) async {
@@ -549,11 +590,13 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         width: 240,
                         child: DropdownButtonFormField<String>(
                           value: _selectedStoreValue,
-                          hint: const Text('Select Store'),
+                          hint: Text(AppLocalizations.of(context)!.storeHint,
+                              style: AppTypography.createPostHints),
                           items: stores.map((Store store) {
                             return DropdownMenuItem<String>(
                               value: store.storeId,
-                              child: Text(store.storeName),
+                              child: Text(store.storeName,
+                                  style: AppTypography.createPostHints),
                             );
                           }).toList(),
                           onChanged: (newValue) {
@@ -563,7 +606,8 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Please enter city, district and store";
+                              return AppLocalizations.of(context)!
+                                  .locationValidation;
                             }
                             return null;
                           },
@@ -584,7 +628,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                             print(e);
                           }
                         },
-                        child: Text(widget.post != null ? 'Update' : 'Create'),
+                        child: Text(
+                            widget.post != null
+                                ? AppLocalizations.of(context)!.updatePostButton
+                                : AppLocalizations.of(context)!
+                                    .createPostButton,
+                            style: AppTypography.createPostHints),
                       ),
                     ],
                   ),

@@ -24,7 +24,7 @@ class AppTypography {
   );
   static const TextStyle heading4 = TextStyle(
     fontFamily: 'GillSans',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: FontWeight.w500,
     height: 1.20,
     letterSpacing: 0,
@@ -59,5 +59,40 @@ class AppTypography {
   );
   static TextStyle whiteHeading2 = heading2.copyWith(
     color: AppColors.main2,
+  );
+  static const TextStyle postCardTitles = TextStyle(
+    fontFamily: 'GillSans',
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    letterSpacing: 0,
+  );
+  static const TextStyle postCardValues = TextStyle(
+    fontFamily: 'GillSans',
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: 1.375,
+    letterSpacing: 0,
+  );
+  static const TextStyle createPostHints = TextStyle(
+    fontFamily: 'GillSans',
+    fontSize: 17,
+    fontWeight: FontWeight.w500,
+    height: 1.17,
+    letterSpacing: 0,
+  );
+  static const TextStyle postCommentTitles = TextStyle(
+    fontFamily: 'GillSans',
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    height: 1.17,
+    letterSpacing: 0,
+  );
+  static const TextStyle postCommentText = TextStyle(
+    fontFamily: 'GillSans',
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    height: 1.17,
+    letterSpacing: 0,
   );
 }

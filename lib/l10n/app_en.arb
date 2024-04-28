@@ -39,14 +39,6 @@
     "@historyScreenTopBarTitle": {
             "description": "Name to describe history screen top bar title"
     },
-    "feedTabLabel": "FEED",
-    "@feedTabLabel": {
-       "description": "Bottom navigation tab bar label for feed"
-    },
-    "feedScreen": "DISCOUNT \u200e\n\u200e FEED",
-    "@feedScreen": {
-        "description": "Name to describe feed screen"
-    },
     "addNewItem": "Add new item",
     "@addNewItem": {
         "description": "Tooltip for creating new recipe"
@@ -78,5 +70,153 @@
     "shoppingListItem": "shopping list",
     "@shoppingListItem": {
         "description": "Name to show on the demo shopping list items"
+    },
+
+
+    "feedScreen": "DISCOUNT \u200e\n\u200e FEED",
+    "@feedScreen": {
+        "description": "Name to describe feed screen"
+    },
+    "feedTabLabel": "FEED",
+    "@feedTabLabel": {
+       "description": "Bottom navigation tab bar label for feed"
+    },
+
+    "postCardExpiringDate": "Expiring date:",
+    "@postCardExpiringDate": {
+        "description": "Expiring date text for posts"
+    },
+    "postCardPrice": "Price:",
+    "@postCardPrice": {
+        "description": "Price text for posts"
+    },
+    "postCardLocation": "Location:",
+    "@postCardLocation": {
+        "description": "Location text for posts"
+    },
+    "postCardDetailsButton": "Show Details",
+    "@postCardDetailsButton": {
+        "description": "Text for posts details button"
+    },
+    "postCardDescription": "Description:",
+    "@postCardDescription": {
+        "description": "Description text for posts"
+    },
+    "postCardTags": "Tags:",
+    "@postCardTags": {
+        "description": "Tags text for posts"
+    },
+    "postCardBarcode": "Product barcode:",
+    "@postCardBarcode": {
+        "description": "Barcode text for posts"
+    },
+    "postCardEditButton": "Edit",
+    "@postCardEditButton": {
+        "description": "Edit button text for posts"
+    },
+    "postCardRemoveButton": "Remove",
+    "@postCardRemoveButton": {
+        "description": "Remove button text for posts"
+    },
+    "commentsViewTitle": "Comments",
+    "@postCardCommentsViewTitle": {
+        "description": "Comments view title for posts"
+    },   
+    "commentsViewNewComment": "New comment...",
+    "@postCardNewComment": {
+        "description": "Comments view new comment text"
+    },   
+    "commentsViewReply": "Reply to comment",
+    "@commentsViewReply": {
+        "description": "Comments view reply text"
+    },
+    "commentsViewEditComment": "Edit",
+    "@commentsViewEditComment": {
+        "description": "Comments view edit comment text"
+    },   
+    "commentsViewRemoveComment": "Remove",
+    "@commentsViewRemoveComment": {
+        "description": "Comments view remove comment text"
+    },   
+
+    "createPostAppBarTitle": "Create Post",
+    "@createPostAppBarTitle": {
+        "description": "App bar title for creating post"
+    },
+    "editPostAppBarTitle": "Edit Post",
+    "@editPostAppBarTitle": {
+        "description": "App bar title for editing post"
+    },
+    "titleHint": "Title",
+    "@titleHint": {
+        "description": "Hint text for the title field"
+    },
+    "descriptionHint": "Description",
+    "@descriptionHint": {
+        "description": "Hint text for the description field"
+    },
+    "priceHint": "Price",
+    "@priceHint": {
+        "description": "Hint text for the price field"
+    },
+    "expiringDateHint": "Expiring date",
+    "@expiringDateHint": {
+        "description": "Hint text for the expiring date field"
+    },
+    "tagsHint": "Tags",
+    "@tagsHint": {
+        "description": "Hint text for the tags field"
+    },
+    "cityHint": "City",
+    "@cityHint": {
+        "description": "Hint text for the city field"
+    },
+    "districtHint": "District",
+    "@districtHint": {
+        "description": "Hint text for the district field"
+    },
+    "storeHint": "Store",
+    "@storeHint": {
+        "description": "Hint text for the store field"
+    },
+    "addImageButton": "Add Image",
+    "@addImageButton": {
+        "description": "Text for image adding button"
+    },
+    "createPostButton": "Create",
+    "@createPostButton": {
+        "description": "Text for create post button"
+    },
+    "updatePostButton": "Update",
+    "@updatePostButton": {
+        "description": "Text for post updating button"
+    },
+    "setTagButton": "Set tags",
+    "@setTagButton": {
+        "description": "Text for set tags button"
+    },
+    "expiringDatePast": "Expiration date cannot be in the past.",
+    "@expiringDatePast": {
+        "description": "Snackbar text if user tries to set date from the past"
+    },
+    "titleValidation": "Please enter title",
+    "@titleValidation": {
+        "description": "Validation for title"
+    },
+    "locationValidation": "Please enter city, district and store.",
+    "@locationValidation": {
+        "description": "Validation for location"
+    },
+    "imageValidation": "Select at least one image to create a post.",
+    "@imageValidation": {
+        "description": "Validation for images"
+    },
+    "cameraSelection": "Camera",
+    "@cameraSelection": {
+        "description": "Text for selecting camera for image source"
+    },
+    "gallerySelection": "Gallery",
+    "@gallerySelection": {
+        "description": "Text for selecting gallery for image source"
     }
 }

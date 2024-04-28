@@ -15,6 +15,8 @@ import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'image_carousel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
+import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
 /// A card widget that displays a post.
 class PostCard extends StatefulWidget {
@@ -56,14 +58,14 @@ class _PostCardState extends State<PostCard> {
     fetchStoreName();
     //loadComments();
     if (widget.post.expiringDate != DateTime(2000, 1, 2)) {
-      expiringDate =
-          'Expiring date: ${DateFormat('dd.MM.yyyy').format(widget.post.expiringDate)}';
+      expiringDate = DateFormat('dd.MM.yyyy').format(widget.post.expiringDate);
     } else {
       expiringDate = '';
     }
   }
 
   Future<void> fetchStoreName() async {
+    if (!mounted) return; // Check if widget is still mounted
     if (widget.post.storeId == '') {
       setState(() {
         storeName = 'No store';
@@ -77,6 +79,7 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> fetchUserId() async {
+    if (!mounted) return; // Check if widget is still mounted
     final fetchedUserId = await postService.getUserId();
     setState(() {
       userId = fetchedUserId;
@@ -160,10 +163,7 @@ class _PostCardState extends State<PostCard> {
               children: [
                 Text(
                   widget.post.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: AppTypography.heading4,
                 ),
                 if (isOwner)
                   PopupMenuButton<String>(
@@ -177,13 +177,17 @@ class _PostCardState extends State<PostCard> {
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'edit',
-                        child: Text('Edit'),
+                        child: Text(
+                            AppLocalizations.of(context)!.postCardEditButton,
+                            style: AppTypography.paragraph),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'remove',
-                        child: Text('Remove'),
+                        child: Text(
+                            AppLocalizations.of(context)!.postCardRemoveButton,
+                            style: AppTypography.paragraph),
                       ),
                     ],
                   ),
@@ -208,37 +212,40 @@ class _PostCardState extends State<PostCard> {
                 children: [
                   if (expiringDate != '')
                     Flexible(
-                      child: Text(
-                        expiringDate,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      child: Row(
+                        children: [
+                          Text(
+                              "${AppLocalizations.of(context)!.postCardExpiringDate} ",
+                              style: AppTypography.postCardTitles),
+                          Text(expiringDate,
+                              style: AppTypography.postCardValues),
+                        ],
                       ),
                     ),
                   if (widget.post.price != '')
                     Flexible(
-                      child: Text(
-                        'Price: ${widget.post.price}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                              '${AppLocalizations.of(context)!.postCardPrice} ',
+                              style: AppTypography.postCardTitles),
+                          Text(widget.post.price,
+                              style: AppTypography.postCardValues),
+                        ],
                       ),
                     ),
                 ],
               ),
             ),
-            /*Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(
-                widget.post.description,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-            const SizedBox(height: 8),*/
             Padding(
-              padding: const EdgeInsets.only(left: 4.0),
-              child: Text(
-                'Location: $storeName',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Color.fromARGB(255, 29, 31, 33)),
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                children: [
+                  Text('${AppLocalizations.of(context)!.postCardLocation} ',
+                      style: AppTypography.postCardTitles),
+                  Text(storeName, style: AppTypography.postCardValues),
+                ],
               ),
             ),
             Padding(
@@ -302,7 +309,12 @@ class _PostCardState extends State<PostCard> {
                       });
                     },
                     child: Row(
-                      children: [const Text('Show details'), extendButtonIcon],
+                      children: [
+                        Text(
+                            AppLocalizations.of(context)!.postCardDetailsButton,
+                            style: AppTypography.postCardTitles),
+                        extendButtonIcon
+                      ],
                     ),
                   ),
                 ],
@@ -402,23 +414,14 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
       children: [
         const Divider(color: Colors.grey),
         const SizedBox(height: 10),
-        const Text(
-          'Description:',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)),
-        ),
+        Text(AppLocalizations.of(context)!.postCardDescription,
+            style: AppTypography.postCardTitles),
         Padding(
             padding: const EdgeInsets.all(8),
-            child: Text(widget.post.description)),
-        const Text(
-          'Tags:',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color.fromARGB(255, 29, 31, 33)),
-        ),
+            child: Text(widget.post.description,
+                style: AppTypography.postCardValues)),
+        Text(AppLocalizations.of(context)!.postCardTags,
+            style: AppTypography.postCardTitles),
         Padding(
           padding: const EdgeInsets.all(8),
           child: Wrap(
@@ -432,12 +435,13 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
           })),
         ),
         if (widget.post.productBarcode != '')
-          Text(
-            "Product barcode: ${widget.post.productBarcode}",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: Color.fromARGB(255, 29, 31, 33)),
+          Row(
+            children: [
+              Text("${AppLocalizations.of(context)!.postCardBarcode} ",
+                  style: AppTypography.postCardTitles),
+              Text(widget.post.productBarcode,
+                  style: AppTypography.postCardValues),
+            ],
           ),
         if (widget.post.productBarcode != '')
           Row(
