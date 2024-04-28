@@ -24,7 +24,7 @@ class CreateEditPostView extends StatefulWidget {
   final Post? post;
   final List<String>? existingImages;
 
-  const CreateEditPostView({Key? key, this.post, this.existingImages}) : super(key: key);
+  const CreateEditPostView({super.key, this.post, this.existingImages});
 
   @override
   _CreateEditPostViewState createState() => _CreateEditPostViewState();
