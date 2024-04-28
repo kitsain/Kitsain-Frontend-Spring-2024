@@ -126,7 +126,7 @@ class _FeedViewState extends State<FeedView> {
   void filterPosts(){
     List<Post> filteredPosts = [];
     List<String?> tags = _filtering[0];
-    List<String?> location = _filtering[1];
+   // List<String?> location = _filtering[1];
 
     isFiltering = true;
     for (Post post in postProvider.posts) {
