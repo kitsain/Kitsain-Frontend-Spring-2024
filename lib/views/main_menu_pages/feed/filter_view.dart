@@ -20,6 +20,7 @@ class FilterView extends StatefulWidget {
 class _FilterViewState extends State<FilterView> {
   var logger = Logger(printer: PrettyPrinter());
   final StoreService _storeService = StoreService();
+  late List<List<String?>> _parameters;
 
   late List<String> _myTags = [];
 
@@ -34,20 +35,14 @@ class _FilterViewState extends State<FilterView> {
   List<Store> _stores = [];
   bool _dataReady = false;
 
-  // Filtering parameters to be returned
-  final List<String?> _filterLocation = [];
-
   @override
   void initState() {
     super.initState();
+    _parameters = widget.parameters;
 
-    if (widget.parameters.isNotEmpty) {
+    if (widget.parameters[0].isNotEmpty) {
       _myTags = widget.parameters[0].map((e) => e.toString()).toList();
     }
-
-    /*_selectedCityValue = null;
-    _selectedDistrictValue = null;
-    _selectedStoreValue = null;*/
 
     fetchCityData();
   }
@@ -93,9 +88,18 @@ class _FilterViewState extends State<FilterView> {
                 _districts = allDistricts
                     .where((district) => district.hasStores)
                     .toList();
-                /*_selectedCityValue = city.cityId;
-                _selectedDistrictValue = dist.districtId;
-                _selectedStoreValue = store.storeId;*/
+                city.cityId == _parameters[1][0]
+                    ? _selectedCityValue = city.cityId
+                    : _selectedCityValue = null;
+
+                dist.districtId == _parameters[1][1]
+                    ? _selectedDistrictValue = dist.districtId
+                    : _selectedDistrictValue = null;
+
+                store.storeId == _parameters[1][2]
+                    ? _selectedStoreValue = store.storeId
+                    : _selectedStoreValue = null;
+
                 _dataReady = true;
               });
               return;
@@ -125,142 +129,165 @@ class _FilterViewState extends State<FilterView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Container(
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Select tags:'),
-                ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(context: context,
-                          builder: (buildContext) {
-                            return TagSelectView(myTags: _myTags);
-                          }).then((tags) {
-                            setState(() {
-                              _myTags = tags;
-                            });
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Select tags:'),
+              ElevatedButton(
+                  onPressed: () {
+                    showModalBottomSheet(context: context,
+                        builder: (buildContext) {
+                          return TagSelectView(myTags: _myTags);
+                        }).then((tags) {
+                          setState(() {
+                            _myTags = tags;
+                          });
+                    });
+                    },
+                  child: const Text('Set tags'))
+            ],
+          ),
+          Wrap(
+            children: List.generate(_myTags.length, (index) {
+              return _myTags.isEmpty
+                ? const Text('NoTags')
+                : Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 2.0),
+                child: Tag(text: _myTags[index]));
+            })
+          ),
+          const Divider(),
+          const Text('Select store:'),
+          _dataReady ? Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  DropdownButton<String>(
+                    value: _selectedCityValue,
+                    hint: const Text('City'),
+                    items: _cities.map((City city) {
+                      return DropdownMenuItem<String>(
+                        value: city.cityId,
+                        child: Text(city.cityName),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) async {
+                      setState(() {
+                        _selectedCityValue = newValue!;
+                        // Reset the selected district value when the city changes
+                        _selectedDistrictValue = null;
+                        _selectedStoreValue = null;
+                        _stores = [];
+                        _districts = [];
                       });
-                      },
-                    child: const Text('Set tags'))
-              ],
-            ),
-            Wrap(
-              children: List.generate(_myTags.length, (index) {
-                return _myTags.isEmpty
-                  ? const Text('NoTags')
-                  : Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 2.0),
-                  child: Tag(text: _myTags[index]));
-              })
-            ),
-            const Divider(),
-            const Text('Select store:'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DropdownButton<String>(
-                  value: _selectedCityValue,
-                  hint: const Text('City'),
-                  items: _cities.map((City city) {
-                    return DropdownMenuItem<String>(
-                      value: city.cityId,
-                      child: Text(city.cityName),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) async {
-                    setState(() {
-                      _selectedCityValue = newValue!;
-                      // Reset the selected district value when the city changes
-                      _selectedDistrictValue = null;
-                      _selectedStoreValue = null;
-                      _stores = [];
-                      _districts = [];
-                    });
-                    // Fetch districts for the newly selected city
-                    var allDistricts =
-                    await _storeService.getDistricts(newValue!);
-                    for (District district in allDistricts) {
-                      if (district.hasStores) {
-                        _districts.add(district);
+                      // Fetch districts for the newly selected city
+                      var allDistricts =
+                      await _storeService.getDistricts(newValue!);
+                      for (District district in allDistricts) {
+                        if (district.hasStores) {
+                          _districts.add(district);
+                        }
                       }
-                    }
-                    setState(() {
-                      _selectedCityValue = newValue;
-                    });
-                  },
-                ),
-                DropdownButton<String>(
-                  value: _selectedDistrictValue,
-                  hint: const Text('District'),
-                  items: _districts.map((District district) {
-                    return DropdownMenuItem<String>(
-                      value: district.districtId,
-                      child: Text(district.districtName),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) async {
-                    setState(() {
-                      _selectedDistrictValue = newValue!;
-                      // Reset the selected district value when the city changes
-                      _selectedStoreValue = null;
-                      _stores = [];
-                    });
-                    // Fetch districts for the newly selected city
-                    _stores = await _storeService.getStores(newValue!);
-                    setState(() {
-                      _selectedDistrictValue = newValue;
-                    });
-                  },
-                ),
-              ],
-            ),
-            DropdownButton<String>(
-              value: _selectedStoreValue,
-              hint: const Text('Select Store'),
-              items: _stores.map((Store store) {
-                return DropdownMenuItem<String>(
-                  value: store.storeId,
-                  child: Text(store.storeName),
-                );
-              }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  _selectedStoreValue = newValue!;
-                });
+                      setState(() {
+                        _selectedCityValue = newValue;
+                      });
+                    },
+                  ),
+                  DropdownButton<String>(
+                    value: _selectedDistrictValue,
+                    hint: const Text('District'),
+                    items: _districts.map((District district) {
+                      return DropdownMenuItem<String>(
+                        value: district.districtId,
+                        child: Text(district.districtName),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) async {
+                      setState(() {
+                        _selectedDistrictValue = newValue!;
+                        // Reset the selected district value when the city changes
+                        _selectedStoreValue = null;
+                        _stores = [];
+                      });
+                      // Fetch districts for the newly selected city
+                      _stores = await _storeService.getStores(newValue!);
+                      setState(() {
+                        _selectedDistrictValue = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              DropdownButton<String>(
+                value: _selectedStoreValue,
+                hint: const Text('Select Store'),
+                items: _stores.map((Store store) {
+                  return DropdownMenuItem<String>(
+                    value: store.storeId,
+                    child: Text(store.storeName),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedStoreValue = newValue!;
+                  });
+                },
+              ),
+            ],
+          )
+          : const CircularProgressIndicator(),
+          const Divider(),
+          OutlinedButton(
+              onPressed: (){
+                _removeFilters();
               },
-            ),
-            const Divider(),
-            OutlinedButton(
-                onPressed: (){
-                  _removeFilters();
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.red),
-                  foregroundColor: Colors.red,
-                ),
-                child: const Text('Remove filters')
-            ),
-            ElevatedButton(
-                onPressed: (){
-                  _filterLocation.add(_selectedCityValue);
-                  _filterLocation.add(_selectedDistrictValue);
-                  _filterLocation.add(_selectedStoreValue);
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Remove filters')
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.grey
+                    ),
+                  )
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                  onPressed: (){
+                    List<String?> filterLocation = [];
+                    filterLocation.add(_selectedCityValue);
+                    filterLocation.add(_selectedDistrictValue);
+                    filterLocation.add(_selectedStoreValue);
 
-                  // List of selected parameters, where value at idx 0 is
-                  // a list of selected tags, and value at idx 1 is list
-                  // of selected location
-                  List<List<String?>> results = [];
-                  results.add(_myTags);
-                  results.add(_filterLocation);
+                    // List of selected parameters, where value at idx 0 is
+                    // a list of selected tags, and value at idx 1 is list
+                    // of selected location
+                    List<List<String?>> results = [];
 
-                  Navigator.pop(context, results);
-                },
-                child: const Text('Done'))
-          ],
-        ),
+                    results.add(_myTags);
+                    results.add(filterLocation);
+
+                    Navigator.pop(context, results);
+                  },
+                  child: const Text('Done')
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
