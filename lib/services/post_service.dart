@@ -22,45 +22,31 @@ class PostService {
   /// Returns a list of [Post] objects.
   Future<List<Post>> getPosts({List<List<String?>> parameters = const []}) async {
     try {
-      String url = '$baseUrl/feed';
       List<String> tags = [];
       String cityId = '';
       String districtId = '';
       String storeId = '';
 
       if (parameters.isNotEmpty){
-        String filterUrl = '?';
         if (parameters[0].isNotEmpty){
-          filterUrl += 'tags=';
           List<String> formattedTags =
           parameters[0].map((e) => e.toString().toUpperCase().replaceAll(' ', '_')).toList();
-          for (int i = 0; i < formattedTags.length; i++) {
-            filterUrl += formattedTags[i];
-            if (i != formattedTags.length - 1){
-              filterUrl += ',';
-            }
-            tags.add(formattedTags[i]);
+          for (String tag in formattedTags) {
+            tags.add(tag);
           }
         }
         if (parameters[1].isNotEmpty) {
           List<String> location = parameters[1].map((e) => e.toString()).toList();
-          if (filterUrl.length > 1) {
-            filterUrl += '&';
-          }
           if(location[0] != 'null'){
-            filterUrl += 'cityId=${location[0]}';
             cityId = location[0];
           }
           if (location[1] != 'null'){
-            filterUrl += '&districtId=${location[1]}';
             districtId = location[1];
           }
           if (location[2] != 'null'){
-            filterUrl += '&storeId=${location[2]}';
             storeId = location[2];
           }
         }
-        url += filterUrl;
       }
 
       var uri = Uri.parse('$baseUrl/feed');

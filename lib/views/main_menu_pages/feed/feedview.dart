@@ -122,15 +122,18 @@ class _FeedViewState extends State<FeedView> {
     });
   }
 
-  Future<void> filterPosts(List<List<String?>> parameters) async {
-    List<Post> filteredPosts = await postService.getPosts(parameters: parameters);
+  /// Fetches filtered posts from the backend and updates the
+  /// order of the posts in the feed accordingly.
+  Future<void> filterPosts() async {
+    List<Post> filteredPosts = await postService.getPosts(parameters: _filtering);
     setState(() {
       _posts.clear();
       _posts = filteredPosts;
     });
   }
   
-  void _sortPosts(String order) {
+  /// Sorts posts according to chosen parameter and refreshes feed.
+  void _sortPosts(String order) async {
     List<Post> temp = _posts;
     if (order == 'exp_OLDEST') {
       temp.sort((a,b){return a.expiringDate.compareTo(b.expiringDate);});
@@ -139,9 +142,11 @@ class _FeedViewState extends State<FeedView> {
     } else if (order == 'posted_OLDEST'){
       temp = postProvider.posts.reversed.toList();
     } else if (order == "posted_NEWEST" || order == 'default') {
-      temp = postProvider.posts;
+      // Default order of posts in the backend is by time of posting
+      temp = await postService.getPosts();
     }
     setState(() {
+      _posts.clear();
       _posts = temp;
     });
   }
@@ -180,11 +185,12 @@ class _FeedViewState extends State<FeedView> {
                         builder: (buildContext) {
                           return FilterView(parameters: _filtering);
                       }). then((parameters) {
-                        parameters != null
-                            ? _filtering = parameters
-                            : parameters = _filtering;
-                        print(parameters);
-                        filterPosts(parameters);
+                        // If view returns null, assumes action was cancelled
+                        // and does not change filtering parameters
+                        if (parameters != null){
+                          _filtering = parameters;
+                        }
+                        filterPosts();
                       });
                     },
                   ),

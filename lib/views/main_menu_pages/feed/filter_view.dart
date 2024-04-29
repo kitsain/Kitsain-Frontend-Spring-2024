@@ -272,9 +272,8 @@ class _FilterViewState extends State<FilterView> {
                     filterLocation.add(_selectedDistrictValue);
                     filterLocation.add(_selectedStoreValue);
 
-                    // List of selected parameters, where value at idx 0 is
-                    // a list of selected tags, and value at idx 1 is list
-                    // of selected location
+                    // List of selected parameters with following values:
+                    // [[tags] , [city, district, store]]
                     List<List<String?>> results = [];
 
                     results.add(_myTags);
