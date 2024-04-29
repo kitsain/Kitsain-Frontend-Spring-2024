@@ -20,6 +20,7 @@ class FilterView extends StatefulWidget {
 class _FilterViewState extends State<FilterView> {
   var logger = Logger(printer: PrettyPrinter());
   final StoreService _storeService = StoreService();
+  late List<List<String?>> _parameters;
 
   late List<String> _myTags = [];
 
@@ -32,22 +33,16 @@ class _FilterViewState extends State<FilterView> {
   List<City> _cities = [];
   List<District> _districts = [];
   List<Store> _stores = [];
-  // bool _dataReady = false;
-
-  // Filtering parameters to be returned
-  final List<String?> _filterLocation = [];
+  bool _dataReady = false;
 
   @override
   void initState() {
     super.initState();
+    _parameters = widget.parameters;
 
-    if (widget.parameters.isNotEmpty) {
+    if (widget.parameters[0].isNotEmpty) {
       _myTags = widget.parameters[0].map((e) => e.toString()).toList();
     }
-
-    /*_selectedCityValue = null;
-    _selectedDistrictValue = null;
-    _selectedStoreValue = null;*/
 
     fetchCityData();
   }
@@ -93,11 +88,19 @@ class _FilterViewState extends State<FilterView> {
                 _districts = allDistricts
                     .where((district) => district.hasStores)
                     .toList();
-                print(store);
-                /*_selectedCityValue = city.cityId;
-                _selectedDistrictValue = dist.districtId;
-                _selectedStoreValue = store.storeId;*/
-                // _dataReady = true;
+                city.cityId == _parameters[1][0]
+                    ? _selectedCityValue = city.cityId
+                    : _selectedCityValue = null;
+
+                dist.districtId == _parameters[1][1]
+                    ? _selectedDistrictValue = dist.districtId
+                    : _selectedDistrictValue = null;
+
+                store.storeId == _parameters[1][2]
+                    ? _selectedStoreValue = store.storeId
+                    : _selectedStoreValue = null;
+
+                _dataReady = true;
               });
               return;
             }
@@ -157,80 +160,85 @@ class _FilterViewState extends State<FilterView> {
           ),
           const Divider(),
           const Text('Select store:'),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          _dataReady ? Column(
             children: [
-              DropdownButton<String>(
-                value: _selectedCityValue,
-                hint: const Text('City'),
-                items: _cities.map((City city) {
-                  return DropdownMenuItem<String>(
-                    value: city.cityId,
-                    child: Text(city.cityName),
-                  );
-                }).toList(),
-                onChanged: (newValue) async {
-                  setState(() {
-                    _selectedCityValue = newValue!;
-                    // Reset the selected district value when the city changes
-                    _selectedDistrictValue = null;
-                    _selectedStoreValue = null;
-                    _stores = [];
-                    _districts = [];
-                  });
-                  // Fetch districts for the newly selected city
-                  var allDistricts =
-                  await _storeService.getDistricts(newValue!);
-                  for (District district in allDistricts) {
-                    if (district.hasStores) {
-                      _districts.add(district);
-                    }
-                  }
-                  setState(() {
-                    _selectedCityValue = newValue;
-                  });
-                },
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  DropdownButton<String>(
+                    value: _selectedCityValue,
+                    hint: const Text('City'),
+                    items: _cities.map((City city) {
+                      return DropdownMenuItem<String>(
+                        value: city.cityId,
+                        child: Text(city.cityName),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) async {
+                      setState(() {
+                        _selectedCityValue = newValue!;
+                        // Reset the selected district value when the city changes
+                        _selectedDistrictValue = null;
+                        _selectedStoreValue = null;
+                        _stores = [];
+                        _districts = [];
+                      });
+                      // Fetch districts for the newly selected city
+                      var allDistricts =
+                      await _storeService.getDistricts(newValue!);
+                      for (District district in allDistricts) {
+                        if (district.hasStores) {
+                          _districts.add(district);
+                        }
+                      }
+                      setState(() {
+                        _selectedCityValue = newValue;
+                      });
+                    },
+                  ),
+                  DropdownButton<String>(
+                    value: _selectedDistrictValue,
+                    hint: const Text('District'),
+                    items: _districts.map((District district) {
+                      return DropdownMenuItem<String>(
+                        value: district.districtId,
+                        child: Text(district.districtName),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) async {
+                      setState(() {
+                        _selectedDistrictValue = newValue!;
+                        // Reset the selected district value when the city changes
+                        _selectedStoreValue = null;
+                        _stores = [];
+                      });
+                      // Fetch districts for the newly selected city
+                      _stores = await _storeService.getStores(newValue!);
+                      setState(() {
+                        _selectedDistrictValue = newValue;
+                      });
+                    },
+                  ),
+                ],
               ),
               DropdownButton<String>(
-                value: _selectedDistrictValue,
-                hint: const Text('District'),
-                items: _districts.map((District district) {
+                value: _selectedStoreValue,
+                hint: const Text('Select Store'),
+                items: _stores.map((Store store) {
                   return DropdownMenuItem<String>(
-                    value: district.districtId,
-                    child: Text(district.districtName),
+                    value: store.storeId,
+                    child: Text(store.storeName),
                   );
                 }).toList(),
-                onChanged: (newValue) async {
+                onChanged: (newValue) {
                   setState(() {
-                    _selectedDistrictValue = newValue!;
-                    // Reset the selected district value when the city changes
-                    _selectedStoreValue = null;
-                    _stores = [];
-                  });
-                  // Fetch districts for the newly selected city
-                  _stores = await _storeService.getStores(newValue!);
-                  setState(() {
-                    _selectedDistrictValue = newValue;
+                    _selectedStoreValue = newValue!;
                   });
                 },
               ),
             ],
-          ),
-          DropdownButton<String>(
-            value: _selectedStoreValue,
-            hint: const Text('Select Store'),
-            items: _stores.map((Store store) {
-              return DropdownMenuItem<String>(
-                value: store.storeId,
-                child: Text(store.storeName),
-              );
-            }).toList(),
-            onChanged: (newValue) {
-              setState(() {
-                _selectedStoreValue = newValue!;
-              });
-            },
-          ),
+          )
+          : const CircularProgressIndicator(),
           const Divider(),
           OutlinedButton(
               onPressed: (){
@@ -242,22 +250,42 @@ class _FilterViewState extends State<FilterView> {
               ),
               child: const Text('Remove filters')
           ),
-          ElevatedButton(
-              onPressed: (){
-                _filterLocation.add(_selectedCityValue);
-                _filterLocation.add(_selectedDistrictValue);
-                _filterLocation.add(_selectedStoreValue);
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.grey
+                    ),
+                  )
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                  onPressed: (){
+                    List<String?> filterLocation = [];
+                    filterLocation.add(_selectedCityValue);
+                    filterLocation.add(_selectedDistrictValue);
+                    filterLocation.add(_selectedStoreValue);
 
-                // List of selected parameters, where value at idx 0 is
-                // a list of selected tags, and value at idx 1 is list
-                // of selected location
-                List<List<String?>> results = [];
-                results.add(_myTags);
-                results.add(_filterLocation);
+                    // List of selected parameters, where value at idx 0 is
+                    // a list of selected tags, and value at idx 1 is list
+                    // of selected location
+                    List<List<String?>> results = [];
 
-                Navigator.pop(context, results);
-              },
-              child: const Text('Done'))
+                    results.add(_myTags);
+                    results.add(filterLocation);
+
+                    Navigator.pop(context, results);
+                  },
+                  child: const Text('Done')
+              ),
+            ],
+          )
         ],
       ),
     );

@@ -31,7 +31,7 @@ class _FeedViewState extends State<FeedView> {
   final ScrollController _scrollController = ScrollController();
 
   // Parameters for filtering
-  List<List<String?>> _filtering = [];
+  late List<List<String?>> _filtering;
 
 
   @override
@@ -44,6 +44,9 @@ class _FeedViewState extends State<FeedView> {
 
     // Assign posts to local variable
     _posts = postProvider.posts;
+
+    // initialize filtering values
+    _filtering = [[],[null,null,null]];
   }
 
   @override
@@ -119,32 +122,12 @@ class _FeedViewState extends State<FeedView> {
     });
   }
 
-  /// filters post according to determined parameters.
-  /// User can now filter posts by:
-  ///  * tags
-  ///  * location <- TODO
-  void filterPosts(){
-    List<Post> filteredPosts = [];
-    List<String?> tags = _filtering[0];
-   // List<String?> location = _filtering[1];
-
-    isFiltering = true;
-    for (Post post in postProvider.posts) {
-      if (tags.every((element) => post.tags.contains(element))){
-        filteredPosts.add(post);
-      }
-      // TODO: filter location
-    }
-
-    if (filteredPosts.isNotEmpty){
-      setState(() {
-        _posts = filteredPosts;
-      });
-    } else {
-      setState(() {
-        _posts = postProvider.posts;
-      });
-    }
+  Future<void> filterPosts(List<List<String?>> parameters) async {
+    List<Post> filteredPosts = await postService.getPosts(parameters: parameters);
+    setState(() {
+      _posts.clear();
+      _posts = filteredPosts;
+    });
   }
   
   void _sortPosts(String order) {
@@ -199,8 +182,9 @@ class _FeedViewState extends State<FeedView> {
                       }). then((parameters) {
                         parameters != null
                             ? _filtering = parameters
-                            : parameters = [];
-                        filterPosts();
+                            : parameters = _filtering;
+                        print(parameters);
+                        filterPosts(parameters);
                       });
                     },
                   ),
