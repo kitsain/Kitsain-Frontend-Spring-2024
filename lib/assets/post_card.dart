@@ -25,11 +25,11 @@ class PostCard extends StatefulWidget {
   final Function(Post) onEditPost;
 
   const PostCard({
-    super.key,
+    Key? key,
     required this.post,
     required this.onRemovePost,
     required this.onEditPost,
-  });
+  }) : super(key: key);
 
   @override
   State<PostCard> createState() => _PostCardState();

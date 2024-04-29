@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/app_colors.dart';
 import 'package:kitsain_frontend_spring2023/assets/post_card.dart';
@@ -146,8 +148,15 @@ class _FeedViewState extends State<FeedView> {
       temp = await postService.getPosts();
     }
     setState(() {
-      _posts.clear();
       _posts = temp;
+    });
+  }
+  void refreshView(List<Post> newPosts) {
+    setState(() {
+      _posts.clear();
+    });
+    setState(() {
+      _posts = newPosts;
     });
   }
 
@@ -240,6 +249,7 @@ class _FeedViewState extends State<FeedView> {
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   return PostCard(
+                    key: ValueKey(_posts[index].id),
                     post: _posts[index],
                     onRemovePost: (Post removedPost) {
                       removePost(removedPost);
