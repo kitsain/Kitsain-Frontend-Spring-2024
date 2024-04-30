@@ -20,30 +20,33 @@ class PostService {
   /// Retrieves a list of all posts.
   ///
   /// Returns a list of [Post] objects.
-  Future<List<Post>> getPosts({List<List<String?>> parameters = const []}) async {
+  Future<List<Post>> getPosts(
+      {List<List<String?>> parameters = const []}) async {
     try {
       List<String> tags = [];
       String cityId = '';
       String districtId = '';
       String storeId = '';
 
-      if (parameters.isNotEmpty){
-        if (parameters[0].isNotEmpty){
-          List<String> formattedTags =
-          parameters[0].map((e) => e.toString().toUpperCase().replaceAll(' ', '_')).toList();
+      if (parameters.isNotEmpty) {
+        if (parameters[0].isNotEmpty) {
+          List<String> formattedTags = parameters[0]
+              .map((e) => e.toString().toUpperCase().replaceAll(' ', '_'))
+              .toList();
           for (String tag in formattedTags) {
             tags.add(tag);
           }
         }
         if (parameters[1].isNotEmpty) {
-          List<String> location = parameters[1].map((e) => e.toString()).toList();
-          if(location[0] != 'null'){
+          List<String> location =
+              parameters[1].map((e) => e.toString()).toList();
+          if (location[0] != 'null') {
             cityId = location[0];
           }
-          if (location[1] != 'null'){
+          if (location[1] != 'null') {
             districtId = location[1];
           }
-          if (location[2] != 'null'){
+          if (location[2] != 'null') {
             storeId = location[2];
           }
         }
@@ -75,7 +78,7 @@ class PostService {
           return await parsePost(json);
         }));
 
-        logger.i("Posts loaded successfully");
+        //logger.i("Posts loaded successfully");
         return posts;
       } else {
         throw Exception(
@@ -133,7 +136,6 @@ class PostService {
         DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(expiringDate.toUtc());
     List<String> formattedTags =
         tags.map((e) => e.toUpperCase().replaceAll(' ', '_')).toList();
-    print(formattedTags);
 
     try {
       // Send a POST request to the server with the post data

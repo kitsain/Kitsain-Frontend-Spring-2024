@@ -25,11 +25,11 @@ class PostCard extends StatefulWidget {
   final Function(Post) onEditPost;
 
   const PostCard({
-    Key? key,
+    super.key,
     required this.post,
     required this.onRemovePost,
     required this.onEditPost,
-  }) : super(key: key);
+  });
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -65,7 +65,6 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> fetchStoreName() async {
-    if (!mounted) return; // Check if widget is still mounted
     if (widget.post.storeId == '') {
       setState(() {
         storeName = 'No store';
@@ -79,7 +78,6 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> fetchUserId() async {
-    if (!mounted) return; // Check if widget is still mounted
     final fetchedUserId = await postService.getUserId();
     setState(() {
       userId = fetchedUserId;
@@ -100,9 +98,7 @@ class _PostCardState extends State<PostCard> {
 // Navigate to the CreateEditPostView and wait for the result
     final updatedPost = await Navigator.push(
       context,
-      MaterialPageRoute(
-          builder: (context) =>
-              CreateEditPostView(post: post, existingImages: post.images)),
+      MaterialPageRoute(builder: (context) => CreateEditPostView(post: post)),
     );
 
     // Check if the updatedPost is not null
@@ -201,9 +197,7 @@ class _PostCardState extends State<PostCard> {
             // Add image holder here
             if (widget.post.images.isNotEmpty)
               EditImageWidget(
-                  images: const [],
-                  stringImages: widget.post.images,
-                  feedImages: true),
+                  stringImages: widget.post.images, feedImages: true),
 
             Padding(
               padding: const EdgeInsets.all(4.0),

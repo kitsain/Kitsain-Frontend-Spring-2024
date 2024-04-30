@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/app_colors.dart';
 import 'package:kitsain_frontend_spring2023/assets/post_card.dart';
@@ -35,7 +33,6 @@ class _FeedViewState extends State<FeedView> {
   // Parameters for filtering
   late List<List<String?>> _filtering;
 
-
   @override
   void initState() {
     super.initState();
@@ -48,7 +45,10 @@ class _FeedViewState extends State<FeedView> {
     _posts = postProvider.posts;
 
     // initialize filtering values
-    _filtering = [[],[null,null,null]];
+    _filtering = [
+      [],
+      [null, null, null]
+    ];
   }
 
   @override
@@ -127,21 +127,26 @@ class _FeedViewState extends State<FeedView> {
   /// Fetches filtered posts from the backend and updates the
   /// order of the posts in the feed accordingly.
   Future<void> filterPosts() async {
-    List<Post> filteredPosts = await postService.getPosts(parameters: _filtering);
+    List<Post> filteredPosts =
+        await postService.getPosts(parameters: _filtering);
     setState(() {
       _posts.clear();
       _posts = filteredPosts;
     });
   }
-  
+
   /// Sorts posts according to chosen parameter and refreshes feed.
   void _sortPosts(String order) async {
     List<Post> temp = _posts;
     if (order == 'exp_OLDEST') {
-      temp.sort((a,b){return a.expiringDate.compareTo(b.expiringDate);});
+      temp.sort((a, b) {
+        return a.expiringDate.compareTo(b.expiringDate);
+      });
     } else if (order == 'exp_NEWEST') {
-      temp.sort((a,b){return b.expiringDate.compareTo(a.expiringDate);});
-    } else if (order == 'posted_OLDEST'){
+      temp.sort((a, b) {
+        return b.expiringDate.compareTo(a.expiringDate);
+      });
+    } else if (order == 'posted_OLDEST') {
       temp = postProvider.posts.reversed.toList();
     } else if (order == "posted_NEWEST" || order == 'default') {
       // Default order of posts in the backend is by time of posting
@@ -151,6 +156,7 @@ class _FeedViewState extends State<FeedView> {
       _posts = temp;
     });
   }
+
   void refreshView(List<Post> newPosts) {
     setState(() {
       _posts.clear();
@@ -180,33 +186,31 @@ class _FeedViewState extends State<FeedView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                const Text('Filter: ',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold
+                  const Text(
+                    'Filter: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
                   IconButton(
                     icon: const Icon(Icons.tune),
                     onPressed: () {
                       // Open a view for picking filters
                       showModalBottomSheet(
-                        context: context,
-                        builder: (buildContext) {
-                          return FilterView(parameters: _filtering);
-                      }). then((parameters) {
+                          context: context,
+                          builder: (buildContext) {
+                            return FilterView(parameters: _filtering);
+                          }).then((parameters) {
                         // If view returns null, assumes action was cancelled
                         // and does not change filtering parameters
-                        if (parameters != null){
+                        if (parameters != null) {
                           _filtering = parameters;
                         }
                         filterPosts();
                       });
                     },
                   ),
-                  const Text('Sort: ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold
-                    ),
+                  const Text(
+                    'Sort: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.filter_list),
@@ -214,7 +218,7 @@ class _FeedViewState extends State<FeedView> {
                       _sortPosts(value);
                     },
                     itemBuilder: (BuildContext context) =>
-                    <PopupMenuEntry<String>>[
+                        <PopupMenuEntry<String>>[
                       const PopupMenuItem<String>(
                         value: 'exp_OLDEST',
                         child: Text('Expiry date (closest first)'),
@@ -268,9 +272,7 @@ class _FeedViewState extends State<FeedView> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const CreateEditPostView(existingImages: [])),
+            MaterialPageRoute(builder: (context) => const CreateEditPostView()),
           ).then((newPost) async {
             if (newPost != null) {
               setState(() {
