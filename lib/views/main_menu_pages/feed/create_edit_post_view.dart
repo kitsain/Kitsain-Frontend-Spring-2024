@@ -22,9 +22,8 @@ import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
-  final List<String>? existingImages;
 
-  const CreateEditPostView({super.key, this.post, this.existingImages});
+  const CreateEditPostView({super.key, this.post});
 
   @override
   _CreateEditPostViewState createState() => _CreateEditPostViewState();
@@ -40,7 +39,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
   String _description = '';
   DateTime _expiringDate = DateTime(2000, 1, 2);
   List<String> _myTags = [];
-  List<File> tempImages = [];
+  List<String> tempImages = [];
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
   final TextEditingController _dateController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -68,7 +67,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     super.initState();
     if (widget.post != null) {
       _id = widget.post!.id;
-      _images = List.from(widget.existingImages ?? []);
+      tempImages = widget.post!.images;
       _titleController.text = widget.post!.title;
       _description = widget.post!.description;
       _priceController.text = widget.post!.price;
@@ -79,6 +78,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       _myTags = widget.post!.tags;
       _selectedStoreValue = widget.post!.storeId;
       _barcodeController.text = widget.post!.productBarcode;
+      imageSelected = _images.isNotEmpty;
     } else {
       _images = [];
       _titleController.text = '';
@@ -151,7 +151,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
       fetchBarCode(File(pickedImage.path));
 
-      tempImages.add(File(croppedFile!.path));
+      tempImages.add(await _postService.uploadFile(File(croppedFile!.path)));
       setState(() {
         imageSelected = tempImages.isNotEmpty;
       });
@@ -188,16 +188,12 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
 
   Future<Post?> _updateOrCreatePost() async {
     try {
-      // Upload images
-      for (var image in tempImages) {
-        _images.add(await _postService.uploadFile(image));
-      }
       // Check if it's an update operation
       if (widget.post != null) {
         // Update the existing post
         return await _postService.updatePost(
             id: _id,
-            images: _images,
+            images: tempImages,
             title: _titleController.text,
             description: _description,
             price: _priceController.text,
@@ -208,7 +204,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       } else {
         // Create a new post
         return await _postService.createPost(
-            images: _images,
+            images: tempImages,
             title: _titleController.text,
             description: _description,
             price: _priceController.text,
@@ -350,11 +346,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                   child: Column(
                     children: [
                       EditImageWidget(
-                        images: tempImages,
-                        stringImages: widget.existingImages ?? [],
-                        feedImages: true,
+                        stringImages: tempImages,
+                        feedImages: false,
                       ),
-                      if ((widget.existingImages?.isEmpty ?? true) &&
+                      if ((widget.post?.images.isEmpty ?? true) &&
                           !imageSelected)
                         Text(
                           AppLocalizations.of(context)!.imageValidation,
@@ -499,7 +494,6 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                     _myTags = tags;
                                   }
                                 });
-                                print(_myTags);
                               });
                             },
                             child: Text(
@@ -616,11 +610,18 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                       ElevatedButton(
                         onPressed: () async {
                           try {
-                            setState(() {
-                              imageSelected = tempImages.isNotEmpty;
-                            });
+                            if (tempImages.isNotEmpty) {
+                              setState(() {
+                                _images = tempImages;
+                                imageSelected = true;
+                              });
+                            } else {
+                              setState(() {
+                                imageSelected = false;
+                              });
+                            }
                             if (_formKey.currentState!.validate() &&
-                                tempImages.isNotEmpty) {
+                                imageSelected) {
                               Post? updatedPost = await _updateOrCreatePost();
                               Navigator.pop(context, updatedPost);
                             }
