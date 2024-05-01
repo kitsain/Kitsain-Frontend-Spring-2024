@@ -20,23 +20,23 @@ class PostService {
   /// Retrieves a list of all posts.
   ///
   /// Returns a list of [Post] objects.
-  Future<List<Post>> getPosts({List<List<String?>> parameters = const []}) async {
+  Future<List<Post>> getPosts({List<List<String?>> filtering = const [], sorting = '', direction = ''}) async {
     try {
       List<String> tags = [];
       String cityId = '';
       String districtId = '';
       String storeId = '';
 
-      if (parameters.isNotEmpty){
-        if (parameters[0].isNotEmpty){
+      if (filtering.isNotEmpty){
+        if (filtering[0].isNotEmpty){
           List<String> formattedTags =
-          parameters[0].map((e) => e.toString().toUpperCase().replaceAll(' ', '_')).toList();
+          filtering[0].map((e) => e.toString().toUpperCase().replaceAll(' ', '_')).toList();
           for (String tag in formattedTags) {
             tags.add(tag);
           }
         }
-        if (parameters[1].isNotEmpty) {
-          List<String> location = parameters[1].map((e) => e.toString()).toList();
+        if (filtering[1].isNotEmpty) {
+          List<String> location = filtering[1].map((e) => e.toString()).toList();
           if(location[0] != 'null'){
             cityId = location[0];
           }
@@ -57,7 +57,9 @@ class PostService {
           'tags': tags,
           'storeId': storeId,
           'districtId': districtId,
-          'cityId': cityId
+          'cityId': cityId,
+          'sortField': sorting,
+          'sortDirection': direction
         }),
         headers: {
           'accept': '*/*',

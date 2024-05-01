@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/app_colors.dart';
 import 'package:kitsain_frontend_spring2023/assets/post_card.dart';
@@ -127,7 +125,7 @@ class _FeedViewState extends State<FeedView> {
   /// Fetches filtered posts from the backend and updates the
   /// order of the posts in the feed accordingly.
   Future<void> filterPosts() async {
-    List<Post> filteredPosts = await postService.getPosts(parameters: _filtering);
+    List<Post> filteredPosts = await postService.getPosts(filtering: _filtering);
     setState(() {
       _posts.clear();
       _posts = filteredPosts;
@@ -138,25 +136,20 @@ class _FeedViewState extends State<FeedView> {
   void _sortPosts(String order) async {
     List<Post> temp = _posts;
     if (order == 'exp_OLDEST') {
-      temp.sort((a,b){return a.expiringDate.compareTo(b.expiringDate);});
+      temp = await postService.getPosts(
+          filtering: _filtering, sorting: 'expringDate', direction: 'asc');
     } else if (order == 'exp_NEWEST') {
-      temp.sort((a,b){return b.expiringDate.compareTo(a.expiringDate);});
+      temp = await postService.getPosts(
+          filtering: _filtering, sorting: 'expringDate', direction: 'desc');
     } else if (order == 'posted_OLDEST'){
-      temp = postProvider.posts.reversed.toList();
+      temp = await postService.getPosts(
+          filtering: _filtering, sorting: 'createdDate', direction: 'asc');
     } else if (order == "posted_NEWEST" || order == 'default') {
       // Default order of posts in the backend is by time of posting
-      temp = await postService.getPosts();
+      temp = await postService.getPosts(filtering: _filtering);
     }
     setState(() {
       _posts = temp;
-    });
-  }
-  void refreshView(List<Post> newPosts) {
-    setState(() {
-      _posts.clear();
-    });
-    setState(() {
-      _posts = newPosts;
     });
   }
 
@@ -197,6 +190,7 @@ class _FeedViewState extends State<FeedView> {
                         // If view returns null, assumes action was cancelled
                         // and does not change filtering parameters
                         if (parameters != null){
+                          print(_filtering);
                           _filtering = parameters;
                         }
                         filterPosts();
