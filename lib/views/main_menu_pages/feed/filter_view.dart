@@ -6,6 +6,8 @@ import '../../../models/city.dart';
 import '../../../models/district.dart';
 import '../../../models/store.dart';
 import '../../../services/store_service.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
+import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
 class FilterView extends StatefulWidget {
   final List<List<String?>> parameters;
@@ -25,9 +27,9 @@ class _FilterViewState extends State<FilterView> {
   late List<String> _myTags = [];
 
   // Information fetched from dropdown menu
-  String? _selectedCityValue;
-  String? _selectedDistrictValue;
-  String? _selectedStoreValue;
+  late String? _selectedCityValue;
+  late String? _selectedDistrictValue;
+  late String? _selectedStoreValue;
 
   // Information fetched from backend
   List<City> _cities = [];
@@ -45,6 +47,10 @@ class _FilterViewState extends State<FilterView> {
     }
 
     fetchCityData();
+
+    _selectedCityValue = null;
+    _selectedDistrictValue = null;
+    _selectedStoreValue = null;
   }
 
   /// Fetches city data and updates the state with the fetched data.
@@ -76,7 +82,7 @@ class _FilterViewState extends State<FilterView> {
       allCities.remove(city);
     }
 
-    for (City city in allCities) {
+    outerloop: for (City city in allCities) {
       final allDistricts = await _storeService.getDistricts(city.cityId);
       for (District dist in allDistricts) {
         if (dist.hasStores) {
@@ -88,30 +94,27 @@ class _FilterViewState extends State<FilterView> {
                 _districts = allDistricts
                     .where((district) => district.hasStores)
                     .toList();
-                city.cityId == _parameters[1][0]
-                    ? _selectedCityValue = city.cityId
-                    : _selectedCityValue = null;
 
-                dist.districtId == _parameters[1][1]
-                    ? _selectedDistrictValue = dist.districtId
-                    : _selectedDistrictValue = null;
-
-                store.storeId == _parameters[1][2]
-                    ? _selectedStoreValue = store.storeId
-                    : _selectedStoreValue = null;
-
-                _dataReady = true;
+                if(city.cityId == _parameters[1][0]){
+                  _selectedCityValue = city.cityId;
+                  if(dist.districtId == _parameters[1][1]){
+                    _selectedDistrictValue = dist.districtId;
+                    if(store.storeId == _parameters[1][2]){
+                      _selectedStoreValue = store.storeId;
+                    }
+                  }
+                }
               });
-              return;
+              if (_selectedDistrictValue != null) {
+                break outerloop;
+              }
             }
           }
         }
       }
     }
-
     setState(() {
-      logger.i('Store: ');
-      _cities = allCities;
+      _dataReady = true;
     });
   }
 
@@ -167,7 +170,8 @@ class _FilterViewState extends State<FilterView> {
                 children: [
                   DropdownButton<String>(
                     value: _selectedCityValue,
-                    hint: const Text('City'),
+                    hint: Text(AppLocalizations.of(context)!.cityHint,
+                        style: AppTypography.createPostHints),
                     items: _cities.map((City city) {
                       return DropdownMenuItem<String>(
                         value: city.cityId,
@@ -198,13 +202,15 @@ class _FilterViewState extends State<FilterView> {
                   ),
                   DropdownButton<String>(
                     value: _selectedDistrictValue,
-                    hint: const Text('District'),
-                    items: _districts.map((District district) {
+                    hint: Text(AppLocalizations.of(context)!.districtHint,
+                        style: AppTypography.createPostHints),
+                    items: _selectedCityValue != null ? _districts.map((District district) {
                       return DropdownMenuItem<String>(
                         value: district.districtId,
                         child: Text(district.districtName),
                       );
-                    }).toList(),
+                    }).toList()
+                    : [],
                     onChanged: (newValue) async {
                       setState(() {
                         _selectedDistrictValue = newValue!;
@@ -223,13 +229,15 @@ class _FilterViewState extends State<FilterView> {
               ),
               DropdownButton<String>(
                 value: _selectedStoreValue,
-                hint: const Text('Select Store'),
-                items: _stores.map((Store store) {
+                hint: Text(AppLocalizations.of(context)!.storeHint,
+                    style: AppTypography.createPostHints),
+                items: _selectedDistrictValue != null ? _stores.map((Store store) {
                   return DropdownMenuItem<String>(
                     value: store.storeId,
                     child: Text(store.storeName),
                   );
-                }).toList(),
+                }).toList()
+                : [],
                 onChanged: (newValue) {
                   setState(() {
                     _selectedStoreValue = newValue!;
