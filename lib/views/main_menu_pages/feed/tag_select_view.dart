@@ -24,12 +24,7 @@ class _TagSelectViewState extends State<TagSelectView> {
   void initState() {
     super.initState();
     _myTags = widget.myTags;
-    // markTagsSelected();
     //loadTags();
-  }
-
-  void loadTags() async {
-    // _tags = await postService.getTags();
   }
 
   @override
@@ -53,6 +48,8 @@ class _TagSelectViewState extends State<TagSelectView> {
                     child: Wrap(
                       children: List.generate(_tags.length, (index) {
                         Color color;
+                        // if tag is in myTags, set color to grey indicating it is selected
+                        // else set color to white indicating it is not selected.
                         if (_myTags.contains(_tags[index])){
                           color = Colors.grey;
                         } else {
@@ -69,9 +66,11 @@ class _TagSelectViewState extends State<TagSelectView> {
                               onPressed: () {
                                 Color BtnColor = _buttonColors[index];
                                 setState(() {
+                                  // if button is white (not selected), change to grey
                                   if (BtnColor == Colors.white){
                                     _buttonColors[index] = Colors.grey;
                                     _myTags.add(_tags[index]);
+                                  // if button is grey (selected), change to white
                                   } else if (BtnColor == Colors.grey) {
                                     _buttonColors[index] = Colors.white;
                                     _myTags.remove(_tags[index]);

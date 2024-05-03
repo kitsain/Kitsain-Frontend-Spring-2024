@@ -30,8 +30,7 @@ class _FeedViewState extends State<FeedView> {
 
   final ScrollController _scrollController = ScrollController();
 
-  // Parameters for filtering
-  late List<List<String?>> _filtering;
+  late List<List<String?>> _filtering; // = [tags, [city, district, store]]
 
   @override
   void initState() {
@@ -125,7 +124,7 @@ class _FeedViewState extends State<FeedView> {
   }
 
   /// Fetches filtered posts from the backend and updates the
-  /// order of the posts in the feed accordingly.
+  /// posts shown in the UI accordingly.
   Future<void> filterPosts() async {
     List<Post> filteredPosts =
         await postService.getPosts(filtering: _filtering);
@@ -135,7 +134,12 @@ class _FeedViewState extends State<FeedView> {
     });
   }
 
-  /// Sorts posts according to chosen parameter and refreshes feed.
+  /// fetches sorted posts from the backend and updates
+  /// the posts shown in the UI accordingly.
+  /// order: 'exp_OLDEST'    -> furthest expirydate,
+  ///        'exp_NEWEST'    -> closest expirydate,
+  ///        'posted_OLDEST' -> oldest post,
+  ///        'posted_NEWEST' -> newest post (also default).
   void _sortPosts(String order) async {
     List<Post> temp = _posts;
     if (order == 'exp_OLDEST') {
@@ -153,15 +157,6 @@ class _FeedViewState extends State<FeedView> {
     }
     setState(() {
       _posts = temp;
-    });
-  }
-
-  void refreshView(List<Post> newPosts) {
-    setState(() {
-      _posts.clear();
-    });
-    setState(() {
-      _posts = newPosts;
     });
   }
 

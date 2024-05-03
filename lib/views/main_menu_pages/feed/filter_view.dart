@@ -22,11 +22,13 @@ class FilterView extends StatefulWidget {
 class _FilterViewState extends State<FilterView> {
   var logger = Logger(printer: PrettyPrinter());
   final StoreService _storeService = StoreService();
-  late List<List<String?>> _parameters;
+  // previously selected parameters
+  late List<List<String?>> _parameters; // = [tags, [city, district, store]]
 
+  // List of tags selected by user
   late List<String> _myTags = [];
 
-  // Information fetched from dropdown menu
+  // Information selected by the user from dropdown buttons
   late String? _selectedCityValue;
   late String? _selectedDistrictValue;
   late String? _selectedStoreValue;
@@ -82,12 +84,15 @@ class _FilterViewState extends State<FilterView> {
       allCities.remove(city);
     }
 
-    outerloop: for (City city in allCities) {
+    // Iterate through all cities and finds each district within a city.
+    for (City city in allCities) {
       final allDistricts = await _storeService.getDistricts(city.cityId);
+      // Iterate through districts and finds the ones which have stores.
       for (District dist in allDistricts) {
         if (dist.hasStores) {
           _stores = await _storeService.getStores(dist.districtId);
           if (_stores.isNotEmpty) {
+            // Iterate through stores and call setState to update the UI.
             for (Store store in _stores) {
               setState(() {
                 _cities = allCities;
@@ -95,6 +100,8 @@ class _FilterViewState extends State<FilterView> {
                     .where((district) => district.hasStores)
                     .toList();
 
+                // Check if location info matches previously selected
+                // parameters, and update dropdown-button value accordingly.
                 if(city.cityId == _parameters[1][0]){
                   _selectedCityValue = city.cityId;
                   if(dist.districtId == _parameters[1][1]){
@@ -105,12 +112,15 @@ class _FilterViewState extends State<FilterView> {
                   }
                 }
               });
-              if (_selectedDistrictValue != null) {
-                break outerloop;
-              }
             }
           }
         }
+        if (_selectedDistrictValue != null) {
+          break;
+        }
+      }
+      if (_selectedCityValue != null) {
+        break;
       }
     }
     setState(() {
@@ -118,6 +128,7 @@ class _FilterViewState extends State<FilterView> {
     });
   }
 
+  /// Removes all current filter parameters.
   void _removeFilters() {
     setState(() {
       _myTags.clear();
@@ -146,7 +157,7 @@ class _FilterViewState extends State<FilterView> {
                           setState(() {
                             _myTags = tags;
                           });
-                    });
+                        });
                     },
                   child: const Text('Set tags'))
             ],
@@ -163,6 +174,8 @@ class _FilterViewState extends State<FilterView> {
           ),
           const Divider(),
           const Text('Select store:'),
+          // Displays a CircularProgressIndicator wheel in UI,
+          // if data is still being handled.
           _dataReady ? Column(
             children: [
               Row(
@@ -204,7 +217,8 @@ class _FilterViewState extends State<FilterView> {
                     value: _selectedDistrictValue,
                     hint: Text(AppLocalizations.of(context)!.districtHint,
                         style: AppTypography.createPostHints),
-                    items: _selectedCityValue != null ? _districts.map((District district) {
+                    items: // Display districts only if a city is selected.
+                    _selectedCityValue != null ? _districts.map((District district) {
                       return DropdownMenuItem<String>(
                         value: district.districtId,
                         child: Text(district.districtName),
@@ -231,7 +245,8 @@ class _FilterViewState extends State<FilterView> {
                 value: _selectedStoreValue,
                 hint: Text(AppLocalizations.of(context)!.storeHint,
                     style: AppTypography.createPostHints),
-                items: _selectedDistrictValue != null ? _stores.map((Store store) {
+                items: // Display stores only if a district is selected.
+                _selectedDistrictValue != null ? _stores.map((Store store) {
                   return DropdownMenuItem<String>(
                     value: store.storeId,
                     child: Text(store.storeName),
@@ -281,18 +296,20 @@ class _FilterViewState extends State<FilterView> {
                     filterLocation.add(_selectedStoreValue);
 
                     // List of selected parameters with following values:
-                    // [[tags] , [city, district, store]]
+                    // [[tags] , [city, district, store]].
                     List<List<String?>> results = [];
 
                     results.add(_myTags);
                     results.add(filterLocation);
 
+                    // Send results back to feedView.
                     Navigator.pop(context, results);
                   },
                   child: const Text('Done')
               ),
             ],
-          )
+          ),
+          const SizedBox(height: 30,)
         ],
       ),
     );
