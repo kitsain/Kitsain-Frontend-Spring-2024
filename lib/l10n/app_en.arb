@@ -1,4 +1,8 @@
 {
+    "tags": "Other,Meat,Seafood,Fruit,Vegetables,Frozen,Drinks,Bread,Treats,Dairy,Ready Meals,Dry n canned goods,Dessert,Gluten free,Healthy,Fast food,Milk,Lactose Free",
+    "@tags": {
+        "description": "Tags for posts"
+    },
     "pantryScreen": "MY PANTRY",
     "@pantryScreen": {
         "description": "Name to describe pantry screen"
@@ -218,5 +222,57 @@
     "gallerySelection": "Gallery",
     "@gallerySelection": {
         "description": "Text for selecting gallery for image source"
+    },
+    "doneButton": "Done",
+    "@doneButton": {
+        "description": "Text for buttons indicating action is done"
+    },
+    "cancelButton": "Cancel",
+    "@cancelButton": {
+        "description": "Text for buttons indicating action was cancelled"
+    },
+    "selectTags": "Select tags",
+    "@selectTags": {
+        "description": "Tag select label"
+    },
+    "selectLocation": "Select location",
+    "@selectLocation": {
+        "description": "Label to display above selecting location"
+    },
+    "setTagsButton": "Set tags",
+    "@setTagsButton": {
+        "description": "Set tags label"
+    },
+    "removeFiltersButton": "Remove filters",
+    "@removeFiltersButton": {
+        "description": "Remove filters button label"
+    },
+    "filter": "Filter",
+    "@filter": {
+        "description": "Filter label"
+    },
+    "sort": "Sort",
+    "@sort": {
+        "description": "Sort label"
+    },
+    "expFarthest": "Expiry date (latest first)",
+    "@expFarthest": {
+        "description": "Sort by expiry date, latest first"
+    },
+    "expClosest": "Expiry date (closest first)",
+    "@expClosest": {
+        "description": "Sort by expiry date, closest first"
+    },
+    "postedNewest": "Date posted (newest first)",
+    "@postedNewest": {
+        "description": "Sort by date posted, newest first"
+    }, 
+    "postedOldest": "Date posted (oldest first)",
+    "@postedOldest": {
+        "description": "Sort by date posted, oldest first"
+    },
+    "defaultSort": "Default",
+    "@default": {
+        "description": "Default sort"
     }
 }

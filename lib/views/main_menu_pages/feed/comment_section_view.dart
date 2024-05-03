@@ -6,9 +6,6 @@ import 'package:kitsain_frontend_spring2023/assets/comment_box.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 
-/// TODO:
-/// - Connect user information to comment box; an identifier
-///   for unique users.
 
 /// Class for creating the comment section view.
 class CommentSectionView extends StatefulWidget {

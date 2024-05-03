@@ -634,8 +634,10 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                                 ? AppLocalizations.of(context)!.updatePostButton
                                 : AppLocalizations.of(context)!
                                     .createPostButton,
-                            style: AppTypography.createPostHints),
+                            style: AppTypography.createPostHints
+                        ),
                       ),
+                      const SizedBox(height: 150,)
                     ],
                   ),
                 ),

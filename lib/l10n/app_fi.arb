@@ -1,4 +1,6 @@
 {
+    "tags": "Muu,Liha,Merenantimet,Hedelmät,Vihannekset,Pakasteet,Juomat,Leivät,Herkut,Maitotuotteet,Valmisateriat,Kuivatuotteet,Jälkiruoka,Gluteeniton,Terveellinen,Pikaruoka,Maito,Laktoositon",
+
     "pantryScreen": "RUOKAKOMERO",
     "pantryTabLabel": "RUOKAKOMERO",
     "recipeScreen": "RESEPTIT",
@@ -54,5 +56,21 @@
     "locationValidation": "Lisää kaupunki, alue ja kauppa.",
     "imageValidation": "Lisää vähintään yksi kuva luodaksi julkaisu.",
     "cameraSelection": "Kamera",
-    "gallerySelection": "Galleria"
+    "gallerySelection": "Galleria",
+
+    "doneButton": "Valmis",
+    "cancelButton": "Peruuta",
+    "selectTags": "Valitse tagit",
+    "setTagsButton": "Lisää tagi",
+    "selectLocation": "Valitse sijainti",
+    "removeFiltersButton": "Poista suodattimet",
+    
+    "filter": "Suodata",
+    "sort": "Lajittele",
+
+    "expFarthest": "Parasta ennen -päiväys kauimpana",
+    "expClosest": "Parasta ennen -päiväys lähimpänä",
+    "postedNewest": "Julkaistu uusimpana",
+    "postedOldest": "Julkaistu vanhimpana",
+    "defaultSort": "Oletus"
 }

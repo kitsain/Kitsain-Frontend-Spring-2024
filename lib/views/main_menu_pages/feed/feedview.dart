@@ -180,9 +180,9 @@ class _FeedViewState extends State<FeedView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const Text(
-                    'Filter: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    '${AppLocalizations.of(context)!.filter}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.tune),
@@ -202,9 +202,9 @@ class _FeedViewState extends State<FeedView> {
                       });
                     },
                   ),
-                  const Text(
-                    'Sort: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    '${AppLocalizations.of(context)!.sort}: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.filter_list),
@@ -213,25 +213,25 @@ class _FeedViewState extends State<FeedView> {
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'exp_OLDEST',
-                        child: Text('Expiry date (closest first)'),
+                        child: Text(AppLocalizations.of(context)!.expFarthest),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'exp_NEWEST',
-                        child: Text('Expiry date (farthest first)'),
+                        child: Text(AppLocalizations.of(context)!.expClosest),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'posted_OLDEST',
-                        child: Text('Date posted (oldest)'),
+                        child: Text(AppLocalizations.of(context)!.postedOldest),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'posted_NEWEST',
-                        child: Text('Date posted (newest)'),
+                        child: Text(AppLocalizations.of(context)!.postedNewest),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'default',
-                        child: Text('Default'),
+                        child: Text(AppLocalizations.of(context)!.defaultSort),
                       ),
                     ],
                   ),

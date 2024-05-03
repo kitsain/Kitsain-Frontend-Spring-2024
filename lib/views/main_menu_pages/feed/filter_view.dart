@@ -8,6 +8,7 @@ import '../../../models/store.dart';
 import '../../../services/store_service.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/app_typography.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 
 class FilterView extends StatefulWidget {
   final List<List<String?>> parameters;
@@ -147,7 +148,7 @@ class _FilterViewState extends State<FilterView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Select tags:'),
+              Text('${AppLocalizations.of(context)!.selectTags}:'),
               ElevatedButton(
                   onPressed: () {
                     showModalBottomSheet(context: context,
@@ -159,7 +160,7 @@ class _FilterViewState extends State<FilterView> {
                           });
                         });
                     },
-                  child: const Text('Set tags'))
+                  child: Text(AppLocalizations.of(context)!.setTagsButton))
             ],
           ),
           Wrap(
@@ -173,7 +174,7 @@ class _FilterViewState extends State<FilterView> {
             })
           ),
           const Divider(),
-          const Text('Select store:'),
+          Text("${AppLocalizations.of(context)!.selectLocation}:"),
           // Displays a CircularProgressIndicator wheel in UI,
           // if data is still being handled.
           _dataReady ? Column(
@@ -271,7 +272,7 @@ class _FilterViewState extends State<FilterView> {
                 side: const BorderSide(color: Colors.red),
                 foregroundColor: Colors.red,
               ),
-              child: const Text('Remove filters')
+              child: Text(AppLocalizations.of(context)!.removeFiltersButton)
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -280,9 +281,9 @@ class _FilterViewState extends State<FilterView> {
                   onPressed: (){
                     Navigator.pop(context);
                   },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context)!.cancelButton,
+                    style: const TextStyle(
                       color: Colors.grey
                     ),
                   )
@@ -305,7 +306,7 @@ class _FilterViewState extends State<FilterView> {
                     // Send results back to feedView.
                     Navigator.pop(context, results);
                   },
-                  child: const Text('Done')
+                  child: Text(AppLocalizations.of(context)!.doneButton)
               ),
             ],
           ),

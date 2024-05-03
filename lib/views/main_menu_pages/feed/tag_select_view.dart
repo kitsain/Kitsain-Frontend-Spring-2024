@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
+import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 
 class TagSelectView extends StatefulWidget {
   final List<String> myTags;
@@ -24,7 +25,6 @@ class _TagSelectViewState extends State<TagSelectView> {
   void initState() {
     super.initState();
     _myTags = widget.myTags;
-    //loadTags();
   }
 
   @override
@@ -36,7 +36,7 @@ class _TagSelectViewState extends State<TagSelectView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(child: Text('Select tags:')),
+            Center(child: Text('${AppLocalizations.of(context)!.selectTags}:')),
             const SizedBox(height: 10),
             Expanded(
               child: Scrollbar(
@@ -78,7 +78,8 @@ class _TagSelectViewState extends State<TagSelectView> {
                                   print(_myTags);
                                 });
                               },
-                              child: Text('+  ${_tags[index]}')),
+                              child: Text(
+                                  '+  ${AppLocalizations.of(context)!.tags.split(',')[index]}')),
                         );
                       }),
                     ),
@@ -96,7 +97,7 @@ class _TagSelectViewState extends State<TagSelectView> {
                   onPressed: (){
                     Navigator.pop(context, _myTags);
                   },
-                  child: const Text('Done')
+                  child: Text(AppLocalizations.of(context)!.doneButton)
               ),
             )
           ],

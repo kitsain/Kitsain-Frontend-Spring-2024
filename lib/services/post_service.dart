@@ -162,7 +162,7 @@ class PostService {
       );
 
       if (response.statusCode == 200) {
-        //logger.i("Post created successfully");
+        logger.i("Post created successfully");
         Map<String, dynamic> postResponse =
             jsonDecode(response.body)['details'];
 
