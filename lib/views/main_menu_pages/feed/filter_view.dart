@@ -8,7 +8,6 @@ import '../../../models/store.dart';
 import '../../../services/store_service.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/app_typography.dart';
-import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 
 class FilterView extends StatefulWidget {
   final List<List<String?>> parameters;
