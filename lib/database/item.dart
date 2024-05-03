@@ -47,7 +47,7 @@ class _Recipe {
 
 class CategoryMaps {
   Map catEnglish = {
-    0: 'No category',
+    0: 'Other',
     1: 'Meat',
     2: 'Seafood',
     3: 'Fruit',
@@ -65,11 +65,10 @@ class CategoryMaps {
     15: 'Fast food',
     16: 'Milk',
     17: 'Lactose free',
-    18: 'Other'
   };
 
   Map catFinnish = {
-    0: 'Ei kategoriaa',
+    0: 'Muu',
     1: 'Liha',
     2: 'Merenantimet',
     3: 'Hedelmät',
@@ -81,6 +80,11 @@ class CategoryMaps {
     9: 'Maitotuotteet',
     10: 'Valmisateriat',
     11: 'Kuivatuotteet',
-    12: 'Muut'
+    12: 'Jälkiruoka',
+    13: 'Gluteeniton',
+    14: 'Terveellinen',
+    15: 'Pikaruoka',
+    16: 'Maito',
+    17: 'Laktoositon'
   };
 }
