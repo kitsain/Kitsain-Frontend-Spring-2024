@@ -10,7 +10,7 @@ class CommentService {
   final accessToken = Get.put(AuthService()).accessToken;
   var logger = Logger(printer: PrettyPrinter());
 
-  final String baseUrl = 'http://nocng.id.vn:9090/api/v1/comments';
+  final String baseUrl = 'http://40.113.61.81:9090/api/v1/comments';
 
   /// Retrieves list of comments associated with a post
   ///
@@ -116,17 +116,13 @@ class CommentService {
   Future<bool> putComment(String id, String userId, String postId) async {
     try {
       // Send a POST request to the server with the post data
-      final response =
-      await http.put(Uri.parse('$baseUrl/$id'),
+      final response = await http.put(Uri.parse('$baseUrl/$id'),
           headers: {
-        'Content-Type': 'application/json',
-        'accept': '*/*',
-        'Authorization': 'Bearer ${accessToken.value}',
-      },
-      body: jsonEncode({
-            'content': 'null#800020',
-            'postId': postId
-          }));
+            'Content-Type': 'application/json',
+            'accept': '*/*',
+            'Authorization': 'Bearer ${accessToken.value}',
+          },
+          body: jsonEncode({'content': 'null#800020', 'postId': postId}));
 
       if (response.statusCode == 200) {
         logger.i("Comment removed successfully");

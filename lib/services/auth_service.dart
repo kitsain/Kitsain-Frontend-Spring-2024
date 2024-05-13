@@ -17,7 +17,7 @@ class AuthService extends GetxController {
   Future verifyToken(String token) async {
     try {
       http.Response response = await http.post(
-        Uri.parse("http://nocng.id.vn:9090/api/v1/auth/verifyToken"),
+        Uri.parse("http://40.113.61.81:9090/api/v1/auth/verifyToken"),
         headers: {
           'Content-Type': 'application/json',
           'accept': '*/*',
