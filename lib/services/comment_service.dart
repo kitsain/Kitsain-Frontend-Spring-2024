@@ -31,7 +31,6 @@ class CommentService {
 
       if (response.statusCode == 200) {
         dynamic responseData = jsonDecode(response.body);
-        // logger.i(response.body);
 
         // Assuming responseData is a JSON object with a key 'posts' containing a list of posts
         List<dynamic> commentData = responseData['details']['records'];
@@ -42,14 +41,15 @@ class CommentService {
           return await parseComment(json);
         }));
 
-        //logger.i("Comments loaded successfully");
         return comments.reversed.toList();
       } else {
-        throw Exception(
+        logger.e(
             'Failed to load posts: ${response.statusCode} /n ${response.body}');
+        return [];
       }
     } catch (e) {
-      throw Exception('Error fetching comments: $e');
+      logger.e('Error fetching comments: $e');
+      return [];
     }
   }
 
@@ -76,11 +76,9 @@ class CommentService {
           }));
 
       if (response.statusCode == 200) {
-        //logger.i("Comment posted successfully");
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        logger.e(response.body);
       }
     } catch (error) {
       logger.e("ERROR: $error");
@@ -98,18 +96,15 @@ class CommentService {
         'Authorization': 'Bearer ${accessToken.value}',
       });
       if (response.statusCode == 200) {
-        //logger.i("Comment removed successfully");
         return true;
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        //logger.e(response.body);
         return false;
       }
     } catch (error) {
       logger.e("ERROR: $error");
       return false;
-      // Handle any errors that occur during the request
     }
   }
 
@@ -125,13 +120,10 @@ class CommentService {
           body: jsonEncode({'content': 'null#800020', 'postId': postId}));
 
       if (response.statusCode == 200) {
-        logger.i("Comment removed successfully");
         return true;
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        print(postId);
-        logger.e(response.body);
         return false;
       }
     } catch (error) {

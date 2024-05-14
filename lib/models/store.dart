@@ -1,4 +1,5 @@
-/// Represents a store with its unique identifier, name, location coordinates, and store chain information.
+/// Represents a store with its unique identifier,
+/// name, location coordinates, and store chain information.
 class Store {
   String storeId;
   String storeName;
@@ -7,7 +8,8 @@ class Store {
   String storeChain;
   String lowerStoreChain;
 
-  /// Constructs a new instance of the [Store] class with the given parameters.
+  /// Constructs a new instance of the [Store] class with
+  /// the given parameters.
   Store({
     required this.storeId,
     required this.storeName,

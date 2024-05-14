@@ -318,6 +318,7 @@ class _FilterViewState extends State<FilterView> {
     );
   }
 
+  /// Converts a list of English tags to localized tags.
   List<String> tagsLocalized(List<String> tags) {
     List<String> temp = [];
     List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');

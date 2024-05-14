@@ -217,20 +217,18 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
       }
     } catch (error) {
       // Handle errors
-      print('Error in _updateOrCreatePost: $error');
+      logger.e('Error in _updateOrCreatePost: $error');
       // Return null to indicate failure
       return null;
     }
   }
 
   Future<void> fetchBarCode(File file) async {
-    //logger.i('Fetching barcode from image');
     var barCodeScanner = GoogleMlKit.vision.barcodeScanner();
     final inputImage = InputImage.fromFile(file);
     final List<Barcode> barcodes =
         await barCodeScanner.processImage(inputImage);
     if (barcodes.isEmpty) {
-      //logger.i('No barcode found');
       return;
     }
     for (Barcode barcode in barcodes) {
@@ -251,7 +249,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
           logger.e('Error fetching product information: $e');
         }
       } else {
-        logger.w('Barcode raw value is null');
+        logger.e('Barcode raw value is null');
       }
     }
   }
@@ -631,7 +629,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                               Navigator.pop(context, updatedPost);
                             }
                           } catch (e) {
-                            print(e);
+                            logger.e(e);
                           }
                         },
                         child: Text(
@@ -652,6 +650,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
     );
   }
 
+  /// Converts the tags from English to the localized language.
   List<String> tagsLocalized(List<String> tags) {
     List<String> temp = [];
     List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');

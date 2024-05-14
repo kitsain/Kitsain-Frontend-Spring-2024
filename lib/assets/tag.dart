@@ -9,15 +9,7 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return /*ElevatedButton(
-        onPressed: null,
-        style: ElevatedButton.styleFrom(
-          fixedSize: Size.fromHeight(50),
-          disabledBackgroundColor: Colors.grey[250],
-          disabledForegroundColor: Colors.grey[600],
-        ),
-        child: Text(text));*/
-    Container(
+    return Container(
         height:37,
         decoration: BoxDecoration(
           color: Colors.grey[500],

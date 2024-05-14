@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Widget for displaying images in a carousel.
 class EditImageWidget extends StatefulWidget {
   final List<String> stringImages;
   final bool feedImages;
@@ -74,7 +75,6 @@ class _EditImageWidgetState extends State<EditImageWidget> {
               top: 4,
               child: GestureDetector(
                 onTap: () {
-                  // Add your logic to delete the image
                   setState(() {
                     widget.stringImages.removeAt(itemIndex);
                   });

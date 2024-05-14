@@ -81,8 +81,7 @@ class PostService {
         List<Post> posts = await Future.wait(postsData.map((json) async {
           return await parsePost(json);
         }));
-
-        //logger.i("Posts loaded successfully");
+        
         return posts;
       } else {
         throw Exception(
@@ -105,7 +104,6 @@ class PostService {
       });
 
       if (response.statusCode == 200) {
-        //logger.i("Post loaded successfully");
         Map<String, dynamic> postResponse =
             jsonDecode(response.body)['details'];
 
@@ -238,7 +236,6 @@ class PostService {
         );
 
         if (response.statusCode == 200) {
-          // logger.i("Post updated successfully");
           // Deserialize the updated post and return it
           Map<String, dynamic> postResponse = jsonDecode(response.body);
           return Post.fromJson(postResponse['details']);
@@ -276,12 +273,10 @@ class PostService {
       });
 
       if (response.statusCode == 200) {
-        // logger.i("Post removed successfully");
         return true;
       } else {
         // Handle other status codes if needed
         logger.e('Request failed with status: ${response.statusCode}');
-        //logger.e(response.body);
         return false;
       }
     } catch (error) {
@@ -321,7 +316,6 @@ class PostService {
 
       // Handle response from the backend
       if (response.statusCode == 200) {
-        //logger.i("File uploaded successfully");
 
         // Decode the response body
         dynamic responseData = jsonDecode(response.body);
@@ -395,7 +389,6 @@ class PostService {
           userId: userId,
           comments: await commentService.getComments(id),
           useful: useful,
-          //tags: tags.map((e) => e.toString()).toList()
           tags: formattedTags,
           storeId: json['storeId'] ?? '',
           productBarcode: productBarcode);
@@ -445,9 +438,7 @@ class PostService {
         'Authorization': 'Bearer ${accessToken.value}',
       });
 
-      if (response.statusCode == 200) {
-        //logger.i("Post marked as useful");
-      } else {
+      if (response.statusCode != 200) {
         logger.e(
             'Failed to mark post as useful: ${response.statusCode} /n ${response.body}');
       }
@@ -475,10 +466,6 @@ class PostService {
 
         List<dynamic> tagsData = responseData['details']['records'];
         List<String> tags = tagsData.map((e) => e.toString()).toList();
-
-        print(tags);
-
-        //logger.i("Tags loaded successfully");
 
         return tags;
       } else {

@@ -7,11 +7,6 @@ import 'package:kitsain_frontend_spring2023/models/comment.dart';
 ///
 /// Needed for storing post information locally.
 class Post extends ChangeNotifier {
-  /*TODO:
-  *  - Functions related to likes
-  *  - Functions related to comments
-  *  - figure out the proper location for post.dart file
-  * */
 
   List<String> images = [];
   String title = "TITLE_HERE";
@@ -25,7 +20,6 @@ class Post extends ChangeNotifier {
   List<String> tags = [];
   String storeId = "";
   String productBarcode = "";
-  //Item item;
 
   Post({
     required this.images,

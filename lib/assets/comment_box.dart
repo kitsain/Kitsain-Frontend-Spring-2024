@@ -6,7 +6,6 @@ import 'package:kitsain_frontend_spring2023/app_typography.dart';
 ///
 /// Displayed in CommentSectionView
 class CommentBox extends StatelessWidget {
-  // TODO: connect author to actual user
 
   final String author;
   final String? comment;
@@ -22,7 +21,7 @@ class CommentBox extends StatelessWidget {
 
   /// Converts the time into a pretty string.
   /// > If comment was posted within 7 days -> display days ago
-  /// > If time was under 1 minute ago -> displau 'just now'
+  /// > If time was under 1 minute ago -> display 'just now'
   /// > If time was under 1 hour ago -> display minutes
   /// > If time was over 1 hour ago -> display hours
   String _timeToString(DateTime t) {

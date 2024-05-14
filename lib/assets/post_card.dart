@@ -57,7 +57,6 @@ class _PostCardState extends State<PostCard> {
     super.initState();
     fetchUserId();
     fetchStoreName();
-    //loadComments();
     if (widget.post.expiringDate != DateTime(2000, 1, 2)) {
       expiringDate = DateFormat('dd.MM.yyyy').format(widget.post.expiringDate);
     } else {
@@ -483,6 +482,7 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
     );
   }
 
+  /// Converts a list of english tags to localized language.
   List<String> tagsLocalized(List<String> tags) {
     List<String> temp = [];
     List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');

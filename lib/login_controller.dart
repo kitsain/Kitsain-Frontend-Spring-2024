@@ -37,12 +37,12 @@ class LoginController extends GetxController {
     // var tstlistCount = await taskApiAuthenticated.value?.tasklists.list();
 
     print(taskApiAuthenticated.value?.tasklists.list());
-    print(taskapi.tasklists.list());
+    // print(taskapi.tasklists.list());
     var tskList = await taskApiAuthenticated.value?.tasklists.list();
     // taskLists.value = tskList;
 
-    print('ok');
-    print(tskList?.items!.last.title);
+    // print('ok');
+    // print(tskList?.items!.last.title);
 
     ///extra
 

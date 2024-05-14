@@ -177,7 +177,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                           });
                                         },
                                       ),
-                                      ListTile(
+                                      /*ListTile(
                                         leading: const Icon(Icons.edit),
                                         title: Text(
                                             AppLocalizations.of(context)!
@@ -187,12 +187,13 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                         onTap: () {
                                           // TODO: logic for editing comment
                                         },
-                                      ),
+                                      ),*/
                                     ]),
                               );
                             });
                       } else {
-                        showModalBottomSheet(
+                        // TODO: Logic for case where user is not author
+                        /*showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
                             return Padding(
@@ -212,7 +213,7 @@ class _CommentSectionViewState extends State<CommentSectionView> {
                                   ]),
                             );
                           },
-                        );
+                        );*/
                       }
                     },
                     child: _tempComments[index].message != 'null#800020'

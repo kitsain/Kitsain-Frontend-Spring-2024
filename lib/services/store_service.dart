@@ -37,8 +37,6 @@ class StoreService {
                   cityName: json['name'],
                 ))
             .toList();
-
-        //logger.i("Cities loaded successfully");
         return cities;
       } else {
         throw Exception(
@@ -73,7 +71,6 @@ class StoreService {
                 ))
             .toList();
 
-        //logger.i("Districts loaded successfully");
         return districts;
       } else {
         throw Exception(
@@ -110,8 +107,6 @@ class StoreService {
                   lowerStoreChain: json['lowerStoreChain'],
                 ))
             .toList();
-
-        //logger.i("Stores loaded successfully");
         return stores;
       } else {
         throw Exception(
