@@ -12,7 +12,8 @@ class ShoppingListItem extends StatefulWidget {
       required this.itemName,
       this.itemDescription = '',
       required this.itemIndex,
-      required this.listId});
+      required this.listId,
+      });
 
   final String itemId;
   final String itemName;

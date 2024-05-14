@@ -4,7 +4,7 @@
    <application
         android:label="kitsain_frontend_spring2023"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/kitsain_logo_new">
         <activity
             android:name=".MainActivity"
             android:exported="true"

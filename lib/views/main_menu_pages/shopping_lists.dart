@@ -12,7 +12,6 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/user_shopping_
 import 'package:kitsain_frontend_spring2023/views/edit/edit_shopping_list.dart';
 import 'package:kitsain_frontend_spring2023/views/add_forms/add_new_shopping_list_form.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
-import 'package:kitsain_frontend_spring2023/models/ShoppingListItemModel.dart';
 
 class ShoppingLists extends StatefulWidget {
   const ShoppingLists({super.key, required this.setActiveShoppingListIndex});
@@ -30,18 +29,19 @@ class _ShoppingListsState extends State<ShoppingLists> {
   final taskController = Get.put(TaskController());
 
   final loginController = Get.put(LoginController());
+  late Future<void> fetchTasksFuture;
   var tskList;
 
   @override
   void initState() {
     super.initState();
-    fetchTasks();
+    fetchTasksFuture=fetchTasks();
   }
 
   Future<void> fetchTasks() async {
     var taskListIndex = await findShopIndex();
     print("taskListIndex: $taskListIndex");
-    tskList = await taskController.getTasksListStream(taskListIndex);
+    tskList = await taskController.getTasksShopList(taskListIndex);
     print("Tasks: $tskList");
     setState(() {});
   }
@@ -125,9 +125,9 @@ class _ShoppingListsState extends State<ShoppingLists> {
             builder: ((context) => UserShoppingList(
                   taskListIndex: index,
                   taskListId:
-                      '${taskListController.taskLists.value?.items?[index].id}',
+                      '${tskList[index].id}',
                   taskListName:
-                      '${taskListController.taskLists.value?.items?[index].title}',
+                      '${tskList[index].title}',
                 ))));
   }
 
@@ -172,106 +172,96 @@ class _ShoppingListsState extends State<ShoppingLists> {
     }
     return shopIndex;
   }
-
-  
-
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.main2,
-      appBar: TopBar(
-        title: AppLocalizations.of(context)!.shoppingListsScreenTopBarTitle,
-        addFunction: _addNewItem,
-        addIcon: Icons.post_add,
-        helpFunction: _help,
-        backgroundImageName: 'assets/images/aisle-3105629_1280_B1.jpg',
-        titleBackgroundColor: AppColors.titleBackgroundBrown,
-      ),
-      body: RefreshIndicator(onRefresh: () async {
-        print("testingrefresh");
-      },
-       child: SingleChildScrollView(
-        child: StreamBuilder<List<ShoppingListItemModel>>(
-            stream: taskController.tasksStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {  
-                final tasks = snapshot.data ?? [];
-                return ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.vertical,
-                  itemCount: tasks.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(15),
-                  itemBuilder: (context, index) {
-                    final task = tasks[index];
-                    return Column(
-                      children: [
-                        DragTarget<Item>(
-                          onAcceptWithDetails: (data) => _receiveItem(index, data as Item),
-                          builder: (context, candidateData, rejectedData) {
-                            return Card(
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                side: BorderSide(
-                                  width: candidateData.isNotEmpty ? 4 : 1,
-                                  color: candidateData.isNotEmpty
-                                      ? AppColors.main1
-                                      : Colors.black38,
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.main2,
+    appBar: TopBar(
+      title: AppLocalizations.of(context)!.shoppingListsScreenTopBarTitle,
+      addFunction: _addNewItem,
+      addIcon: Icons.post_add,
+      helpFunction: _help,
+      backgroundImageName: 'assets/images/aisle-3105629_1280_B1.jpg',
+      titleBackgroundColor: AppColors.titleBackgroundBrown,
+    ),
+    body: FutureBuilder(
+      future: fetchTasksFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return SingleChildScrollView(
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              itemCount: tskList.length,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(15),
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    DragTarget<Item>(
+                      onAcceptWithDetails: (data) => _receiveItem(index, data as Item),
+                      builder: (context, candidateData, rejectedData) {
+                        return Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: BorderSide(
+                              width: candidateData.isNotEmpty ? 4 : 1,
+                              color: candidateData.isNotEmpty
+                                  ? AppColors.main1
+                                  : Colors.black38,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 5, right: 0, top: 5, bottom: 5),
+                            child: ListTile(
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      '${tskList[index].title}',
+                                      style:
+                                          const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    const Spacer(),
+                                    IconButton(
+                                      onPressed: () {
+                                        _deleteListDialog(index);
+                                      },
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: AppColors.main1,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () => _editList(
+                                          '${tskList[index].id}',
+                                          index),
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: AppColors.main1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5, right: 0, top: 5, bottom: 5),
-                                child: ListTile(
-                                  title: Row(
-                                    children: [
-                                      Text(
-                                        task.title,
-                                        style:
-                                            const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      const Spacer(),
-                                      IconButton(
-                                        onPressed: () {
-                                          _deleteListDialog(index);
-                                        },
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: AppColors.main1,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: () => _editList(
-                                            task.id,
-                                            index),
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          color: AppColors.main1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () => _openShoppingList(index),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 5),
-                      ],
-                    );
-                  },
+                                onTap: () => _openShoppingList(index)),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 5),
+                  ],
                 );
-              }
-            },
-          ),
-      ),
-    ));
-  }
+              },
+            ),
+          );
+        }
+      },
+    ),
+  );
+}
 }

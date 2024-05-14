@@ -78,8 +78,15 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   test: ^1.24.9
+  flutter_launcher_icons: "^0.13.1"
 
   # Barcode scanner
+
+flutter_launcher_icons:
+  android: "kitsain_logo_new"
+  ios: true
+  image_path: "assets/images/new_kitsain_app_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -134,3 +141,4 @@ flutter:
         - asset: assets/fonts/Vollkorn-VariableFont_wght.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+

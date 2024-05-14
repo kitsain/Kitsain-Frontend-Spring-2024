@@ -4,6 +4,7 @@ import 'package:kitsain_frontend_spring2023/assets/top_bar.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/database/item.dart';
 import 'package:kitsain_frontend_spring2023/views/add_forms/create_recipe.dart';
+//import 'package:kitsain_frontend_spring2023/views/add_forms/create_recipe_single_item_form.dart';
 import 'package:kitsain_frontend_spring2023/views/help_pages/recipe_help_page.dart';
 import 'package:realm/realm.dart';
 import 'package:kitsain_frontend_spring2023/database/recipes_proxy.dart';
@@ -41,6 +42,10 @@ class _RecipeViewState extends State<RecipeView> {
   void _createNewRecipe() {
     _showModalBottomSheet(const CreateNewRecipeForm());
   }
+
+  //void _createSingleItemRecipe() {
+  //  _showModalBottomSheet(const CreateRecipeSingleItemForm());
+  //  }
 
   void _showHelp() {
     _showModalBottomSheet(const RecipeHelp());

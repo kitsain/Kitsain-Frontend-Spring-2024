@@ -64,6 +64,53 @@ Future<List<Recipe>> generateRecipe(
   return recipes;
 }
 
+
+/// Generates a recipe using the parameters
+/// [ingredient] (the ingredient to generate a recipe for),
+/// Returns a Recipe object with the generated recipe from ChatGPT
+Future<List<Recipe>> generateSingleItemRecipe(
+  String ingredient) async {
+  var url = Uri.https(
+      'kitsain-backend-test-ohtuprojekti-staging.apps.ocp-test-0.k8s.it.helsinki.fi',
+      '/generate');
+  var headers = {"Content-Type": "application/json"};
+  var requestBody = json.encode({
+    'required_items': {ingredient: ''},
+    'pantry': {},
+    'recipe_type': '',
+  });
+  print('Request body: $requestBody');
+
+  var response = await http.post(url, headers: headers, body: requestBody);
+
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
+
+  var responseMap = json.decode(response.body);
+  List<Recipe> recipes = [];
+
+  for (var recipe in responseMap['recipes']) {
+    // Convert ingredients to string values
+    Map<String, String> convertedIngredients = Map<String, String>.fromIterable(
+      recipe["ingredients"].keys,
+      value: (key) => recipe["ingredients"][key].toString(),
+    );
+
+    // Convert instructions to a list of strings
+    List<String> convertedInstructions = recipe["instructions"].cast<String>();
+
+    // Create a Recipe object and add it to the recipes list
+    recipes.add(Recipe(
+      ObjectId().toString(),
+      recipe["recipe_name"],
+      ingredients: convertedIngredients,
+      instructions: convertedInstructions,
+    ));
+  }
+  return recipes;
+}
+
+
 /// Changes a recipe with the following values
 /// [ingredients] (list of ingredients),
 /// [recipeType] (the type of recipe (eg. vegan)),

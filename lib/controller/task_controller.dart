@@ -9,9 +9,6 @@ class TaskController extends GetxController {
   var shoppingListItem = Rx<List<ShoppingListItemModel>?>([]);
 
   final loginController = Get.put(LoginController());
-  final _tasksStreamController = StreamController<List<ShoppingListItemModel>>.broadcast();
-
-  Stream<List<ShoppingListItemModel>> get tasksStream => _tasksStreamController.stream;
 
   /// Returns list of created tasks in a task list
   ///
@@ -21,7 +18,18 @@ class TaskController extends GetxController {
     var tskList = await loginController.taskApiAuthenticated.value?.tasks
         .list(taskListId, showHidden: true);
 
-    tskList?.items?.forEach((element) {
+    return tskList;
+  }
+
+  getTasksShopList(String taskListId, {bool pantryList = false}) async {
+    shoppingListItem = Rx<List<ShoppingListItemModel>?>([]);
+    var tskList = await loginController.taskApiAuthenticated.value?.tasks
+        .list(taskListId, showHidden: true);
+
+    var filteredTasks = tskList?.items?.where((element) => element.parent == null).toList();
+    var filteredTasks2 = tskList?.items?.where((element) => element.parent != null).toList();
+
+    filteredTasks2?.forEach((element) {
       var newItem = ShoppingListItemModel(
           '${element.title}',
           element.notes == null ? '' : '${element.notes}',
@@ -32,35 +40,9 @@ class TaskController extends GetxController {
 
     shoppingListItem.refresh();
 
-    return tskList;
+    return filteredTasks;
   }
 
-  getTasksListStream(String taskListId) async {
-    var tskList = await loginController.taskApiAuthenticated.value?.tasks
-        .list(taskListId, showHidden: true);
-    shoppingListItem.value?.clear();
-    tskList?.items?.forEach((element) {
-      if (element.parent == null) {
-        print(element);
-        var newItem = ShoppingListItemModel(
-            element.title ?? '',
-            element.notes ?? '',
-            false,
-            element.id ?? '');
-        shoppingListItem.value?.add(newItem);
-      }
-    });
-    _tasksStreamController.add(shoppingListItem.value ?? []);
-    shoppingListItem.refresh();
-
-    return tskList;
-  }
-
-  @override
-  void onClose() {
-    _tasksStreamController.close();
-    super.onClose();
-  }
 
   /// Sends created task to the google tasks API
   ///
@@ -116,7 +98,7 @@ class TaskController extends GetxController {
   /// [due] is the optional expiry date of a pantry item task.
   editTask(String itemName, String description, String taskListId,
       String taskId, int index,
-      [String? due, String? amount, bool? completed]) async {
+      [String? due, String? amount, bool? completed,]) async {
     var itemAmount = amount;
     print("editAmount: ${amount}");
     if (amount == null) {
@@ -127,6 +109,9 @@ class TaskController extends GetxController {
 
     print("completed: ${completed}");
 
+    if (completed == null) {
+      completed = false;
+    }
     var newTask = Task(
         title: itemName,
         notes: description,

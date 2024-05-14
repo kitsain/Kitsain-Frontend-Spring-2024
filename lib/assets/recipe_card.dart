@@ -395,6 +395,7 @@ class _RecipeCardState extends State<RecipeCard> {
             onPressed: () {
               _recipeController.deleteRecipe(widget.recipe);
               Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: const Text('Delete'),
           ),

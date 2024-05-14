@@ -9,7 +9,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:kitsain_frontend_spring2023/controller/recipe_controller.dart';
 import 'package:kitsain_frontend_spring2023/views/add_forms/feedback_form.dart';
 
-
 class CreateNewRecipeForm extends StatefulWidget {
   const CreateNewRecipeForm({super.key});
 
@@ -129,6 +128,7 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       );
     }
   }
+
   /// Checks if the text form fields empty
   bool _areFormFieldsEmpty() {
     return _itemName.text.isEmpty &&
@@ -136,8 +136,9 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
         _suppliesController.text.isEmpty &&
         _expSoonController.text.isEmpty;
   }
+
   /// Builds the dialog button
-  /// 
+  ///
   /// Returns the text button
   Widget _buildDialogButton(
       String text, Color textColor, void Function() onPressed) {
@@ -206,6 +207,7 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       }).toList(),
     );
   }
+
   /// Builds the options choice dropdown
   ///
   /// Returns the DropDownButton widget
@@ -271,6 +273,20 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          PantryBuilder(
+              items: _pantryItems,
+              sortMethod: "az",
+              onMustHaveItemsChanged: (mustHaveItems) {
+                setState(() {
+                  this.mustHaveItems = mustHaveItems;
+                });
+              },
+              onOptionalItemsChanged: (optionalItems) {
+                setState(() {
+                  this.optionalItems = optionalItems;
+                });
+              }),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
           const Text(
               'Your diet or recipe type? eg. vegan, 15-minute recipe, breakfast.',
               style: AppTypography.heading4),
@@ -299,28 +315,15 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
               style: AppTypography.heading4),
           _buildOptionsDropdown(),
           SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-          PantryBuilder(
-              items: _pantryItems,
-              sortMethod: "az",
-              onMustHaveItemsChanged: (mustHaveItems) {
-                setState(() {
-                  this.mustHaveItems = mustHaveItems;
-                });
-              },
-              onOptionalItemsChanged: (optionalItems) {
-                setState(() {
-                  this.optionalItems = optionalItems;
-                });
-              }),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
           _buildActionButtons(),
         ],
       ),
     );
   }
+
   /// Makes a map of all the items in the list,
   /// with the key being the name, and the value being the amount
-  /// 
+  ///
   /// Returns the map
   Map<String, String> itemNamesAndAmountsConvertor(List list) {
     Map<String, String> itemNamesAndAmounts = {}; // Initialize as an empty map
@@ -420,8 +423,9 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       ],
     );
   }
+
   /// Builds the loading dialog
-  /// 
+  ///
   /// Returns the LoadingDialogWithTimeout widget
   Widget _loadingDialog(BuildContext context) {
     return const LoadingDialogWithTimeout();
@@ -439,6 +443,7 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       child: Text(label),
     );
   }
+
   /// Saves the recipes to Google tasks + Realm database
   _saveRecipes(List recipes) async {
     for (var index in _selectedRecipeIndices) {
@@ -478,9 +483,9 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       if (generatedRecipe.length > 1) {
         await _showRecipeSelectionDialog(generatedRecipe);
       } else {
-        await _recipeController.createRecipeTask(generatedRecipe[0]); // Else save the only recipe
+        await _recipeController
+            .createRecipeTask(generatedRecipe[0]); // Else save the only recipe
       }
-
 
       // clear
       _recipeTypeController.clear();
@@ -488,6 +493,7 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
       _expSoonController.clear();
     }
   }
+
   /// Bulds the dialog for selecting from multiple recipes
   Future<void> _showRecipeSelectionDialog(List recipes) async {
     return showDialog<void>(
@@ -533,15 +539,17 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
                 child: const Text('Save Selected Recipes'),
               ),
             ],
-          );});
-        },
+          );
+        });
+      },
     );
   }
+
   /// Builds the details part of the recipe when choosing from multiple recipes
   void _showRecipeDetailsDialog(BuildContext context, recipe) {
     String ingredientsString = recipe.ingredients.entries
-    .map((entry) => '${entry.key}: ${entry.value}')
-    .join('\n');
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join('\n');
     String instructionString = recipe.instructions.join('\n');
     showDialog(
       context: context,
@@ -550,16 +558,16 @@ class _CreateNewRecipeFormState extends State<CreateNewRecipeForm> {
           title: Text(recipe.name),
           content: SingleChildScrollView(
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Ingredients:'),
-              Text(ingredientsString),
-              const SizedBox(height: 20),
-              const Text('Instructions:'),
-              Text(instructionString),
-            ],
-          ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Ingredients:'),
+                Text(ingredientsString),
+                const SizedBox(height: 20),
+                const Text('Instructions:'),
+                Text(instructionString),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
