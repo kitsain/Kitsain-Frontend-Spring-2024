@@ -420,7 +420,7 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
           padding: const EdgeInsets.all(8),
           child: Wrap(
               children: List.generate(widget.post.tags.length, (index) {
-            List<String> tags = widget.post.tags;
+            List<String> tags = AppLocalizations.of(context)!.tags.split(',');
             return tags.isEmpty
                 ? const Text('NoTags')
                 : Padding(

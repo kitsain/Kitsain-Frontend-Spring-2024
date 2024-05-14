@@ -164,12 +164,14 @@ class _FilterViewState extends State<FilterView> {
           ),
           Wrap(
             children: List.generate(_myTags.length, (index) {
+              List<String> tags =
+                  AppLocalizations.of(context)!.tags.split(',');
               return _myTags.isEmpty
                 ? const Text('NoTags')
                 : Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 2.0),
-                child: Tag(text: _myTags[index]));
+                child: Tag(text: tags[index]));
             })
           ),
           const Divider(),

@@ -25,16 +25,31 @@ class _FeedViewState extends State<FeedView> {
   final PostService postService = PostService();
   List<Post> _posts = [];
 
-  bool isLoading = false;
-  bool isFiltering = false;
+  // bool isLoading = false;
+  // bool isFiltering = false;
 
   final ScrollController _scrollController = ScrollController();
 
   late List<List<String?>> _filtering; // = [tags, [city, district, store]]
+  late String _sorting;
+  late String _direction;
 
   @override
   void initState() {
     super.initState();
+
+    // initialize filtering values
+    _filtering = [
+      [],
+      [null, null, null]
+    ];
+
+    // initialize sorting value
+    _sorting = '';
+
+    // initialize order value
+    _direction = '';
+
     loadPosts();
 
     // Add listener to scroll controller
@@ -42,12 +57,6 @@ class _FeedViewState extends State<FeedView> {
 
     // Assign posts to local variable
     _posts = postProvider.posts;
-
-    // initialize filtering values
-    _filtering = [
-      [],
-      [null, null, null]
-    ];
   }
 
   @override
@@ -58,20 +67,18 @@ class _FeedViewState extends State<FeedView> {
 
   /// Loads the posts from the server.
   Future<void> loadPosts() async {
-    setState(() {
-      isLoading = true;
-    });
-
     try {
-      List<Post> newPosts = await postService.getPosts();
+      List<Post> newPosts = await postService.getPosts(
+        filtering: _filtering,
+        sorting: _sorting,
+        direction: _direction
+      );
       setState(() {
         postProvider.posts.addAll(newPosts); // Filter out null posts
-        isLoading = false;
+        _posts.clear();
+        _posts = newPosts;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
       logger.e('Error loading posts: $e');
     }
   }
@@ -142,21 +149,29 @@ class _FeedViewState extends State<FeedView> {
   ///        'posted_NEWEST' -> newest post (also default).
   void _sortPosts(String order) async {
     List<Post> temp = _posts;
+    String direction = '';
     if (order == 'exp_OLDEST') {
       temp = await postService.getPosts(
           filtering: _filtering, sorting: 'expringDate', direction: 'asc');
+          direction = 'asc';
     } else if (order == 'exp_NEWEST') {
       temp = await postService.getPosts(
           filtering: _filtering, sorting: 'expringDate', direction: 'desc');
+          direction = 'desc';
     } else if (order == 'posted_OLDEST'){
       temp = await postService.getPosts(
           filtering: _filtering, sorting: 'createdDate', direction: 'asc');
+          direction = 'asc';
     } else if (order == "posted_NEWEST" || order == 'default') {
       // Default order of posts in the backend is by time of posting
       temp = await postService.getPosts(filtering: _filtering);
+      direction = '';
+      order = '';
     }
     setState(() {
       _posts = temp;
+      _sorting = order;
+      _direction = direction;
     });
   }
 
@@ -251,6 +266,9 @@ class _FeedViewState extends State<FeedView> {
                     post: _posts[index],
                     onRemovePost: (Post removedPost) {
                       removePost(removedPost);
+                      setState(() {
+                        _posts.removeAt(index);
+                      });
                     },
                     onEditPost: (Post updatedPost) {
                       editPost(updatedPost);
