@@ -4,7 +4,7 @@ import 'package:kitsain_frontend_spring2023/assets/post_card.dart';
 import 'package:kitsain_frontend_spring2023/assets/top_bar.dart';
 import 'package:kitsain_frontend_spring2023/models/post.dart';
 import 'package:kitsain_frontend_spring2023/services/post_service.dart';
-import 'package:kitsain_frontend_spring2023/views/help_pages/pantry_help_page.dart';
+import 'package:kitsain_frontend_spring2023/views/help_pages/feed_help_page.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_edit_post_view.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/filter_view.dart';
@@ -105,7 +105,7 @@ class _FeedViewState extends State<FeedView> {
       builder: (BuildContext context) {
         return const FractionallySizedBox(
           //heightFactor: 0.7,
-          child: PantryHelp(),
+          child: FeedHelp(),
         );
       },
     );
@@ -157,8 +157,12 @@ class _FeedViewState extends State<FeedView> {
     } else if (order == 'exp_NEWEST') {
       temp = await postService.getPosts(
           filtering: _filtering, sorting: 'expringDate', direction: 'desc');
+<<<<<<< HEAD
           direction = 'desc';
     } else if (order == 'posted_OLDEST'){
+=======
+    } else if (order == 'posted_OLDEST') {
+>>>>>>> 1f74da42547452e0da676b35493dad1d1462da57
       temp = await postService.getPosts(
           filtering: _filtering, sorting: 'createdDate', direction: 'asc');
           direction = 'asc';

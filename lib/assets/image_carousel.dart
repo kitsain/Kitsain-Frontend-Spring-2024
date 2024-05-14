@@ -63,7 +63,7 @@ class _EditImageWidgetState extends State<EditImageWidget> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              'http://nocng.id.vn:9000/commons/${widget.stringImages[itemIndex]}',
+              'http://40.113.61.81:9000/commons/${widget.stringImages[itemIndex]}',
               fit: BoxFit.cover,
               width: double.infinity,
             ),

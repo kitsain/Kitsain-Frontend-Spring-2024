@@ -14,7 +14,7 @@ class StoreService {
   var logger = Logger(printer: PrettyPrinter());
 
   // Base URL for the API
-  final String baseUrl = 'http://nocng.id.vn:9090/api/v1';
+  final String baseUrl = 'http://40.113.61.81:9090/api/v1';
 
   /// Fetches a list of cities from the API.
   ///

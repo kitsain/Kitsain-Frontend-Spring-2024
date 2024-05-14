@@ -15,13 +15,15 @@ class PostService {
   final CommentService commentService = CommentService();
 
   // Base URL for the API
-  final String baseUrl = 'http://nocng.id.vn:9090/api/v1/posts';
+  final String baseUrl = 'http://40.113.61.81:9090/api/v1/posts';
 
   /// Retrieves a list of all posts.
   ///
   /// Returns a list of [Post] objects.
   Future<List<Post>> getPosts(
-      {List<List<String?>> filtering = const [], sorting = '', direction = ''}) async {
+      {List<List<String?>> filtering = const [],
+      sorting = '',
+      direction = ''}) async {
     try {
       List<String> tags = [];
       String cityId = '';
@@ -302,7 +304,7 @@ class PostService {
 
       // Create a multipart request
       var request = http.MultipartRequest('POST',
-          Uri.parse('http://nocng.id.vn:9090/api/v1/files/upload/files'));
+          Uri.parse('http://40.113.61.81:9090/api/v1/files/upload/files'));
 
       // Add the file to the request
       request.files.add(multipartFile);
@@ -409,7 +411,7 @@ class PostService {
   /// If the request is successful, it returns the user ID as a string.
   Future<String> getUserId() async {
     try {
-      var uri = Uri.parse('http://nocng.id.vn:9090/api/v1/users/me');
+      var uri = Uri.parse('http://40.113.61.81:9090/api/v1/users/me');
       var response = await http.get(
         uri,
         headers: {
@@ -437,7 +439,7 @@ class PostService {
 
   Future<void> markPostUseful(String postId) async {
     try {
-      var uri = Uri.parse('http://nocng.id.vn:9090/api/v1/favorites/$postId');
+      var uri = Uri.parse('http://40.113.61.81:9090/api/v1/favorites/$postId');
       var response = await http.put(uri, headers: {
         'accept': '*/*',
         'Authorization': 'Bearer ${accessToken.value}',
