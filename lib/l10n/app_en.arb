@@ -1,4 +1,5 @@
 {
+    "@@locale": "en",
     "tags": "Other,Meat,Seafood,Fruit,Vegetables,Frozen,Drinks,Bread,Treats,Dairy,Ready Meals,Dry n canned goods,Dessert,Gluten free,Healthy,Fast food,Milk,Lactose Free",
     "@tags": {
         "description": "Tags for posts"
