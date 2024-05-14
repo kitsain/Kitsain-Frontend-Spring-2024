@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/tag_select_view.dart';
 import 'package:logger/logger.dart';
 import '../../../assets/tag.dart';
+import '../../../database/item.dart';
 import '../../../models/city.dart';
 import '../../../models/district.dart';
 import '../../../models/store.dart';
@@ -164,14 +165,14 @@ class _FilterViewState extends State<FilterView> {
           ),
           Wrap(
             children: List.generate(_myTags.length, (index) {
-              List<String> tags =
-                  AppLocalizations.of(context)!.tags.split(',');
+              List<String> localizedTags =
+                  tagsLocalized(_myTags);
               return _myTags.isEmpty
                 ? const Text('NoTags')
                 : Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 2.0),
-                child: Tag(text: tags[index]));
+                child: Tag(text: localizedTags[index]));
             })
           ),
           const Divider(),
@@ -316,4 +317,15 @@ class _FilterViewState extends State<FilterView> {
       ),
     );
   }
+
+  List<String> tagsLocalized(List<String> tags) {
+    List<String> temp = [];
+    List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');
+    for (String tag in tags) {
+      int index = CategoryMaps().catEnglish.indexOf(tag);
+      temp.add(localizedTags[index]);
+    }
+    return temp;
+  }
+
 }

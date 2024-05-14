@@ -46,26 +46,26 @@ class _Recipe {
 }
 
 class CategoryMaps {
-  Map catEnglish = {
-    0: 'Other',
-    1: 'Meat',
-    2: 'Seafood',
-    3: 'Fruit',
-    4: 'Vegetables',
-    5: 'Frozen',
-    6: 'Drinks',
-    7: 'Bread',
-    8: 'Treats',
-    9: 'Dairy', 
-    10: 'Ready meals',
-    11: 'Dry n canned goods',
-    12: 'Dessert',
-    13: 'Gluten free',
-    14: 'Healthy',
-    15: 'Fast food',
-    16: 'Milk',
-    17: 'Lactose free',
-  };
+  List<String> catEnglish = [
+    'Other',
+    'Meat',
+    'Seafood',
+    'Fruit',
+    'Vegetables',
+    'Frozen',
+    'Drinks',
+    'Bread',
+    'Treats',
+    'Dairy',
+    'Ready meals',
+    'Dry n canned goods',
+    'Dessert',
+    'Gluten free',
+    'Healthy',
+    'Fast food',
+    'Milk',
+    'Lactose free',
+  ];
 
   Map catFinnish = {
     0: 'Muu',

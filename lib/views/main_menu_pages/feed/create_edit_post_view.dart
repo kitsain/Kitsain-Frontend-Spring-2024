@@ -20,6 +20,8 @@ import 'package:flutter_gen/gen_l10n/app-localizations.dart';
 import '../../../assets/tag.dart';
 import 'package:kitsain_frontend_spring2023/app_typography.dart';
 
+import '../../../database/item.dart';
+
 class CreateEditPostView extends StatefulWidget {
   final Post? post;
 
@@ -507,7 +509,7 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
                         child: Wrap(
                             children: List.generate(_myTags.length, (index) {
                               List<String> tags =
-                                  AppLocalizations.of(context)!.tags.split(',');
+                                  tagsLocalized(_myTags);
                               return _myTags.isEmpty
                                   ? const Text('NoTags')
                                   : Padding(
@@ -648,5 +650,15 @@ class _CreateEditPostViewState extends State<CreateEditPostView> {
             : const CircularProgressIndicator(),
       ),
     );
+  }
+
+  List<String> tagsLocalized(List<String> tags) {
+    List<String> temp = [];
+    List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');
+    for (String tag in tags) {
+      int index = CategoryMaps().catEnglish.indexOf(tag);
+      temp.add(localizedTags[index]);
+    }
+    return temp;
   }
 }

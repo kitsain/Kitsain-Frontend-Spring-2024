@@ -17,7 +17,7 @@ class TagSelectView extends StatefulWidget {
 class _TagSelectViewState extends State<TagSelectView> {
   PostService postService = PostService();
   //List<String> _tags = [];
-  final Map _tags = CategoryMaps().catEnglish;
+  final List<String> _tags = CategoryMaps().catEnglish;
   late List<String> _myTags = [];
   final List<Color> _buttonColors = [];
 
@@ -79,7 +79,8 @@ class _TagSelectViewState extends State<TagSelectView> {
                                 });
                               },
                               child: Text(
-                                  '+  ${AppLocalizations.of(context)!.tags.split(',')[index]}')),
+                              '+  ${AppLocalizations.of(context)!.tags.split(',')[index]}')
+                          ),
                         );
                       }),
                     ),

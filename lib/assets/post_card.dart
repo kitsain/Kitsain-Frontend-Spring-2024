@@ -13,6 +13,7 @@ import 'package:kitsain_frontend_spring2023/views/main_menu_pages/feed/create_ed
 import 'package:logger/logger.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../database/item.dart';
 import 'image_carousel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/app-localizations.dart';
@@ -419,14 +420,16 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
         Padding(
           padding: const EdgeInsets.all(8),
           child: Wrap(
-              children: List.generate(widget.post.tags.length, (index) {
-            List<String> tags = AppLocalizations.of(context)!.tags.split(',');
-            return tags.isEmpty
-                ? const Text('NoTags')
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: Tag(text: tags[index]));
-          })),
+            children: List.generate(widget.post.tags.length, (index) {
+              List<String> tags = tagsLocalized(widget.post.tags);
+              return tags.isEmpty
+                  ? const Text('NoTags')
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: Tag(text: tags[index]));
+              }
+            )
+          ),
         ),
         if (widget.post.productBarcode != '')
           Row(
@@ -479,4 +482,15 @@ class _ExtendedPostCardState extends State<ExtendedPostCard> {
       ],
     );
   }
+
+  List<String> tagsLocalized(List<String> tags) {
+    List<String> temp = [];
+    List<String> localizedTags = AppLocalizations.of(context)!.tags.split(',');
+    for (String tag in tags) {
+      int index = CategoryMaps().catEnglish.indexOf(tag);
+      temp.add(localizedTags[index]);
+    }
+    return temp;
+  }
+
 }
